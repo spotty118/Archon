@@ -154,7 +154,7 @@ def _select_best_code_variant(similar_blocks: list[dict[str, Any]]) -> dict[str,
     return best_block
 
 
-def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[dict[str, Any]]:
+def extract_code_blocks(markdown_content: str, min_length: int | None = None) -> list[dict[str, Any]]:
     """
     Extract code blocks from markdown content along with context.
 
@@ -490,7 +490,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
 
 def generate_code_example_summary(
-    code: str, context_before: str, context_after: str, language: str = "", provider: str = None
+    code: str, context_before: str, context_after: str, language: str = "", provider: str | None = None
 ) -> dict[str, str]:
     """
     Generate a summary and name for a code example using its surrounding context.
@@ -625,7 +625,7 @@ Format your response as JSON:
 
 
 async def generate_code_summaries_batch(
-    code_blocks: list[dict[str, Any]], max_workers: int = None, progress_callback=None
+    code_blocks: list[dict[str, Any]], max_workers: int | None = None, progress_callback: Callable | None = None
 ) -> list[dict[str, str]]:
     """
     Generate summaries for multiple code blocks with rate limiting and proper worker management.

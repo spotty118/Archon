@@ -105,8 +105,8 @@ async def create_credential(request: CredentialRequest):
             key=request.key,
             value=request.value,
             is_encrypted=request.is_encrypted,
-            category=request.category,
-            description=request.description,
+            category=(request.category or ""),
+            description=(request.description or ""),
         )
 
         if success:
@@ -222,8 +222,8 @@ async def update_credential(key: str, request: dict[str, Any]):
             key=key,
             value=value,
             is_encrypted=is_encrypted,
-            category=category,
-            description=description,
+            category=(category or ""),
+            description=(description or ""),
         )
 
         if success:

@@ -177,6 +177,8 @@ CREATE TABLE IF NOT EXISTS archon_sources (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_archon_sources_created_at ON archon_sources(created_at);
+
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_archon_sources_title ON archon_sources(title);
@@ -206,9 +208,13 @@ CREATE TABLE IF NOT EXISTS archon_crawled_pages (
 );
 
 -- Create indexes for better performance
-CREATE INDEX ON archon_crawled_pages USING ivfflat (embedding vector_cosine_ops);
-CREATE INDEX idx_archon_crawled_pages_metadata ON archon_crawled_pages USING GIN (metadata);
-CREATE INDEX idx_archon_crawled_pages_source_id ON archon_crawled_pages (source_id);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_embedding_cosine ON archon_crawled_pages USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_metadata ON archon_crawled_pages USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_source_id ON archon_crawled_pages (source_id);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_url ON archon_crawled_pages(url);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_source_chunk ON archon_crawled_pages(source_id, chunk_number);
+CREATE INDEX IF NOT EXISTS idx_archon_crawled_pages_embedding_cosine_notnull ON archon_crawled_pages USING ivfflat (embedding vector_cosine_ops) WHERE embedding IS NOT NULL;
+
 
 -- Create the code_examples table
 CREATE TABLE IF NOT EXISTS archon_code_examples (
@@ -230,9 +236,13 @@ CREATE TABLE IF NOT EXISTS archon_code_examples (
 );
 
 -- Create indexes for better performance
-CREATE INDEX ON archon_code_examples USING ivfflat (embedding vector_cosine_ops);
-CREATE INDEX idx_archon_code_examples_metadata ON archon_code_examples USING GIN (metadata);
-CREATE INDEX idx_archon_code_examples_source_id ON archon_code_examples (source_id);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_embedding_cosine ON archon_code_examples USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_metadata ON archon_code_examples USING GIN (metadata);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_source_id ON archon_code_examples (source_id);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_url ON archon_code_examples(url);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_source_chunk ON archon_code_examples(source_id, chunk_number);
+CREATE INDEX IF NOT EXISTS idx_archon_code_examples_embedding_cosine_notnull ON archon_code_examples USING ivfflat (embedding vector_cosine_ops) WHERE embedding IS NOT NULL;
+
 
 -- =====================================================
 -- SECTION 5: SEARCH FUNCTIONS
@@ -269,6 +279,7 @@ BEGIN
   FROM archon_crawled_pages
   WHERE metadata @> filter
     AND (source_filter IS NULL OR source_id = source_filter)
+    AND embedding IS NOT NULL
   ORDER BY archon_crawled_pages.embedding <=> query_embedding
   LIMIT match_count;
 END;
@@ -307,6 +318,7 @@ BEGIN
   FROM archon_code_examples
   WHERE metadata @> filter
     AND (source_filter IS NULL OR source_id = source_filter)
+    AND embedding IS NOT NULL
   ORDER BY archon_code_examples.embedding <=> query_embedding
   LIMIT match_count;
 END;
@@ -393,11 +405,10 @@ CREATE TABLE IF NOT EXISTS archon_tasks (
 CREATE TABLE IF NOT EXISTS archon_project_sources (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID REFERENCES archon_projects(id) ON DELETE CASCADE,
-  source_id TEXT NOT NULL, -- References sources in the knowledge base
+  source_id TEXT NOT NULL,
   linked_at TIMESTAMPTZ DEFAULT NOW(),
   created_by TEXT DEFAULT 'system',
   notes TEXT,
-  -- Unique constraint to prevent duplicate links
   UNIQUE(project_id, source_id)
 );
 
@@ -406,6 +417,7 @@ CREATE TABLE IF NOT EXISTS archon_document_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID REFERENCES archon_projects(id) ON DELETE CASCADE,
   task_id UUID REFERENCES archon_tasks(id) ON DELETE CASCADE, -- DEPRECATED: No longer used, kept for historical data
+
   field_name TEXT NOT NULL, -- 'docs', 'features', 'data', 'prd' (task fields no longer versioned)
   version_number INTEGER NOT NULL,
   content JSONB NOT NULL, -- Full snapshot of the field content
@@ -445,6 +457,10 @@ CREATE OR REPLACE TRIGGER update_archon_projects_updated_at
 
 CREATE OR REPLACE TRIGGER update_archon_tasks_updated_at 
     BEFORE UPDATE ON archon_tasks 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE TRIGGER update_archon_sources_updated_at 
+    BEFORE UPDATE ON archon_sources 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Soft delete function for tasks

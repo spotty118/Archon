@@ -5,7 +5,7 @@ This module contains all storage service classes that handle document and data s
 These services extend the base storage functionality with specific implementations.
 """
 
-from typing import Any
+from typing import Any, Callable
 
 from fastapi import WebSocket
 
