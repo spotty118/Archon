@@ -1,3 +1,27 @@
+DROP INDEX IF EXISTS idx_archon_crawled_pages_embedding_cosine;
+DROP INDEX IF EXISTS idx_archon_code_examples_embedding_cosine;
+
+DROP INDEX IF EXISTS idx_archon_sources_metadata;
+DROP INDEX IF EXISTS idx_archon_crawled_pages_metadata;
+DROP INDEX IF EXISTS idx_archon_code_examples_metadata;
+DROP INDEX IF EXISTS idx_archon_prompts_name;
+
+
+DROP TRIGGER IF EXISTS update_archon_sources_updated_at ON archon_sources;
+
+-- Drop indexes added for performance if they exist
+DROP INDEX IF EXISTS idx_archon_sources_created_at;
+
+DROP INDEX IF EXISTS idx_archon_crawled_pages_url;
+DROP INDEX IF EXISTS idx_archon_crawled_pages_source_chunk;
+DROP INDEX IF EXISTS idx_archon_crawled_pages_embedding_cosine_notnull;
+
+DROP INDEX IF EXISTS idx_archon_code_examples_url;
+DROP INDEX IF EXISTS idx_archon_code_examples_source_chunk;
+DROP INDEX IF EXISTS idx_archon_code_examples_embedding_cosine_notnull;
+
+DROP INDEX IF EXISTS uniq_archon_project_sources_project_source;
+
 -- ======================================================================
 -- ARCHON DATABASE RESET SCRIPT
 -- ======================================================================

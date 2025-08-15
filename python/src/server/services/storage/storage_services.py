@@ -53,7 +53,7 @@ class DocumentStorageService(BaseStorageService):
         ) as span:
             try:
                 # Progress reporting helper
-                async def report_progress(message: str, percentage: int, batch_info: dict = None):
+                async def report_progress(message: str, percentage: int, batch_info: dict[str, Any] | None = None):
                     if websocket:
                         data = {
                             "type": "upload_progress",
@@ -74,7 +74,7 @@ class DocumentStorageService(BaseStorageService):
                     file_content,
                     chunk_size=5000,
                     progress_callback=lambda msg, pct: report_progress(
-                        f"Chunking: {msg}", 10 + float(pct) * 0.2
+                        f"Chunking: {msg}", int(10 + float(pct) * 0.2)
                     ),
                 )
 

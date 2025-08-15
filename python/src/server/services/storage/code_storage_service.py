@@ -154,7 +154,7 @@ def _select_best_code_variant(similar_blocks: list[dict[str, Any]]) -> dict[str,
     return best_block
 
 
-def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[dict[str, Any]]:
+def extract_code_blocks(markdown_content: str, min_length: int | None = None) -> list[dict[str, Any]]:
     """
     Extract code blocks from markdown content along with context.
 
@@ -187,7 +187,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
         enable_diagram_filtering = (
             _get_setting_fallback("ENABLE_DIAGRAM_FILTERING", "true").lower() == "true"
         )
-        enable_contextual_length = (
+        _enable_contextual_length = (
             _get_setting_fallback("ENABLE_CONTEXTUAL_LENGTH", "true").lower() == "true"
         )
         context_window_size = int(_get_setting_fallback("CONTEXT_WINDOW_SIZE", "1000"))
@@ -202,7 +202,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
         max_prose_ratio = 0.15
         min_code_indicators = 3
         enable_diagram_filtering = True
-        enable_contextual_length = True
+        _enable_contextual_length = True
         context_window_size = 1000
 
     search_logger.debug(f"Extracting code blocks with minimum length: {min_length} characters")
@@ -490,7 +490,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
 
 def generate_code_example_summary(
-    code: str, context_before: str, context_after: str, language: str = "", provider: str = None
+    code: str, context_before: str, context_after: str, language: str = "", provider: str | None = None
 ) -> dict[str, str]:
     """
     Generate a summary and name for a code example using its surrounding context.
@@ -625,7 +625,7 @@ Format your response as JSON:
 
 
 async def generate_code_summaries_batch(
-    code_blocks: list[dict[str, Any]], max_workers: int = None, progress_callback=None
+    code_blocks: list[dict[str, Any]], max_workers: int | None = None, progress_callback: Callable | None = None
 ) -> list[dict[str, str]]:
     """
     Generate summaries for multiple code blocks with rate limiting and proper worker management.
@@ -653,7 +653,7 @@ async def generate_code_summaries_batch(
                 max_workers = int(credential_service._cache["CODE_SUMMARY_MAX_WORKERS"])
             else:
                 max_workers = int(os.getenv("CODE_SUMMARY_MAX_WORKERS", "3"))
-        except:
+        except Exception:
             max_workers = 3  # Default fallback
 
     search_logger.info(
@@ -790,13 +790,13 @@ async def add_code_examples_to_supabase(
                 try:
                     decrypted = credential_service._decrypt_value(encrypted_value)
                     use_contextual_embeddings = decrypted.lower() == "true"
-                except:
+                except Exception:
                     use_contextual_embeddings = False
             else:
                 use_contextual_embeddings = False
         else:
             use_contextual_embeddings = bool(use_contextual_embeddings)
-    except:
+    except Exception:
         # Fallback to environment variable
         use_contextual_embeddings = (
             os.getenv("USE_CONTEXTUAL_EMBEDDINGS", "false").lower() == "true"
@@ -870,7 +870,7 @@ async def add_code_examples_to_supabase(
 
         # Prepare batch data - only for successful embeddings
         batch_data = []
-        for j, (embedding, text) in enumerate(
+        for _j, (embedding, text) in enumerate(
             zip(valid_embeddings, successful_texts, strict=False)
         ):
             # Find the original index
