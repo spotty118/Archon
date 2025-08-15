@@ -1,6 +1,11 @@
 DROP INDEX IF EXISTS idx_archon_crawled_pages_embedding_cosine;
 DROP INDEX IF EXISTS idx_archon_code_examples_embedding_cosine;
 
+DROP INDEX IF EXISTS idx_archon_sources_metadata;
+DROP INDEX IF EXISTS idx_archon_crawled_pages_metadata;
+DROP INDEX IF EXISTS idx_archon_code_examples_metadata;
+DROP INDEX IF EXISTS idx_archon_prompts_name;
+
 
 DROP TRIGGER IF EXISTS update_archon_sources_updated_at ON archon_sources;
 
