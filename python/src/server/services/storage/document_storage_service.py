@@ -58,7 +58,7 @@ async def add_documents_to_supabase(
             if batch_size is None:
                 batch_size = int(rag_settings.get("DOCUMENT_STORAGE_BATCH_SIZE", "50"))
             delete_batch_size = int(rag_settings.get("DELETE_BATCH_SIZE", "50"))
-            enable_parallel = rag_settings.get("ENABLE_PARALLEL_BATCHES", "true").lower() == "true"
+            _enable_parallel = rag_settings.get("ENABLE_PARALLEL_BATCHES", "true").lower() == "true"
         except Exception as e:
             search_logger.warning(f"Failed to load storage settings: {e}, using defaults")
             if batch_size is None:
