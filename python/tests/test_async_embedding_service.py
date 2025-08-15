@@ -426,11 +426,16 @@ class TestAsyncEmbeddingService:
         self, mock_llm_client, mock_threading_service
     ):
         """Test that large batches are properly split according to batch size settings"""
-        mock_response = MagicMock()
-        mock_response.data = [
-            MagicMock(embedding=[0.1] * 1536) for _ in range(2)
-        ]  # 2 embeddings per call
-        mock_llm_client.embeddings.create = AsyncMock(return_value=mock_response)
+        # Dynamic mock that returns a number of embeddings matching the input length
+        async def mock_create_embeddings(*args, **kwargs):
+            input_texts = kwargs.get("input", [])
+            mock_response = MagicMock()
+            mock_response.data = [
+                MagicMock(embedding=[0.1] * 1536) for _ in input_texts
+            ]
+            return mock_response
+
+        mock_llm_client.embeddings.create = AsyncMock(side_effect=mock_create_embeddings)
 
         with patch(
             "src.server.services.embeddings.embedding_service.get_threading_service",

@@ -220,8 +220,14 @@ async def create_embeddings_batch(
                                         dimensions=embedding_dimensions,
                                     )
 
+                                    # Pre-check for response length mismatch to avoid partial success
+                                    if len(response.data) != len(batch):
+                                        raise ValueError(
+                                            f"Mismatched response length. Expected {len(batch)}, got {len(response.data)}"
+                                        )
+
                                     # Add successful embeddings
-                                    for text, item in zip(batch, response.data, strict=False):
+                                    for text, item in zip(batch, response.data, strict=True):
                                         result.add_success(item.embedding, text)
 
                                     break  # Success, exit retry loop

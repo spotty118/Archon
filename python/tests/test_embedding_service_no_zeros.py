@@ -266,6 +266,41 @@ class TestNoZeroEmbeddings:
             for embedding in result.embeddings:
                 assert not is_zero_embedding(embedding)
 
+    @pytest.mark.asyncio
+    async def test_batch_mismatched_response_length_fails_gracefully(self) -> None:
+        """Test that a mismatch between batch size and response items is handled."""
+        with patch(
+            "src.server.services.embeddings.embedding_service.get_llm_client"
+        ) as mock_client:
+            # Mock a response that returns fewer items than the batch size
+            mock_ctx = AsyncMock()
+            mock_response = Mock()
+            # Batch of 4, but only 2 embeddings returned
+            mock_response.data = [Mock(embedding=[0.1] * 1536), Mock(embedding=[0.2] * 1536)]
+            mock_ctx.__aenter__.return_value.embeddings.create.return_value = mock_response
+            mock_client.return_value = mock_ctx
+
+            with patch(
+                "src.server.services.embeddings.embedding_service.get_embedding_model",
+                new_callable=AsyncMock,
+                return_value="text-embedding-ada-002",
+            ):
+                with patch(
+                    "src.server.services.embeddings.embedding_service.credential_service.get_credentials_by_category",
+                    new_callable=AsyncMock,
+                    return_value={"EMBEDDING_BATCH_SIZE": "4"},
+                ):
+                    texts = ["text1", "text2", "text3", "text4"]
+                    result = await create_embeddings_batch(texts)
+
+                    # With strict=True, the zip will raise a ValueError, caught by the batch
+                    # exception handler, which fails the whole batch.
+                    assert result.success_count == 0
+                    assert result.failure_count == 4
+                    assert len(result.embeddings) == 0
+                    assert len(result.failed_items) == 4
+                    assert "Mismatched response length" in result.failed_items[0]["error"]
+
 
 class TestEmbeddingBatchResult:
     """Test the EmbeddingBatchResult dataclass."""
