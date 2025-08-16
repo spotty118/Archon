@@ -52,10 +52,18 @@ class ServiceDiscovery:
                 "Default value: 8052"
             )
 
+        # Convert and validate port ranges
+        server_port_int = int(server_port)
+        mcp_port_int = int(mcp_port)
+        agents_port_int = int(agents_port)
+        for name, value in ("ARCHON_SERVER_PORT", server_port_int), ("ARCHON_MCP_PORT", mcp_port_int), ("ARCHON_AGENTS_PORT", agents_port_int):
+            if not (1 <= value <= 65535):
+                raise ValueError(f"{name} must be between 1 and 65535, got {value}")
+
         self.DEFAULT_PORTS = {
-            "api": int(server_port),
-            "mcp": int(mcp_port),
-            "agents": int(agents_port),
+            "api": server_port_int,
+            "mcp": mcp_port_int,
+            "agents": agents_port_int,
         }
 
         self.environment = self._detect_environment()
