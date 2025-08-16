@@ -14,11 +14,23 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 # Import logging
-from ..config.logfire_config import logfire
+from ..config.logfire_config import logfire, get_logger
 from ..services.credential_service import credential_service, initialize_credentials
 from ..utils import get_supabase_client
 
 router = APIRouter(prefix="/api", tags=["settings"])
+
+# Provide a fallback shim if logfire is not available
+_logger = get_logger(__name__)
+if not hasattr(logfire, "info"):
+    class _LogfireShim:
+        def info(self, message: str, **kwargs):
+            _logger.info(message)
+        def error(self, message: str, **kwargs):
+            _logger.error(message)
+        def warning(self, message: str, **kwargs):
+            _logger.warning(message)
+    logfire = _LogfireShim()
 
 
 class CredentialRequest(BaseModel):
