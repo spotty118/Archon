@@ -32,11 +32,21 @@ class AgentChatService {
   private pollingIntervals: Map<string, NodeJS.Timeout> = new Map();
   private messageHandlers: Map<string, (message: ChatMessage) => void> = new Map();
   private errorHandlers: Map<string, (error: Error) => void> = new Map();
+  private pollAttempts: Map<string, number> = new Map(); // Track polling attempts for backoff
+  private isTabVisible: boolean = true; // Track tab visibility
 
   constructor() {
     // In development, the API is proxied through Vite, so we use the same origin
     // In production, this would be the actual API URL
     this.baseUrl = '';
+    
+    // Listen to visibility changes to pause polling when tab is hidden
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        this.isTabVisible = !document.hidden;
+        // Don't immediately restart polling - let it resume naturally on next interval
+      });
+    }
   }
 
   /**
@@ -51,6 +61,7 @@ class AgentChatService {
     
     this.messageHandlers.delete(sessionId);
     this.errorHandlers.delete(sessionId);
+    this.pollAttempts.delete(sessionId); // Clean up backoff tracking
   }
 
   /**
@@ -149,7 +160,7 @@ class AgentChatService {
   }
 
   /**
-   * Stream messages from a chat session using polling
+   * Stream messages from a chat session using smart polling with exponential backoff
    */
   async streamMessages(
     sessionId: string,
@@ -162,10 +173,112 @@ class AgentChatService {
       this.errorHandlers.set(sessionId, onError);
     }
 
-    // Start polling for new messages
+    // Initialize polling attempt counter
+    this.pollAttempts.set(sessionId, 0);
+
+    // Start polling for new messages with smart intervals
     let lastMessageId: string | null = null;
     
+    const createPollFunction = () => {
+      const pollInterval = setInterval(async () => {
+        // Skip polling if tab is not visible (saves CPU and battery)
+        if (!this.isTabVisible) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/messages${lastMessageId ? `?after=${lastMessageId}` : ''}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            // If we get a 404, the service is not available - stop polling
+            if (response.status === 404) {
+    // console.log('Agent chat service not available (404) - stopping polling');
+              clearInterval(pollInterval);
+              this.pollingIntervals.delete(sessionId);
+              const errorHandler = this.errorHandlers.get(sessionId);
+              if (errorHandler) {
+                errorHandler(new Error('Agent chat service is not available'));
+              }
+              return;
+            }
+            throw new Error(`Failed to fetch messages: ${response.statusText}`);
+          }
+
+          const messages: ChatMessage[] = await response.json();
+          
+          // Reset polling attempts on successful response
+          this.pollAttempts.set(sessionId, 0);
+          
+          // Process new messages
+          for (const message of messages) {
+            lastMessageId = message.id;
+            const handler = this.messageHandlers.get(sessionId);
+            if (handler) {
+              handler(message);
+            }
+          }
+
+          // If we received messages, use faster polling temporarily
+          if (messages.length > 0) {
+            clearInterval(pollInterval);
+            this.pollingIntervals.delete(sessionId);
+            // Restart with faster polling for active conversations
+            this.startPollingWithInterval(sessionId, onMessage, onError, lastMessageId, 2000);
+          }
+        } catch (error) {
+          // Increment polling attempts for exponential backoff
+          const attempts = this.pollAttempts.get(sessionId) || 0;
+          this.pollAttempts.set(sessionId, attempts + 1);
+          
+          // Only log non-404 errors (404s are handled above)
+          if (error instanceof Error && !error.message.includes('404')) {
+    // console.error('Failed to poll messages:', error);
+          }
+          const errorHandler = this.errorHandlers.get(sessionId);
+          if (errorHandler) {
+            errorHandler(error instanceof Error ? error : new Error('Unknown error'));
+          }
+        }
+      }, this.calculatePollInterval(sessionId));
+
+      this.pollingIntervals.set(sessionId, pollInterval);
+    };
+
+    createPollFunction();
+  }
+
+  /**
+   * Calculate intelligent polling interval with exponential backoff
+   */
+  private calculatePollInterval(sessionId: string): number {
+    const attempts = this.pollAttempts.get(sessionId) || 0;
+    const baseInterval = 3000; // Start at 3 seconds instead of 1 second
+    const maxInterval = 30000; // Max 30 seconds for inactive chats
+    
+    // Exponential backoff: 3s -> 6s -> 12s -> 24s -> 30s (max)
+    return Math.min(maxInterval, baseInterval * Math.pow(2, attempts));
+  }
+
+  /**
+   * Start polling with a specific interval (used for active conversations)
+   */
+  private startPollingWithInterval(
+    sessionId: string,
+    onMessage: (message: ChatMessage) => void,
+    onError?: (error: Error) => void,
+    lastMessageId?: string | null,
+    interval: number = 3000
+  ): void {
     const pollInterval = setInterval(async () => {
+      if (!this.isTabVisible) {
+        return;
+      }
+
       try {
         const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/messages${lastMessageId ? `?after=${lastMessageId}` : ''}`, {
           method: 'GET',
@@ -175,14 +288,11 @@ class AgentChatService {
         });
 
         if (!response.ok) {
-          // If we get a 404, the service is not available - stop polling
           if (response.status === 404) {
-  // console.log('Agent chat service not available (404) - stopping polling');
             clearInterval(pollInterval);
             this.pollingIntervals.delete(sessionId);
-            const errorHandler = this.errorHandlers.get(sessionId);
-            if (errorHandler) {
-              errorHandler(new Error('Agent chat service is not available'));
+            if (onError) {
+              onError(new Error('Agent chat service is not available'));
             }
             return;
           }
@@ -191,25 +301,18 @@ class AgentChatService {
 
         const messages: ChatMessage[] = await response.json();
         
-        // Process new messages
+        this.pollAttempts.set(sessionId, 0); // Reset on success
+        
         for (const message of messages) {
           lastMessageId = message.id;
-          const handler = this.messageHandlers.get(sessionId);
-          if (handler) {
-            handler(message);
-          }
+          onMessage(message);
         }
       } catch (error) {
-        // Only log non-404 errors (404s are handled above)
-        if (error instanceof Error && !error.message.includes('404')) {
-  // console.error('Failed to poll messages:', error);
-        }
-        const errorHandler = this.errorHandlers.get(sessionId);
-        if (errorHandler) {
-          errorHandler(error instanceof Error ? error : new Error('Unknown error'));
+        if (onError) {
+          onError(error instanceof Error ? error : new Error('Unknown error'));
         }
       }
-    }, 1000); // Poll every second
+    }, interval);
 
     this.pollingIntervals.set(sessionId, pollInterval);
   }
@@ -282,6 +385,7 @@ class AgentChatService {
     this.pollingIntervals.clear();
     this.messageHandlers.clear();
     this.errorHandlers.clear();
+    this.pollAttempts.clear(); // Clean up backoff tracking
   }
 }
 

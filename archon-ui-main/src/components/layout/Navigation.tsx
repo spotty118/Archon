@@ -64,13 +64,7 @@ export function Navigation({ className }: NavigationProps) {
   const isProjectsActive = location.pathname.startsWith("/projects");
 
   return (
-    <nav
-      className={cn(
-        "flex flex-col items-center gap-6 py-6 px-3",
-        "rounded-xl w-[72px] glass-card",
-        className,
-      )}
-    >
+    <nav className={cn("flex flex-col items-center gap-6 py-6 px-3", "rounded-xl w-[72px] glass-card", className)}>
       {/* Logo - Always visible, conditionally clickable for Projects */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -81,16 +75,10 @@ export function Navigation({ className }: NavigationProps) {
                 "relative p-2 rounded-lg",
                 "flex items-center justify-center",
                 "hover:bg-blue-500/10",
-                isProjectsActive && [
-                  "bg-blue-500/20",
-                ],
+                isProjectsActive && ["bg-blue-500/20"],
               )}
             >
-              <img
-                src="/logo-neon.png"
-                alt="Archon"
-                className="w-8 h-8"
-              />
+              <img src="/logo-neon.png" alt="Archon" className="w-8 h-8" />
             </Link>
           ) : (
             <div className="p-2 rounded-lg opacity-50 cursor-not-allowed">
@@ -121,10 +109,7 @@ export function Navigation({ className }: NavigationProps) {
                     "relative p-3 rounded-lg",
                     "flex items-center justify-center",
                     isActive
-                      ? [
-                          "bg-blue-500/20",
-                          "text-blue-600 dark:text-blue-400",
-                        ]
+                      ? ["bg-blue-500/20", "text-blue-600 dark:text-blue-400"]
                       : [
                           "text-gray-500 dark:text-zinc-500",
                           "hover:text-blue-600 dark:hover:text-blue-400",

@@ -12,14 +12,14 @@ export const mcpKeys = {
 };
 
 export function useMcpStatus() {
-  const { refetchInterval } = useSmartPolling(5000); // 5 second polling
+  const { refetchInterval } = useSmartPolling(10000); // Reduced from 5s to 10s for better CPU efficiency
 
   return useQuery({
     queryKey: mcpKeys.status(),
     queryFn: () => mcpApi.getStatus(),
     refetchInterval,
     refetchOnWindowFocus: false,
-    staleTime: 3000,
+    staleTime: 8000, // Increased from 3s to 8s
     throwOnError: true,
   });
 }
@@ -34,27 +34,27 @@ export function useMcpConfig() {
 }
 
 export function useMcpClients() {
-  const { refetchInterval } = useSmartPolling(10000); // 10 second polling
+  const { refetchInterval } = useSmartPolling(15000); // Increased from 10s to 15s
 
   return useQuery({
     queryKey: mcpKeys.clients(),
     queryFn: () => mcpApi.getClients(),
     refetchInterval,
     refetchOnWindowFocus: false,
-    staleTime: 8000,
+    staleTime: 12000, // Increased from 8s to 12s
     throwOnError: true,
   });
 }
 
 export function useMcpSessionInfo() {
-  const { refetchInterval } = useSmartPolling(10000);
+  const { refetchInterval } = useSmartPolling(15000); // Increased from 10s to 15s
 
   return useQuery({
     queryKey: mcpKeys.sessions(),
     queryFn: () => mcpApi.getSessionInfo(),
     refetchInterval,
     refetchOnWindowFocus: false,
-    staleTime: 8000,
+    staleTime: 12000, // Increased from 8s to 12s
     throwOnError: true,
   });
 }

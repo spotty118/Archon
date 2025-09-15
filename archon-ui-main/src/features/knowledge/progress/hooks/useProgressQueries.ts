@@ -19,7 +19,7 @@ export const progressKeys = {
 const TERMINAL_STATES: ProgressStatus[] = ["completed", "error", "failed", "cancelled"];
 
 /**
- * Poll for operation progress
+ * Poll for operation progress with exponential backoff
  * Automatically stops polling when operation completes or fails
  */
 export function useOperationProgress(
@@ -34,12 +34,14 @@ export function useOperationProgress(
   const hasCalledComplete = useRef(false);
   const hasCalledError = useRef(false);
   const consecutiveNotFound = useRef(0);
+  const pollAttempts = useRef(0);
 
   // Reset refs when progressId changes
   useEffect(() => {
     hasCalledComplete.current = false;
     hasCalledError.current = false;
     consecutiveNotFound.current = 0;
+    pollAttempts.current = 0;
   }, []);
 
   const query = useQuery<ProgressResponse | null>({
@@ -50,6 +52,7 @@ export function useOperationProgress(
       try {
         const data = await progressService.getProgress(progressId);
         consecutiveNotFound.current = 0; // Reset counter on success
+        pollAttempts.current = 0; // Reset backoff on success
         return data;
       } catch (error: unknown) {
         // Handle 404 errors specially
@@ -78,8 +81,15 @@ export function useOperationProgress(
         return false;
       }
 
-      // Keep polling on undefined (initial), null (transient 404), or active operations
-      return options?.pollingInterval ?? 1000;
+      // Exponential backoff: start at base interval, double on each attempt, max 30s
+      const baseInterval = options?.pollingInterval ?? 2000; // Start at 2s instead of 1s
+      const maxInterval = 30000; // Max 30 seconds
+      const backoffInterval = Math.min(maxInterval, baseInterval * 2 ** pollAttempts.current);
+
+      // Increment for next time
+      pollAttempts.current++;
+
+      return backoffInterval;
     },
     retry: false, // Don't retry on error
     staleTime: 0, // Always refetch
@@ -158,29 +168,33 @@ export function useOperationProgress(
 }
 
 /**
- * Get all active operations
+ * Get all active operations with smart polling
  * Useful for showing a global progress indicator
  * @param enabled - Whether to enable polling (default: false)
  */
 export function useActiveOperations(enabled = false) {
+  const { refetchInterval } = useSmartPolling(10000); // 10s base interval, reduced from 5s
+
   return useQuery<ActiveOperationsResponse>({
     queryKey: progressKeys.list(),
     queryFn: () => progressService.listActiveOperations(),
     enabled,
-    refetchInterval: enabled ? 5000 : false, // Only poll when explicitly enabled
-    staleTime: 3000,
+    refetchInterval: enabled ? refetchInterval : false, // Use smart polling when enabled
+    staleTime: 5000, // Increased from 3s to 5s
   });
 }
 
 /**
- * Hook for polling all crawl operations
+ * Hook for polling all crawl operations with smart intervals
  * Used in the CrawlingProgress component
  */
 export function useCrawlProgressPolling() {
+  const { refetchInterval } = useSmartPolling(8000); // Reduced from 5s to 8s
+
   const { data, isLoading } = useQuery({
     queryKey: progressKeys.list(),
     queryFn: () => progressService.listActiveOperations(),
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval, // Use smart polling that pauses when tab is inactive
     staleTime: 0,
   });
 
@@ -194,7 +208,7 @@ export function useCrawlProgressPolling() {
 }
 
 /**
- * Hook to manage multiple progress operations
+ * Hook to manage multiple progress operations with optimized polling
  * Useful for the crawling tab that shows multiple operations
  */
 export function useMultipleOperations(
@@ -209,12 +223,15 @@ export function useMultipleOperations(
   const errorIds = useRef(new Set<string>());
   // Track consecutive 404s per operation
   const notFoundCounts = useRef<Map<string, number>>(new Map());
+  // Track poll attempts per operation for exponential backoff
+  const pollAttempts = useRef<Map<string, number>>(new Map());
 
   // Reset tracking sets when progress IDs change
   useEffect(() => {
     completedIds.current.clear();
     errorIds.current.clear();
     notFoundCounts.current.clear();
+    pollAttempts.current.clear();
   }, []); // Use join to create stable dependency
 
   const queries = useQueries({
@@ -224,6 +241,7 @@ export function useMultipleOperations(
         try {
           const data = await progressService.getProgress(progressId);
           notFoundCounts.current.set(progressId, 0); // Reset counter on success
+          pollAttempts.current.set(progressId, 0); // Reset backoff on success
           return data;
         } catch (error: unknown) {
           // Handle 404 errors specially for resilience
@@ -252,8 +270,16 @@ export function useMultipleOperations(
           return false;
         }
 
-        // Keep polling on undefined (initial), null (transient 404), or active operations
-        return 1000;
+        // Exponential backoff for each operation individually
+        const attempts = pollAttempts.current.get(progressId) || 0;
+        const baseInterval = 2000; // Start at 2s instead of 1s
+        const maxInterval = 30000; // Max 30 seconds
+        const backoffInterval = Math.min(maxInterval, baseInterval * 2 ** attempts);
+
+        // Increment for next time
+        pollAttempts.current.set(progressId, attempts + 1);
+
+        return backoffInterval;
       },
       retry: false,
       staleTime: 0,
