@@ -9,3 +9,13 @@ PRPs/completed/
 tmp/
 temp/
 UAT/
+
+# Backup files and directories
+*-backup-*/
+*-backup.*
+*.backup
+backup-*/
+*backup/
+*.tar.gz
+*.tar
+*.zip
