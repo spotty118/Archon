@@ -6,7 +6,7 @@ import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 import { useToast } from '../../features/ui/hooks/useToast';
 import { credentialsService } from '../../services/credentialsService';
-import { OllamaModelDiscoveryModal } from './OllamaModelDiscoveryModal';
+import OllamaModelDiscoveryModal from './OllamaModelDiscoveryModal';
 import OllamaModelSelectionModal from './OllamaModelSelectionModal';
 
 import { RagSettings } from '../../services/credentialsService';

@@ -9,9 +9,9 @@ import { isLmConfigured } from "../../utils/onboarding";
 
 // TEMPORARY: Import from old components until they're migrated to features
 import { BackendStartupError } from "../BackendStartupError";
+import { ChatButton } from "../chat/ChatButton";
 import { useBackendHealth } from "./hooks/useBackendHealth";
-import { Navigation } from './Navigation';
-import { ChatButton } from '../chat/ChatButton';
+import { Navigation } from "./Navigation";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -130,16 +130,13 @@ export function MainLayout({ children, className }: MainLayoutProps) {
   }, [isBackendError, backendError, showToast]);
 
   return (
-    <div className={cn(
-      "relative min-h-screen bg-background overflow-hidden",
-      className
-    )}>
+    <div className={cn("relative min-h-screen bg-background overflow-hidden", className)}>
       {/* TEMPORARY: Show backend startup error using old component */}
       {backendStartupFailed && <BackendStartupError />}
 
       {/* Enhanced background with animated grid */}
       <div className="fixed inset-0 neon-grid pointer-events-none z-0" />
-      
+
       {/* Simple background overlay */}
       <div className="fixed inset-0 bg-background pointer-events-none z-[1]" />
 
@@ -152,9 +149,7 @@ export function MainLayout({ children, className }: MainLayoutProps) {
       {/* Main Content Area with improved responsive design */}
       <div className="relative flex-1 pl-[100px] md:pl-[120px] lg:pl-[100px] z-10">
         <div className="container mx-auto px-4 md:px-6 lg:px-8 relative">
-          <div className="min-h-screen pt-6 md:pt-8 pb-16">
-            {children}
-          </div>
+          <div className="min-h-screen pt-6 md:pt-8 pb-16">{children}</div>
         </div>
       </div>
 

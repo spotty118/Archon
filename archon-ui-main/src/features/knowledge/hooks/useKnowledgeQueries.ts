@@ -5,7 +5,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { useSmartPolling } from "../../ui/hooks";
+import { useDebouncedCallback, useSmartPolling } from "../../ui/hooks";
 import { useToast } from "../../ui/hooks/useToast";
 import { useActiveOperations } from "../progress/hooks";
 import { progressKeys } from "../progress/hooks/useProgressQueries";
@@ -621,6 +621,14 @@ export function useKnowledgeSummaries(filter?: KnowledgeItemsFilter) {
   // Track active crawl IDs locally - only set when we start a crawl/refresh
   const [activeCrawlIds, setActiveCrawlIds] = useState<string[]>([]);
 
+  // Debounced invalidation function to prevent excessive refetches
+  const debouncedInvalidate = useDebouncedCallback(() => {
+    // Invalidate all summaries regardless of filter
+    queryClient.invalidateQueries({ queryKey: knowledgeKeys.summary() });
+    // Also invalidate lists for consistency
+    queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() });
+  }, 2000); // 2 second debounce
+
   // ALWAYS poll for active operations to catch pre-existing ones
   // This ensures we discover operations that were started before page load
   const { data: activeOperationsData } = useActiveOperations(true);
@@ -642,14 +650,14 @@ export function useKnowledgeSummaries(filter?: KnowledgeItemsFilter) {
   }, [activeOperationsData]);
 
   // Fetch summaries with smart polling when there are active operations
-  const { refetchInterval } = useSmartPolling(hasActiveOperations ? 5000 : 30000);
+  const { refetchInterval } = useSmartPolling(hasActiveOperations ? 8000 : 45000); // Optimized intervals: 8s for active, 45s for idle
 
   const summaryQuery = useQuery<KnowledgeItemsResponse>({
     queryKey: knowledgeKeys.summaries(filter),
     queryFn: () => knowledgeService.getKnowledgeSummaries(filter),
     refetchInterval: hasActiveOperations ? refetchInterval : false, // Poll when ANY operations are active
     refetchOnWindowFocus: true,
-    staleTime: 30000, // Consider data stale after 30 seconds
+    staleTime: 45000, // Increased from 30s to 45s to reduce unnecessary refetches
   });
 
   // When operations complete, remove them from tracking
@@ -665,15 +673,12 @@ export function useKnowledgeSummaries(filter?: KnowledgeItemsFilter) {
       // Check if any completed operations are uploads (they complete faster)
       const hasCompletedUpload = completedOps.some((op) => op.operation_type === "upload" || op.type === "upload");
 
-      // Use shorter delay for uploads (1s) vs crawls (5s) to handle fast operations
-      const delay = hasCompletedUpload ? 1000 : 5000;
+      // Use shorter delay for uploads (1s) vs crawls (3s) to handle fast operations
+      const delay = hasCompletedUpload ? 1000 : 3000;
 
-      // Invalidate after a delay to allow backend database to become consistent
+      // Use debounced invalidation to prevent excessive refetches
       const timer = setTimeout(() => {
-        // Invalidate all summaries regardless of filter
-        queryClient.invalidateQueries({ queryKey: knowledgeKeys.summary() });
-        // Also invalidate lists for consistency
-        queryClient.invalidateQueries({ queryKey: knowledgeKeys.lists() });
+        debouncedInvalidate();
 
         // For uploads, also refetch immediately to ensure UI shows the item
         if (hasCompletedUpload) {
@@ -683,7 +688,7 @@ export function useKnowledgeSummaries(filter?: KnowledgeItemsFilter) {
 
       return () => clearTimeout(timer);
     }
-  }, [activeOperations, queryClient]);
+  }, [activeOperations, queryClient, debouncedInvalidate]);
 
   return {
     ...summaryQuery,

@@ -10,9 +10,9 @@ export const taskKeys = {
   all: (projectId: string) => ["projects", projectId, "tasks"] as const,
 };
 
-// Fetch tasks for a specific project
+// Fetch tasks for a specific project with optimized polling
 export function useProjectTasks(projectId: string | undefined, enabled = true) {
-  const { refetchInterval } = useSmartPolling(5000); // 5 second base interval for faster MCP updates
+  const { refetchInterval } = useSmartPolling(8000); // Increased from 5s to 8s for better CPU efficiency
 
   return useQuery<Task[]>({
     queryKey: projectId ? taskKeys.all(projectId) : ["tasks-undefined"],
@@ -23,7 +23,7 @@ export function useProjectTasks(projectId: string | undefined, enabled = true) {
     enabled: !!projectId && enabled,
     refetchInterval, // Smart interval based on page visibility/focus
     refetchOnWindowFocus: true, // Refetch immediately when tab gains focus (ETag makes this cheap)
-    staleTime: 10000, // Consider data stale after 10 seconds
+    staleTime: 15000, // Increased from 10s to 15s to reduce refetches
   });
 }
 
