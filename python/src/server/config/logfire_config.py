@@ -25,8 +25,8 @@ LOGFIRE_AVAILABLE = False
 logfire = None
 
 try:
-    import logfire
-
+    import logfire as _logfire
+    logfire = _logfire
     LOGFIRE_AVAILABLE = True
 except ImportError:
     logfire = None
@@ -79,17 +79,21 @@ def setup_logfire(
 
         if logfire_token:
             try:
-                # Configure logfire
-                logfire.configure(
-                    token=logfire_token,
-                    service_name=service_name,
-                    environment=environment,
-                    send_to_logfire=True,
-                )
+                # Configure logfire - only call if logfire is available
+                if logfire is not None:
+                    logfire.configure(
+                        token=logfire_token,
+                        service_name=service_name,
+                        environment=environment,
+                        send_to_logfire=True,
+                    )
 
-                # Add LogfireLoggingHandler to capture all standard logging
-                handlers.append(logfire.LogfireLoggingHandler())
-                logging.info(f"✅ Logfire enabled for {service_name}")
+                    # Add LogfireLoggingHandler to capture all standard logging
+                    handlers.append(logfire.LogfireLoggingHandler())
+                    logging.info(f"✅ Logfire enabled for {service_name}")
+                else:
+                    logging.error("❌ Logfire module not available")
+                    _logfire_enabled = False
 
             except Exception as e:
                 logging.error(f"❌ Failed to configure Logfire: {e}. Using standard logging.")
@@ -100,9 +104,10 @@ def setup_logfire(
 
     if not _logfire_enabled and LOGFIRE_AVAILABLE:
         try:
-            # Configure logfire but disable sending to remote
-            logfire.configure(send_to_logfire=False)
-            logging.info("📝 Logfire configured but disabled (send_to_logfire=False)")
+            # Configure logfire but disable sending to remote - only if logfire is available
+            if logfire is not None:
+                logfire.configure(send_to_logfire=False)
+                logging.info("📝 Logfire configured but disabled (send_to_logfire=False)")
         except Exception as e:
             logging.warning(f"⚠️  Warning: Could not configure Logfire in disabled mode: {e}")
 

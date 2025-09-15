@@ -202,7 +202,7 @@ MCP_INSTRUCTIONS = """
 ## 📋 Core Workflow
 
 ### Task Management Cycle
-1. **Get current task**: `list_tasks(task_id="...")` 
+1. **Get current task**: `list_tasks(task_id="...")`
 2. **Search/List tasks**: `list_tasks(query="auth", filter_by="status", filter_value="todo")`
 3. **Mark as doing**: `manage_task("update", task_id="...", status="doing")`
 4. **Research phase**:

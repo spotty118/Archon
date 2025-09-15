@@ -203,7 +203,6 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
         max_prose_ratio = 0.15
         min_code_indicators = 3
         enable_diagram_filtering = True
-        enable_contextual_length = True
         context_window_size = 1000
 
     search_logger.debug(f"Extracting code blocks with minimum length: {min_length} characters")
@@ -654,7 +653,7 @@ async def generate_code_summaries_batch(
                 max_workers = int(credential_service._cache["CODE_SUMMARY_MAX_WORKERS"])
             else:
                 max_workers = int(os.getenv("CODE_SUMMARY_MAX_WORKERS", "3"))
-        except:
+        except (ValueError, TypeError):
             max_workers = 3  # Default fallback
 
     search_logger.info(
@@ -791,13 +790,13 @@ async def add_code_examples_to_supabase(
                 try:
                     decrypted = credential_service._decrypt_value(encrypted_value)
                     use_contextual_embeddings = decrypted.lower() == "true"
-                except:
+                except Exception:
                     use_contextual_embeddings = False
             else:
                 use_contextual_embeddings = False
         else:
             use_contextual_embeddings = bool(use_contextual_embeddings)
-    except:
+    except Exception:
         # Fallback to environment variable
         use_contextual_embeddings = (
             os.getenv("USE_CONTEXTUAL_EMBEDDINGS", "false").lower() == "true"

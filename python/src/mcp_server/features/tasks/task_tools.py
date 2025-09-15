@@ -65,7 +65,7 @@ def register_task_tools(mcp: FastMCP):
     ) -> str:
         """
         Find and search tasks (consolidated: list + search + get).
-        
+
         Args:
             query: Keyword search in title, description, feature (optional)
             task_id: Get specific task by ID (returns full details)
@@ -75,10 +75,10 @@ def register_task_tools(mcp: FastMCP):
             include_closed: Include done tasks in results
             page: Page number for pagination
             per_page: Items per page (default: 10)
-        
+
         Returns:
             JSON array of tasks or single task (optimized payloads for lists)
-        
+
         Examples:
             find_tasks() # All tasks
             find_tasks(query="auth") # Search for "auth"
@@ -204,7 +204,7 @@ def register_task_tools(mcp: FastMCP):
     ) -> str:
         """
         Manage tasks (consolidated: create/update/delete).
-        
+
         Args:
             action: "create" | "update" | "delete"
             task_id: Task UUID for update/delete
@@ -215,12 +215,12 @@ def register_task_tools(mcp: FastMCP):
             assignee: "User" | "Archon" | "AI IDE Agent"
             task_order: Priority 0-100 (higher = more priority)
             feature: Feature label for grouping
-        
+
         Examples:
           manage_task("create", project_id="p-1", title="Fix auth bug")
           manage_task("update", task_id="t-1", status="doing")
           manage_task("delete", task_id="t-1")
-        
+
         Returns: {success: bool, task?: object, message: string}
         """
         try:

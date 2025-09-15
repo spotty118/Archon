@@ -17,8 +17,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 
-from .base_agent import ArchonDependencies, BaseAgent
 from ..server.services.client_manager import get_supabase_client
+from .base_agent import ArchonDependencies, BaseAgent
 from .mcp_client import get_mcp_client
 
 logger = logging.getLogger(__name__)

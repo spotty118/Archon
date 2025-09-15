@@ -168,7 +168,7 @@ Requirements:
 - Use proper capitalization
 
 Examples:
-- "Anthropic Documentation" 
+- "Anthropic Documentation"
 - "OpenAI API Reference"
 - "Mem0 llms.txt"
 - "Supabase Docs"
@@ -284,7 +284,7 @@ async def update_source_info(
             if source_display_name:
                 update_data["source_display_name"] = source_display_name
 
-            result = (
+            (
                 client.table("archon_sources")
                 .update(update_data)
                 .eq("source_id", source_id)
