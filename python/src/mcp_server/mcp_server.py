@@ -29,7 +29,6 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-
 from mcp.server.fastmcp import Context, FastMCP
 
 # Add the project root to Python path for imports
@@ -155,7 +154,7 @@ async def lifespan(server: FastMCP) -> AsyncIterator[ArchonContext]:
         try:
             # Initialize session manager
             logger.info("🔐 Initializing session manager...")
-            session_manager = get_session_manager()
+            _session_manager = get_session_manager()
             logger.info("✓ Session manager initialized")
 
             # Initialize service client for HTTP calls

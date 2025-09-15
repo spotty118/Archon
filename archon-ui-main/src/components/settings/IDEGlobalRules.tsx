@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileCode, Copy, Check } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useToast } from '../../features/ui/hooks/useToast';
@@ -386,8 +386,8 @@ archon:manage_task(
     const elements: JSX.Element[] = [];
     let inCodeBlock = false;
     let codeBlockContent: string[] = [];
-    let codeBlockLang = '';
-    const listStack: string[] = [];
+    const _codeBlockLang = '';
+    const _listStack: string[] = [];
 
     lines.forEach((line, index) => {
       // Code blocks

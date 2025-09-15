@@ -133,7 +133,7 @@ class RateLimitHandler:
             match = re.search(r"try again in (\d+(?:\.\d+)?)s", error_message)
             if match:
                 return float(match.group(1))
-        except:
+        except (ValueError, AttributeError):
             pass
         return None
 
@@ -216,7 +216,7 @@ class BaseAgent(ABC, Generic[DepsT, OutputT]):
             self.logger.info(f"Agent {self.name} completed successfully")
             # PydanticAI returns a RunResult with data attribute
             return result.data
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.logger.error(f"Agent {self.name} timed out after 120 seconds")
             raise Exception(f"Agent {self.name} operation timed out - taking too long to respond")
         except Exception as e:

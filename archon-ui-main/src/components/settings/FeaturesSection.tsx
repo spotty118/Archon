@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, FileText, Layout, Bot, Settings, Palette, Flame, Monitor } from 'lucide-react';
+import { Moon, Sun, FileText, Flame, Monitor } from 'lucide-react';
 import { Toggle } from '../ui/Toggle';
-import { Card } from '../ui/Card';
 import { useTheme } from '../../contexts/ThemeContext';
 import { credentialsService } from '../../services/credentialsService';
 import { useToast } from '../../features/ui/hooks/useToast';
@@ -17,8 +16,8 @@ export const FeaturesSection = () => {
   const [projectsEnabled, setProjectsEnabled] = useState(true);
   
   // Commented out for future release
-  const [agUILibraryEnabled, setAgUILibraryEnabled] = useState(false);
-  const [agentsEnabled, setAgentsEnabled] = useState(false);
+  const [_agUILibraryEnabled, _setAgUILibraryEnabled] = useState(false);
+  const [_agentsEnabled, _setAgentsEnabled] = useState(false);
   
   const [logfireEnabled, setLogfireEnabled] = useState(false);
   const [disconnectScreenEnabled, setDisconnectScreenEnabled] = useState(true);
