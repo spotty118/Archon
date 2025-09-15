@@ -99,7 +99,7 @@ async def get_knowledge_sources():
         return []
     except Exception as e:
         safe_logfire_error(f"Failed to get knowledge sources | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.get("/knowledge-items")
@@ -645,9 +645,9 @@ async def crawl_knowledge_item(request: KnowledgeItemRequest):
 
         response = CrawlStartResponse(
             success=True,
-            progress_id=progress_id,
+            progressId=progress_id,
             message="Crawling started",
-            estimated_duration="3-5 minutes"
+            estimatedDuration="3-5 minutes"
         )
 
         return response.model_dump(by_alias=True)
