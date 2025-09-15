@@ -55,7 +55,7 @@ class GitHubService:
         if not self.token:
             raise HTTPException(
                 status_code=500, detail="GitHub integration not configured - GITHUB_TOKEN not found"
-            )
+            ) from e
 
         # Format the issue body
         issue_body = self._format_issue_body(bug_report)
@@ -95,12 +95,12 @@ class GitHubService:
                     raise HTTPException(
                         status_code=500,
                         detail="GitHub authentication failed - check GITHUB_TOKEN permissions",
-                    )
+                    ) from e
                 else:
                     logger.error(f"GitHub API error: {response.status_code} - {response.text}")
                     raise HTTPException(
                         status_code=500, detail=f"GitHub API error: {response.status_code}"
-                    )
+                    ) from e
 
         except httpx.TimeoutException:
             logger.error("GitHub API request timed out")

@@ -120,7 +120,7 @@ async def create_credential(request: CredentialRequest):
             }
         else:
             logfire.error(f"Failed to save credential | key={request.key}")
-            raise HTTPException(status_code=500, detail={"error": "Failed to save credential"})
+            raise HTTPException(status_code=500, detail={"error": "Failed to save credential"}) from e
 
     except Exception as e:
         logfire.error(f"Error creating credential | key={request.key} | error={str(e)}")
@@ -159,7 +159,7 @@ async def get_credential(key: str):
                 }
 
             logfire.warning(f"Credential not found | key={key}")
-            raise HTTPException(status_code=404, detail={"error": f"Credential {key} not found"})
+            raise HTTPException(status_code=404, detail={"error": f"Credential {key} not found"}) from e
 
         logfire.info(f"Credential retrieved successfully | key={key}")
 
@@ -180,7 +180,7 @@ async def get_credential(key: str):
         raise
     except Exception as e:
         logfire.error(f"Error getting credential | key={key} | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.put("/credentials/{key}")
@@ -236,11 +236,11 @@ async def update_credential(key: str, request: dict[str, Any]):
             return {"success": True, "message": f"Credential {key} updated successfully"}
         else:
             logfire.error(f"Failed to update credential | key={key}")
-            raise HTTPException(status_code=500, detail={"error": "Failed to update credential"})
+            raise HTTPException(status_code=500, detail={"error": "Failed to update credential"}) from e
 
     except Exception as e:
         logfire.error(f"Error updating credential | key={key} | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.delete("/credentials/{key}")
@@ -256,7 +256,7 @@ async def delete_credential(key: str):
             return {"success": True, "message": f"Credential {key} deleted successfully"}
         else:
             logfire.error(f"Failed to delete credential | key={key}")
-            raise HTTPException(status_code=500, detail={"error": "Failed to delete credential"})
+            raise HTTPException(status_code=500, detail={"error": "Failed to delete credential"}) from e
 
     except Exception as e:
         logfire.error(f"Error deleting credential | key={key} | error={str(e)}")
