@@ -21,7 +21,11 @@ interface CodeExtractionSettingsProps {
     CONTEXT_WINDOW_SIZE: number;
     ENABLE_CODE_SUMMARIES: boolean;
   };
-  setCodeExtractionSettings: (settings: any) => void;
+  setCodeExtractionSettings: (settings: {
+    CODE_EXTRACTION_MAX_WORKERS: number;
+    CONTEXT_WINDOW_SIZE: number;
+    ENABLE_CODE_SUMMARIES: boolean;
+  }) => void;
 }
 
 export const CodeExtractionSettings = ({

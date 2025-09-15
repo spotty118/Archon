@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { bugReportService, BugContext } from '../services/bugReportService';
 
-export const useBugReport = () => {
+export const useBugReport = (): {
+  isOpen: boolean;
+  context: BugContext | null;
+  loading: boolean;
+  openBugReport: (error?: Error) => Promise<void>;
+  closeBugReport: () => void;
+} => {
   const [isOpen, setIsOpen] = useState(false);
   const [context, setContext] = useState<BugContext | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const openBugReport = async (error?: Error) => {
+  const openBugReport = async (error?: Error): Promise<void> => {
     setLoading(true);
     
     try {
@@ -45,7 +51,7 @@ export const useBugReport = () => {
     }
   };
 
-  const closeBugReport = () => {
+  const closeBugReport = (): void => {
     setIsOpen(false);
     setContext(null);
   };

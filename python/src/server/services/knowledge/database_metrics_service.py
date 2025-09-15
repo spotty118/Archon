@@ -96,7 +96,7 @@ class DatabaseMetricsService:
             )
 
             if knowledge_types_result.data:
-                type_counts = {}
+                type_counts: dict[str, int] = {}
                 for row in knowledge_types_result.data:
                     ktype = row.get("knowledge_type", "unknown")
                     type_counts[ktype] = type_counts.get(ktype, 0) + 1
@@ -111,10 +111,11 @@ class DatabaseMetricsService:
                 .execute()
             )
 
-            stats["recent_sources"] = [
+            recent_sources_list = [
                 {"source_id": s["source_id"], "created_at": s["created_at"]}
                 for s in (recent_sources.data or [])
             ]
+            stats["recent_sources"] = recent_sources_list
 
             return stats
 

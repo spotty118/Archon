@@ -1582,4 +1582,4 @@ class CodeExtractionService:
 
         except Exception as e:
             safe_logfire_error(f"Error storing code examples | error={e}")
-            raise RuntimeError("Failed to store code examples")
+            raise RuntimeError("Failed to store code examples") from e
