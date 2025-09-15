@@ -58,7 +58,7 @@ import { getApiUrl } from "../config/api";
 class CredentialsService {
   private baseUrl = getApiUrl();
 
-  private handleCredentialError(error: any, context: string): Error {
+  private handleCredentialError(error: unknown, context: string): Error {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     // Check for network errors

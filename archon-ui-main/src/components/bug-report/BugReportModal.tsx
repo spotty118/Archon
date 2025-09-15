@@ -108,7 +108,7 @@ export const BugReportModal: React.FC<BugReportModalProps> = ({
         );
       }
     } catch (error) {
-      console.error("Bug report submission failed:", error);
+  // console.error("Bug report submission failed:", error);
       showToast(
         "Failed to submit bug report. Please try again or report manually.",
         "error",

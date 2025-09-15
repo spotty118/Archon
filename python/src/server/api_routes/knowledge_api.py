@@ -383,7 +383,7 @@ async def get_knowledge_item_chunks(
         safe_logfire_error(
             f"Failed to fetch chunks | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.get("/knowledge-items/{source_id}/code-examples")
@@ -473,7 +473,7 @@ async def get_knowledge_item_code_examples(
         safe_logfire_error(
             f"Failed to fetch code examples | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.post("/knowledge-items/{source_id}/refresh")
@@ -530,7 +530,7 @@ async def refresh_knowledge_item(source_id: str):
             safe_logfire_error(f"Failed to get crawler | error={str(e)}")
             raise HTTPException(
                 status_code=500, detail={"error": f"Failed to initialize crawler: {str(e)}"}
-            ) from None
+            ) from e
 
         # Use the same crawl orchestration as regular crawl
         crawl_service = CrawlingService(
@@ -583,7 +583,7 @@ async def refresh_knowledge_item(source_id: str):
         safe_logfire_error(
             f"Failed to refresh knowledge item | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.post("/knowledge-items/crawl")
@@ -653,7 +653,7 @@ async def crawl_knowledge_item(request: KnowledgeItemRequest):
         return response.model_dump(by_alias=True)
     except Exception as e:
         safe_logfire_error(f"Failed to start crawl | error={str(e)} | url={str(request.url)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 async def _perform_crawl_with_progress(
@@ -770,7 +770,7 @@ async def upload_document(
             if not all(isinstance(tag, str) for tag in tag_list):
                 raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"}) from None
         except json.JSONDecodeError as ex:
-            raise HTTPException(status_code=422, detail={"error": f"Invalid tags JSON: {str(ex)}"})
+            raise HTTPException(status_code=422, detail={"error": f"Invalid tags JSON: {str(ex)}"}) from ex
 
         # Read file content immediately to avoid closed file issues
         file_content = await file.read()
@@ -812,7 +812,7 @@ async def upload_document(
         safe_logfire_error(
             f"Failed to start document upload | error={str(e)} | filename={file.filename} | error_type={type(e).__name__}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 async def _perform_upload_with_progress(
@@ -977,7 +977,7 @@ async def perform_rag_query(request: RagQueryRequest):
         safe_logfire_error(
             f"RAG query failed | error={str(e)} | query={request.query[:50]} | source={request.source}"
         )
-        raise HTTPException(status_code=500, detail={"error": f"RAG query failed: {str(e)}"})
+        raise HTTPException(status_code=500, detail={"error": f"RAG query failed: {str(e)}"}) from e
 
 
 @router.post("/rag/code-examples")
@@ -1013,7 +1013,7 @@ async def search_code_examples(request: RagQueryRequest):
         )
         raise HTTPException(
             status_code=500, detail={"error": f"Code examples search failed: {str(e)}"}
-        )
+        ) from e
 
 
 @router.post("/code-examples")
@@ -1038,7 +1038,7 @@ async def get_available_sources():
         return result
     except Exception as e:
         safe_logfire_error(f"Failed to get available sources | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.delete("/sources/{source_id}")
@@ -1073,7 +1073,7 @@ async def delete_source(source_id: str):
         raise
     except Exception as e:
         safe_logfire_error(f"Failed to delete source | error={str(e)} | source_id={source_id}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.get("/database/metrics")
@@ -1086,7 +1086,7 @@ async def get_database_metrics():
         return metrics
     except Exception as e:
         safe_logfire_error(f"Failed to get database metrics | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
 @router.get("/health")
@@ -1183,4 +1183,4 @@ async def stop_crawl_task(progress_id: str):
         safe_logfire_error(
             f"Failed to stop crawl task | error={str(e)} | progress_id={progress_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)})
+        raise HTTPException(status_code=500, detail={"error": str(e)}) from e

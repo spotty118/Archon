@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Loader,
   Settings,
@@ -28,7 +28,7 @@ import {
   CodeExtractionSettings as CodeExtractionSettingsType,
 } from "../services/credentialsService";
 
-export const SettingsPage = () => {
+export const SettingsPage = (): void => {
   const [ragSettings, setRagSettings] = useState<RagSettings>({
     USE_CONTEXTUAL_EMBEDDINGS: false,
     CONTEXTUAL_EMBEDDINGS_MAX_WORKERS: 3,
@@ -63,12 +63,7 @@ export const SettingsPage = () => {
   const { isVisible, containerVariants, itemVariants, titleVariants } =
     useStaggeredEntrance([1, 2, 3, 4], 0.15);
 
-  // Load settings on mount
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async (_isRetry = false) => {
+  const loadSettings = useCallback(async (_isRetry = false): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
@@ -83,12 +78,17 @@ export const SettingsPage = () => {
       setCodeExtractionSettings(codeExtractionSettingsData);
     } catch (err) {
       setError("Failed to load settings");
-      console.error(err);
+  // console.error(err);
       showToast("Failed to load settings", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   if (loading) {
     return (

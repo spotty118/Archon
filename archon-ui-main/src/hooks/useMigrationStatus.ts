@@ -13,7 +13,7 @@ export const useMigrationStatus = (): MigrationStatus => {
   });
 
   useEffect(() => {
-    const checkMigrationStatus = async () => {
+    const checkMigrationStatus = async (): Promise<void> => {
       try {
         const response = await fetch('/api/health');
         const healthData = await response.json();
@@ -31,7 +31,7 @@ export const useMigrationStatus = (): MigrationStatus => {
           });
         }
       } catch (error) {
-        console.error('Failed to check migration status:', error);
+  // console.error('Failed to check migration status:', error);
         setStatus({
           migrationRequired: false,
           loading: false,

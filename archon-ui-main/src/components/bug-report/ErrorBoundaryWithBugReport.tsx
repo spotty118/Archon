@@ -38,7 +38,7 @@ export class ErrorBoundaryWithBugReport extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  // console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     this.setState({
       error,
@@ -54,7 +54,7 @@ export class ErrorBoundaryWithBugReport extends Component<Props, State> {
       const context = await bugReportService.collectBugContext(error);
       this.setState({ bugContext: context });
     } catch (contextError) {
-      console.error("Failed to collect bug context:", contextError);
+  // console.error("Failed to collect bug context:", contextError);
     }
   }
 
@@ -84,7 +84,7 @@ export class ErrorBoundaryWithBugReport extends Component<Props, State> {
     if (this.state.hasError && this.state.error) {
       // Custom fallback if provided
       if (this.props.fallback) {
-        return this.props.fallback(this.state.error, this.state.errorInfo!);
+        return this.props.fallback(this.state.error, this.state.errorInfo ?? null);
       }
 
       // Default error UI

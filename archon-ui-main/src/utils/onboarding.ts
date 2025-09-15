@@ -29,14 +29,14 @@ export function isLmConfigured(
   const provider = providerCred?.value?.toLowerCase();
 
   // Debug logging
-  console.log('🔎 isLmConfigured - Provider:', provider);
-  console.log('🔎 isLmConfigured - API Keys:', apiKeyCreds.map(c => ({
-    key: c.key,
-    value: c.value,
-    encrypted_value: c.encrypted_value,
-    is_encrypted: c.is_encrypted,
-    hasValidValue: !!(c.value && c.value !== 'null' && c.value !== null)
-  })));
+  // console.log('🔎 isLmConfigured - Provider:', provider);
+  // console.log('🔎 isLmConfigured - API Keys:', apiKeyCreds.map(c => ({
+  //   key: c.key,
+  //   value: c.value,
+  //   encrypted_value: c.encrypted_value,
+  //   is_encrypted: c.is_encrypted,
+  //   hasValidValue: !!(c.value && c.value !== 'null' && c.value !== null)
+  // })));
 
   // Helper function to check if a credential has a valid value
   const hasValidCredential = (cred: NormalizedCredential | undefined): boolean => {
@@ -54,8 +54,8 @@ export function isLmConfigured(
   const hasOpenAIKey = hasValidCredential(openAIKeyCred);
   const hasGoogleKey = hasValidCredential(googleKeyCred);
 
-  console.log('🔎 isLmConfigured - OpenAI key valid:', hasOpenAIKey);
-  console.log('🔎 isLmConfigured - Google key valid:', hasGoogleKey);
+  // console.log('🔎 isLmConfigured - OpenAI key valid:', hasOpenAIKey);
+  // console.log('🔎 isLmConfigured - Google key valid:', hasGoogleKey);
 
   // Check based on provider
   if (provider === 'openai') {
@@ -69,7 +69,7 @@ export function isLmConfigured(
     return true;
   } else if (provider) {
     // Unknown provider, assume it doesn't need an API key
-    console.log('🔎 isLmConfigured - Unknown provider, assuming configured:', provider);
+  // console.log('🔎 isLmConfigured - Unknown provider, assuming configured:', provider);
     return true;
   } else {
     // No provider specified, check if ANY API key is configured
