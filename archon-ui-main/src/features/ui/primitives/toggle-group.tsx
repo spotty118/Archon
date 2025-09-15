@@ -2,18 +2,32 @@ import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import React from "react";
 import { cn, glassmorphism } from "./styles";
 
-export interface ToggleGroupProps extends Omit<React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root>, 'type'> {
+export interface ToggleGroupProps {
   variant?: "subtle" | "solid";
   size?: "sm" | "md";
-  type?: "single" | "multiple";
+  className?: string;
+  children?: React.ReactNode;
 }
 
-export const ToggleGroup = React.forwardRef<React.ElementRef<typeof ToggleGroupPrimitive.Root>, ToggleGroupProps>(
-  ({ className, variant = "subtle", size = "sm", type = "single", ...props }, ref) => {
+export interface ToggleGroupSingleProps extends ToggleGroupProps {
+  type: "single";
+  value?: string;
+  onValueChange?: (value: string) => void;
+}
+
+export interface ToggleGroupMultipleProps extends ToggleGroupProps {
+  type: "multiple";
+  value?: string[];
+  onValueChange?: (value: string[]) => void;
+}
+
+export const ToggleGroup = React.forwardRef<
+  React.ElementRef<typeof ToggleGroupPrimitive.Root>, 
+  ToggleGroupSingleProps | ToggleGroupMultipleProps
+>(({ className, variant = "subtle", size = "sm", ...props }, ref) => {
     return (
       <ToggleGroupPrimitive.Root
         ref={ref}
-        type={type}
         className={cn(
           "inline-flex items-center rounded-lg overflow-hidden",
           variant === "subtle" &&
@@ -21,7 +35,7 @@ export const ToggleGroup = React.forwardRef<React.ElementRef<typeof ToggleGroupP
           variant === "solid" && cn(glassmorphism.background.cyan, glassmorphism.border.cyan, glassmorphism.shadow.lg),
           className,
         )}
-        {...props}
+        {...(props as any)}
       />
     );
   },

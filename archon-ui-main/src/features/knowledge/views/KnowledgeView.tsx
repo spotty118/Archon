@@ -72,7 +72,7 @@ export const KnowledgeView = () => {
       // Check if it was an error or success
       if (op.status === "error" || op.status === "failed") {
         // Show error message with details
-        const errorMessage = op.message || op.error || "Operation failed";
+        const errorMessage = op.message || "Operation failed";
         showError(`❌ ${errorMessage}`, 7000);
       } else if (op.status === "completed") {
         // Show success message

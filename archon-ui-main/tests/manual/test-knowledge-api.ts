@@ -13,9 +13,8 @@ import { progressService } from '../../src/features/knowledge/progress/services/
 // Ensure fetch in Node environments lacking global fetch
 if (typeof fetch === "undefined") {
   // Use dynamic import for ESM compatibility
-  const { fetch: nodeFetch } = await import('node-fetch');
-  // @ts-expect-error: assign global
-  globalThis.fetch = nodeFetch as any;
+  const nodeFetch = await import('node-fetch');
+  globalThis.fetch = nodeFetch.default as any;
 }
 
 async function testKnowledgeAPI() {
@@ -64,10 +63,11 @@ async function testKnowledgeAPI() {
     // Test 5: Search
     console.log('🔎 Test 5: Searching knowledge base...');
     try {
-      const _searchResults = await knowledgeService.searchKnowledgeBase({
+      const searchResults = await knowledgeService.searchKnowledgeBase({
         query: 'API',
         limit: 3,
       });
+      console.log(`✅ Found ${searchResults.results.length} search results`);
       console.log('✅ Search completed');
       console.log('');
     } catch (error) {

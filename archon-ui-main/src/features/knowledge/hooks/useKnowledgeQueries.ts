@@ -331,7 +331,7 @@ export function useUploadDocument() {
           source_type: "file",
           status: "processing",
           description: `Uploading ${file.name}`,
-          filename: file.name,
+          file_name: file.name,
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

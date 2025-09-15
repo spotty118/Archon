@@ -22,9 +22,22 @@ interface ToastProviderProps {
 export function ToastProvider({ children, duration = 4000, swipeDirection = "right" }: ToastProviderProps) {
   const { toasts, showToast, removeToast } = createToastContext();
 
+  // Convenience methods
+  const showSuccess = (message: string, duration?: number) => showToast(message, "success", duration);
+  const showError = (message: string, duration?: number) => showToast(message, "error", duration);
+  const showInfo = (message: string, duration?: number) => showToast(message, "info", duration);
+  const showWarning = (message: string, duration?: number) => showToast(message, "warning", duration);
+
   return (
     <RadixToastProvider duration={duration} swipeDirection={swipeDirection}>
-      <ToastContext.Provider value={{ showToast, removeToast }}>
+      <ToastContext.Provider value={{ 
+        showToast, 
+        removeToast, 
+        showSuccess, 
+        showError, 
+        showInfo, 
+        showWarning 
+      }}>
         {children}
         {toasts.map((toast) => {
           const Icon = getToastIcon(toast.type);

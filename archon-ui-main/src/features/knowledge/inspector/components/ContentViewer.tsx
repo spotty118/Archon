@@ -131,7 +131,7 @@ export const ContentViewer: React.FC<ContentViewerProps> = ({ selectedItem, onCo
                 <span className="text-cyan-400">{(selectedItem.metadata.relevance_score * 100).toFixed(0)}%</span>
               </span>
             )}
-            {selectedItem.type === "document" && "url" in selectedItem.metadata && selectedItem.metadata.url && (
+            {selectedItem.type === "document" && selectedItem.metadata && "url" in selectedItem.metadata && selectedItem.metadata.url && (
               <a
                 href={selectedItem.metadata.url}
                 target="_blank"

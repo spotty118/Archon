@@ -41,8 +41,6 @@ export const APIKeysSection = () => {
       
       // Convert to UI format
       const uiCredentials = apiKeys.map(cred => {
-        const _isEncryptedFromBackend = cred.is_encrypted && cred.value === '[ENCRYPTED]';
-        
         return {
           key: cred.key,
           value: cred.value || '',
@@ -53,7 +51,7 @@ export const APIKeysSection = () => {
           is_encrypted: cred.is_encrypted || false,
           showValue: false,
           isNew: false,
-          isFromBackend: !cred.isNew, // Mark as from backend unless it's a new credential
+          isFromBackend: true, // Always from backend since we're loading from API
         };
       });
       
