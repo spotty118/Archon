@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext
 
 from .base_agent import ArchonDependencies, BaseAgent
+from ..server.services.client_manager import get_supabase_client
 from .mcp_client import get_mcp_client
 
 logger = logging.getLogger(__name__)
@@ -321,7 +322,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                         if new_content.startswith("[") and new_content.endswith("]"):
                             try:
                                 current_content[section_to_update] = json.loads(new_content)
-                            except:
+                            except (json.JSONDecodeError, ValueError):
                                 current_content[section_to_update].append(new_content)
                         else:
                             current_content[section_to_update].append(new_content)
@@ -330,7 +331,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                         try:
                             update_dict = json.loads(new_content)
                             current_content[section_to_update].update(update_dict)
-                        except:
+                        except (json.JSONDecodeError, ValueError):
                             current_content[section_to_update]["update"] = new_content
                     else:
                         # Simple string replacement
@@ -339,7 +340,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                     # Create new section
                     try:
                         current_content[section_to_update] = json.loads(new_content)
-                    except:
+                    except (json.JSONDecodeError, ValueError):
                         current_content[section_to_update] = new_content
 
                 # Update document via MCP
