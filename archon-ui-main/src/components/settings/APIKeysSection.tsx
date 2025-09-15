@@ -18,7 +18,7 @@ interface CustomCredential {
   isFromBackend?: boolean; // Track if credential came from backend (write-only once encrypted)
 }
 
-export const APIKeysSection = () => {
+export const APIKeysSection = (): void => {
   const [customCredentials, setCustomCredentials] = useState<CustomCredential[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,7 +57,7 @@ export const APIKeysSection = () => {
       
       setCustomCredentials(uiCredentials);
     } catch (err) {
-      console.error('Failed to load credentials:', err);
+  // console.error('Failed to load credentials:', err);
       showToast('Failed to load credentials', 'error');
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ export const APIKeysSection = () => {
     setHasUnsavedChanges(hasChanges);
   }, [customCredentials]);
 
-  const handleAddNewRow = () => {
+  const handleAddNewRow = (): void => {
     const newCred: CustomCredential = {
       key: '',
       value: '',
@@ -91,7 +91,7 @@ export const APIKeysSection = () => {
     setCustomCredentials([...customCredentials, newCred]);
   };
 
-  const updateCredential = (index: number, field: keyof CustomCredential, value: any) => {
+  const updateCredential = (index: number, field: keyof CustomCredential, value: unknown) => {
     setCustomCredentials(customCredentials.map((cred, i) => {
       if (i === index) {
         const updated = { ...cred, [field]: value };
@@ -141,7 +141,7 @@ export const APIKeysSection = () => {
         setCustomCredentials(customCredentials.filter((_, i) => i !== index));
         showToast(`Deleted ${cred.key}`, 'success');
       } catch (err) {
-        console.error('Failed to delete credential:', err);
+  // console.error('Failed to delete credential:', err);
         showToast('Failed to delete credential', 'error');
       }
     }
@@ -191,7 +191,7 @@ export const APIKeysSection = () => {
             }
           }
         } catch (err) {
-          console.error(`Failed to save ${cred.key}:`, err);
+  // console.error(`Failed to save ${cred.key}:`, err);
           showToast(`Failed to save ${cred.key}`, 'error');
           hasErrors = true;
         }

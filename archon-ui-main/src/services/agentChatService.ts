@@ -68,7 +68,7 @@ class AgentChatService {
         return 'offline';
       }
     } catch (error) {
-      console.error('Failed to check chat server status:', error);
+  // console.error('Failed to check chat server status:', error);
       return 'offline';
     }
   }
@@ -87,7 +87,7 @@ class AgentChatService {
 
       return response.ok;
     } catch (error) {
-      console.error('Failed to validate session:', error);
+  // console.error('Failed to validate session:', error);
       return false;
     }
   }
@@ -111,7 +111,7 @@ class AgentChatService {
       if (!response.ok) {
         // If we get a 404, the agent service is not running
         if (response.status === 404) {
-          console.log('Agent chat service not available - service may be disabled');
+  // console.log('Agent chat service not available - service may be disabled');
           throw new Error('Agent chat service is not available. The service may be disabled.');
         }
         throw new Error(`Failed to create session: ${response.statusText}`);
@@ -122,7 +122,7 @@ class AgentChatService {
     } catch (error) {
       // Don't log fetch errors for disabled service
       if (error instanceof Error && !error.message.includes('not available')) {
-        console.error('Failed to create chat session:', error);
+  // console.error('Failed to create chat session:', error);
       }
       throw error;
     }
@@ -132,25 +132,20 @@ class AgentChatService {
    * Send a message to an existing chat session
    */
   async sendMessage(sessionId: string, request: ChatRequest): Promise<ChatMessage> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
+    const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
-      }
-
-      const message = await response.json();
-      return message;
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to send message: ${response.statusText}`);
     }
+
+    const message = await response.json();
+    return message;
   }
 
   /**
@@ -182,7 +177,7 @@ class AgentChatService {
         if (!response.ok) {
           // If we get a 404, the service is not available - stop polling
           if (response.status === 404) {
-            console.log('Agent chat service not available (404) - stopping polling');
+  // console.log('Agent chat service not available (404) - stopping polling');
             clearInterval(pollInterval);
             this.pollingIntervals.delete(sessionId);
             const errorHandler = this.errorHandlers.get(sessionId);
@@ -207,7 +202,7 @@ class AgentChatService {
       } catch (error) {
         // Only log non-404 errors (404s are handled above)
         if (error instanceof Error && !error.message.includes('404')) {
-          console.error('Failed to poll messages:', error);
+  // console.error('Failed to poll messages:', error);
         }
         const errorHandler = this.errorHandlers.get(sessionId);
         if (errorHandler) {
@@ -230,47 +225,37 @@ class AgentChatService {
    * Get chat history for a session
    */
   async getChatHistory(sessionId: string): Promise<ChatMessage[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/messages`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}/messages`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to get chat history: ${response.statusText}`);
-      }
-
-      const messages = await response.json();
-      return messages;
-    } catch (error) {
-      console.error('Failed to get chat history:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to get chat history: ${response.statusText}`);
     }
+
+    const messages = await response.json();
+    return messages;
   }
 
   /**
    * Delete a chat session
    */
   async deleteSession(sessionId: string): Promise<void> {
-    try {
-      // Clean up any active connections first
-      this.cleanupConnection(sessionId);
+    // Clean up any active connections first
+    this.cleanupConnection(sessionId);
 
-      const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const response = await fetch(`${this.baseUrl}/api/agent-chat/sessions/${sessionId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Failed to delete session: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Failed to delete chat session:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`Failed to delete session: ${response.statusText}`);
     }
   }
 

@@ -109,7 +109,7 @@ class ProgressTracker:
 
         # CRITICAL: Never allow progress to go backwards
         current_progress_raw = self.state.get("progress", 0)
-        current_progress = int(current_progress_raw) if isinstance(current_progress_raw, (int, float)) else 0
+        current_progress = int(current_progress_raw) if isinstance(current_progress_raw, int | float) else 0
         new_progress = min(100, max(0, progress))  # Ensure 0-100
 
         # Only update if new progress is greater than or equal to current

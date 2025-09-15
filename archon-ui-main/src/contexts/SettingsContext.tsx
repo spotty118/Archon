@@ -10,7 +10,7 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-export const useSettings = () => {
+export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
     throw new Error('useSettings must be used within a SettingsProvider');
@@ -26,7 +26,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
   const [projectsEnabled, setProjectsEnabledState] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  const loadSettings = async () => {
+  const loadSettings = async (): Promise<void> => {
     try {
       setLoading(true);
       
@@ -40,7 +40,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
       }
       
     } catch (error) {
-      console.error('Failed to load settings:', error);
+  // console.error('Failed to load settings:', error);
       setProjectsEnabledState(true);
     } finally {
       setLoading(false);
@@ -51,7 +51,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     loadSettings();
   }, []);
 
-  const setProjectsEnabled = async (enabled: boolean) => {
+  const setProjectsEnabled = async (enabled: boolean): Promise<void> => {
     try {
       // Update local state immediately
       setProjectsEnabledState(enabled);
@@ -65,14 +65,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         description: 'Enable or disable Projects and Tasks functionality'
       });
     } catch (error) {
-      console.error('Failed to update projects setting:', error);
+  // console.error('Failed to update projects setting:', error);
       // Revert on error
       setProjectsEnabledState(!enabled);
       throw error;
     }
   };
 
-  const refreshSettings = async () => {
+  const refreshSettings = async (): Promise<void> => {
     await loadSettings();
   };
 

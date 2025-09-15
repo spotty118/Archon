@@ -57,8 +57,8 @@ export const ButtonPlayground: React.FC = () => {
     layer: 'layer1' | 'layer2',
     corner: keyof CornerRadius,
     value: number,
-    linked: any,
-    setRadius: any
+    linked: unknown,
+    setRadius: unknown
   ) => {
     if (layer === 'layer1') {
       if (linked[corner]) {
@@ -101,7 +101,7 @@ export const ButtonPlayground: React.FC = () => {
     }
   };
 
-  const generateCSS = () => {
+  const generateCSS = (): void => {
     const layer1BorderRadius = `${layer1Radius.topLeft}px ${layer1Radius.topRight}px ${layer1Radius.bottomRight}px ${layer1Radius.bottomLeft}px`;
     const layer2BorderRadius = `${layer2Radius.topLeft}px ${layer2Radius.topRight}px ${layer2Radius.bottomRight}px ${layer2Radius.bottomLeft}px`;
     
@@ -256,7 +256,7 @@ export const ButtonPlayground: React.FC = () => {
     return configs[color];
   };
 
-  const copyToClipboard = () => {
+  const copyToClipboard = (): void => {
     navigator.clipboard.writeText(generateCSS());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

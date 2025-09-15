@@ -91,7 +91,7 @@ class RecursiveCrawlStrategy:
         except (ValueError, KeyError, TypeError) as e:
             # Critical configuration errors should fail fast
             logger.error(f"Invalid crawl settings format: {e}", exc_info=True)
-            raise ValueError(f"Failed to load crawler configuration: {e}")
+            raise ValueError(f"Failed to load crawler configuration: {e}") from e
         except Exception as e:
             # For non-critical errors (e.g., network issues), use defaults but log prominently
             logger.error(
