@@ -13,6 +13,11 @@ interface Toast {
 interface ToastContextType {
   showToast: (message: string, type?: Toast["type"], duration?: number) => void;
   removeToast: (id: string) => void;
+  // Convenience methods for better DX
+  showSuccess: (message: string, duration?: number) => void;
+  showError: (message: string, duration?: number) => void;
+  showInfo: (message: string, duration?: number) => void;
+  showWarning: (message: string, duration?: number) => void;
 }
 
 // Create context
@@ -66,6 +71,23 @@ export function createToastContext() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  // Convenience methods for better Developer Experience
+  const showSuccess = useCallback((message: string, duration?: number) => {
+    showToast(message, "success", duration);
+  }, [showToast]);
+
+  const showError = useCallback((message: string, duration?: number) => {
+    showToast(message, "error", duration);
+  }, [showToast]);
+
+  const showInfo = useCallback((message: string, duration?: number) => {
+    showToast(message, "info", duration);
+  }, [showToast]);
+
+  const showWarning = useCallback((message: string, duration?: number) => {
+    showToast(message, "warning", duration);
+  }, [showToast]);
+
   useEffect(() => {
     return () => {
       for (const timeoutId of timeoutsRef.current.values()) clearTimeout(timeoutId);
@@ -77,6 +99,10 @@ export function createToastContext() {
     toasts,
     showToast,
     removeToast,
+    showSuccess,
+    showError,
+    showInfo,
+    showWarning,
   };
 }
 

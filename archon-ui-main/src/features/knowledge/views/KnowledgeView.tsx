@@ -50,7 +50,7 @@ export const KnowledgeView = () => {
   const hasActiveOperations = activeOperations.length > 0;
 
   // Toast notifications
-  const { showToast } = useToast();
+  const { showSuccess, showError } = useToast();
   const previousOperations = useRef<ActiveOperation[]>([]);
 
   // Track crawl completions and errors for toast notifications
@@ -73,11 +73,11 @@ export const KnowledgeView = () => {
       if (op.status === "error" || op.status === "failed") {
         // Show error message with details
         const errorMessage = op.message || op.error || "Operation failed";
-        showToast(`❌ ${errorMessage}`, "error", 7000);
+        showError(`❌ ${errorMessage}`, 7000);
       } else if (op.status === "completed") {
         // Show success message
         const message = op.message || "Operation completed";
-        showToast(`✅ ${message}`, "success", 5000);
+        showSuccess(`✅ ${message}`, 5000);
       }
 
       // Remove from active crawl IDs
@@ -89,7 +89,7 @@ export const KnowledgeView = () => {
 
     // Update previous operations
     previousOperations.current = [...activeOperations];
-  }, [activeOperations, showToast, refetch, setActiveCrawlIds]);
+  }, [activeOperations, showSuccess, showError, refetch, setActiveCrawlIds]);
 
   const handleAddKnowledge = () => {
     setIsAddDialogOpen(true);
