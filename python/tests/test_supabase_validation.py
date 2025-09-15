@@ -123,7 +123,7 @@ def test_config_handles_invalid_jwt():
             "OPENAI_API_KEY": ""  # Clear any existing key
         }
     ):
-        with patch("builtins.print") as mock_print:
+        with patch("builtins.print"):
             # Should not raise an exception for invalid JWT
             config = load_environment_config()
             assert config.supabase_service_key == "invalid-jwt-key"

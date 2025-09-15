@@ -200,7 +200,7 @@ def load_environment_config() -> EnvironmentConfig:
     try:
         port = int(port_str)
     except ValueError as e:
-        raise ConfigurationError(f"PORT must be a valid integer, got: {port_str}") from e
+        raise ConfigurationError(f"PORT must be a valid integer, got: {port_str}")
 
     return EnvironmentConfig(
         openai_api_key=openai_api_key,

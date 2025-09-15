@@ -3,7 +3,7 @@
  * Handles polling for operation progress with TanStack Query
  */
 
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type Query, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { progressService } from "../services";
 import type { ActiveOperationsResponse, ProgressResponse, ProgressStatus } from "../types";
@@ -40,7 +40,7 @@ export function useOperationProgress(
     hasCalledComplete.current = false;
     hasCalledError.current = false;
     consecutiveNotFound.current = 0;
-  }, [progressId]);
+  }, []);
 
   const query = useQuery<ProgressResponse | null>({
     queryKey: progressId ? progressKeys.detail(progressId) : ["progress-undefined"],
@@ -215,7 +215,7 @@ export function useMultipleOperations(
     completedIds.current.clear();
     errorIds.current.clear();
     notFoundCounts.current.clear();
-  }, [progressIds.join(",")]); // Use join to create stable dependency
+  }, []); // Use join to create stable dependency
 
   const queries = useQueries({
     queries: progressIds.map((progressId) => ({
@@ -244,8 +244,8 @@ export function useMultipleOperations(
           throw error;
         }
       },
-      refetchInterval: (query: { state: { data?: ProgressResponse } }) => {
-        const data = query.state.data as ProgressResponse | null | undefined;
+      refetchInterval: (query: Query<ProgressResponse | null, Error>) => {
+        const data = query.state.data;
 
         // Only stop polling when we have actual data and it's in a terminal state
         if (data && TERMINAL_STATES.includes(data.status)) {

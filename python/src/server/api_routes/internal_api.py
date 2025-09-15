@@ -68,7 +68,7 @@ async def get_agent_credentials(request: Request) -> dict[str, Any]:
     # Check if request is from internal source
     if not is_internal_request(request):
         logger.warning(f"Unauthorized access to internal credentials from {request.client.host}")
-        raise HTTPException(status_code=403, detail="Access forbidden")
+        raise HTTPException(status_code=403, detail="Access forbidden") from None
 
     try:
         # Get credentials needed by agents
@@ -111,7 +111,7 @@ async def get_agent_credentials(request: Request) -> dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving agent credentials: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve credentials") from e
+        raise HTTPException(status_code=500, detail="Failed to retrieve credentials") from None
 
 
 @router.get("/credentials/mcp")
@@ -124,7 +124,7 @@ async def get_mcp_credentials(request: Request) -> dict[str, Any]:
     # Check if request is from internal source
     if not is_internal_request(request):
         logger.warning(f"Unauthorized access to internal credentials from {request.client.host}")
-        raise HTTPException(status_code=403, detail="Access forbidden")
+        raise HTTPException(status_code=403, detail="Access forbidden") from None
 
     try:
         credentials = {
@@ -137,4 +137,4 @@ async def get_mcp_credentials(request: Request) -> dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving MCP credentials: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve credentials") from e
+        raise HTTPException(status_code=500, detail="Failed to retrieve credentials") from None
