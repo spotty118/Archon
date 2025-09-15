@@ -386,8 +386,7 @@ archon:manage_task(
     const elements: JSX.Element[] = [];
     let inCodeBlock = false;
     let codeBlockContent: string[] = [];
-    const _codeBlockLang = '';
-    const _listStack: string[] = [];
+    let codeBlockLang = '';
 
     lines.forEach((line, index) => {
       // Code blocks
@@ -400,7 +399,9 @@ archon:manage_task(
           inCodeBlock = false;
           elements.push(
             <pre key={index} className="bg-gray-900 dark:bg-gray-800 text-gray-100 p-3 rounded-md overflow-x-auto my-2">
-              <code className="text-sm font-mono">{codeBlockContent.join('\n')}</code>
+              <code className={`text-sm font-mono ${codeBlockLang ? `language-${codeBlockLang}` : ''}`}>
+                {codeBlockContent.join('\n')}
+              </code>
             </pre>
           );
         }

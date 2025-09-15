@@ -60,7 +60,6 @@ export const GlassCrawlDepthSelector: React.FC<GlassCrawlDepthSelectorProps> = (
         {levels.map((level) => {
           const isSelected = level <= value;
           const isCurrentValue = level === value;
-          const _isHovered = level === hoveredLevel;
           
           return (
             <button

@@ -32,7 +32,6 @@ class AgentChatService {
   private pollingIntervals: Map<string, NodeJS.Timeout> = new Map();
   private messageHandlers: Map<string, (message: ChatMessage) => void> = new Map();
   private errorHandlers: Map<string, (error: Error) => void> = new Map();
-  private serverStatus: 'online' | 'offline' | 'unknown' = 'unknown';
 
   constructor() {
     // In development, the API is proxied through Vite, so we use the same origin
@@ -64,15 +63,12 @@ class AgentChatService {
       });
       
       if (response.ok) {
-        this.serverStatus = 'online';
         return 'online';
       } else {
-        this.serverStatus = 'offline';
         return 'offline';
       }
     } catch (error) {
       console.error('Failed to check chat server status:', error);
-      this.serverStatus = 'offline';
       return 'offline';
     }
   }
@@ -284,7 +280,6 @@ class AgentChatService {
   async getServerStatus(): Promise<'online' | 'offline' | 'unknown'> {
     const serverHealthy = await serverHealthService.checkHealth();
     if (!serverHealthy) {
-      this.serverStatus = 'offline';
       return 'offline';
     }
 

@@ -61,7 +61,7 @@ export const KnowledgeHeader: React.FC<KnowledgeHeaderProps> = ({
             type="single"
             size="sm"
             value={typeFilter}
-            onValueChange={(v) => v && onTypeFilterChange(v as "all" | "technical" | "business")}
+            onValueChange={(v: string) => v && onTypeFilterChange(v as "all" | "technical" | "business")}
             aria-label="Filter knowledge type"
           >
             <ToggleGroupItem value="all" aria-label="All" title="All" className="flex items-center justify-center">

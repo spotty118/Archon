@@ -95,17 +95,17 @@ async def create_embedding(text: str, provider: str | None = None) -> list[float
                 if "quota" in error_msg.lower():
                     raise EmbeddingQuotaExhaustedError(
                         f"OpenAI quota exhausted: {error_msg}", text_preview=text
-                    )
+                    ) from e
                 elif "rate" in error_msg.lower():
-                    raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text)
+                    raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text) from e
                 else:
                     raise EmbeddingAPIError(
                         f"Failed to create embedding: {error_msg}", text_preview=text
-                    )
+                    ) from e
             else:
                 raise EmbeddingAPIError(
                     "No embeddings returned from batch creation", text_preview=text
-                )
+                ) from e
         return result.embeddings[0]
     except EmbeddingError:
         # Re-raise our custom exceptions
@@ -119,13 +119,13 @@ async def create_embedding(text: str, provider: str | None = None) -> list[float
         if "insufficient_quota" in error_msg:
             raise EmbeddingQuotaExhaustedError(
                 f"OpenAI quota exhausted: {error_msg}", text_preview=text
-            )
+            ) from e
         elif "rate_limit" in error_msg.lower():
-            raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text)
+            raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text) from e
         else:
             raise EmbeddingAPIError(
                 f"Embedding error: {error_msg}", text_preview=text, original_error=e
-            )
+            ) from e
 
 
 async def create_embeddings_batch(
