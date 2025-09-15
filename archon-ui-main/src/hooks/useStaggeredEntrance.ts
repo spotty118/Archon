@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
  * @param forceReanimateCounter Optional counter to force reanimation when it changes
  * @returns Animation variants and props for Framer Motion
  */
-export const useStaggeredEntrance = <T,>(items: T[], staggerDelay: number = 0.15, forceReanimateCounter?: number) => {
+export const useStaggeredEntrance = <T,>(_items: T[], staggerDelay: number = 0.15, forceReanimateCounter?: number) => {
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
     // Set visible after component mounts for the animation to trigger

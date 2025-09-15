@@ -33,6 +33,14 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
   const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'connecting'>('connecting');
   const [isReconnecting, setIsReconnecting] = useState(false);
   
+  // Use the actual state variables (remove underscore prefix)
+  const isTyping = _isTyping;
+  // const setIsTyping = _setIsTyping;  // Commented out as not used
+  const streamingMessage = _streamingMessage;
+  // const setStreamingMessage = _setStreamingMessage;  // Commented out as not used
+  const isStreaming = _isStreaming;
+  // const setIsStreaming = _setIsStreaming;  // Commented out as not used
+  
   // No agent switching - always use RAG
   
   // Refs for DOM elements
@@ -53,7 +61,7 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
         // Create a new chat session
         try {
           console.log(`[CHAT PANEL] Creating session with agentType: "rag"`);
-          const { session_id } = await agentChatService.createSession(undefined, 'rag');
+          const { session_id } = await agentChatService.createSession('rag');
           console.log(`[CHAT PANEL] Session created with ID: ${session_id}`);
           setSessionId(session_id);
           sessionIdRef.current = session_id;
@@ -197,7 +205,11 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
       };
       
       // Send message to agent via service
-      await agentChatService.sendMessage(sessionId, inputValue.trim(), context);
+      const request = {
+        message: inputValue.trim(),
+        context: context
+      };
+      await agentChatService.sendMessage(sessionId, request);
       setInputValue('');
       setConnectionError(null);
     } catch (error) {
@@ -225,10 +237,14 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
     setConnectionError('Attempting to reconnect...');
     
     try {
-      const success = await agentChatService.manualReconnect(sessionId);
-      if (success) {
+      // Try to create a new session to test connectivity
+      const { session_id } = await agentChatService.createSession('rag');
+      if (session_id) {
         setConnectionError(null);
         setConnectionStatus('online');
+        // Optionally switch to the new session
+        setSessionId(session_id);
+        sessionIdRef.current = session_id;
       } else {
         setConnectionError('Reconnection failed. Server may still be offline.');
         setConnectionStatus('offline');

@@ -188,9 +188,10 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
         enable_diagram_filtering = (
             _get_setting_fallback("ENABLE_DIAGRAM_FILTERING", "true").lower() == "true"
         )
-        enable_contextual_length = (
-            _get_setting_fallback("ENABLE_CONTEXTUAL_LENGTH", "true").lower() == "true"
-        )
+        # enable_contextual_length setting is defined but not currently used
+        # enable_contextual_length = (
+        #     _get_setting_fallback("ENABLE_CONTEXTUAL_LENGTH", "true").lower() == "true"
+        # )
         context_window_size = int(_get_setting_fallback("CONTEXT_WINDOW_SIZE", "1000"))
 
     except Exception as e:

@@ -2,16 +2,18 @@ import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import React from "react";
 import { cn, glassmorphism } from "./styles";
 
-export interface ToggleGroupProps extends React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> {
+export interface ToggleGroupProps extends Omit<React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root>, 'type'> {
   variant?: "subtle" | "solid";
   size?: "sm" | "md";
+  type?: "single" | "multiple";
 }
 
 export const ToggleGroup = React.forwardRef<React.ElementRef<typeof ToggleGroupPrimitive.Root>, ToggleGroupProps>(
-  ({ className, variant = "subtle", size = "sm", ...props }, ref) => {
+  ({ className, variant = "subtle", size = "sm", type = "single", ...props }, ref) => {
     return (
       <ToggleGroupPrimitive.Root
         ref={ref}
+        type={type}
         className={cn(
           "inline-flex items-center rounded-lg overflow-hidden",
           variant === "subtle" &&
