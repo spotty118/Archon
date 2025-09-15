@@ -5,7 +5,6 @@
  */
 
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 import { Briefcase, Clock, Code, ExternalLink, File, FileText, Globe, Terminal } from "lucide-react";
 import { useState } from "react";
 import { StatPill } from "../../ui/primitives";
@@ -141,13 +140,11 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   };
 
   return (
-    <motion.button
-      className="relative group cursor-pointer w-full text-left"
+    <button
+      className="relative group cursor-pointer w-full text-left hover:scale-105 transition-transform duration-200"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onViewDocument}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
     >
       <div
         className={cn(
@@ -305,6 +302,6 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
           </div>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 };
