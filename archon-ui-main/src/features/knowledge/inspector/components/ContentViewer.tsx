@@ -131,16 +131,19 @@ export const ContentViewer: React.FC<ContentViewerProps> = ({ selectedItem, onCo
                 <span className="text-cyan-400">{(selectedItem.metadata.relevance_score * 100).toFixed(0)}%</span>
               </span>
             )}
-            {selectedItem.type === "document" && selectedItem.metadata && "url" in selectedItem.metadata && selectedItem.metadata.url && (
-              <a
-                href={selectedItem.metadata.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 hover:text-cyan-300 transition-colors underline"
-              >
-                View Source
-              </a>
-            )}
+            {selectedItem.type === "document" &&
+              selectedItem.metadata &&
+              "url" in selectedItem.metadata &&
+              selectedItem.metadata.url && (
+                <a
+                  href={selectedItem.metadata.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:text-cyan-300 transition-colors underline"
+                >
+                  View Source
+                </a>
+              )}
           </div>
           <span className="text-gray-600">{selectedItem.type === "document" ? "Document Chunk" : "Code Example"}</span>
         </div>

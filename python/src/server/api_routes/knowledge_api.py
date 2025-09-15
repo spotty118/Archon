@@ -99,7 +99,7 @@ async def get_knowledge_sources():
         return []
     except Exception as e:
         safe_logfire_error(f"Failed to get knowledge sources | error={str(e)}")
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.get("/knowledge-items")
@@ -119,7 +119,7 @@ async def get_knowledge_items(
         safe_logfire_error(
             f"Failed to get knowledge items | error={str(e)} | page={page} | per_page={per_page}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.get("/knowledge-items/summary")
@@ -150,7 +150,7 @@ async def get_knowledge_items_summary(
         safe_logfire_error(
             f"Failed to get knowledge summaries | error={str(e)} | page={page} | per_page={per_page}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.put("/knowledge-items/{source_id}")
@@ -175,7 +175,7 @@ async def update_knowledge_item(source_id: str, updates: dict):
         safe_logfire_error(
             f"Failed to update knowledge item | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.delete("/knowledge-items/{source_id}")
@@ -224,7 +224,7 @@ async def delete_knowledge_item(source_id: str):
         safe_logfire_error(
             f"Failed to delete knowledge item | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.get("/knowledge-items/{source_id}/chunks")
@@ -383,7 +383,7 @@ async def get_knowledge_item_chunks(
         safe_logfire_error(
             f"Failed to fetch chunks | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.get("/knowledge-items/{source_id}/code-examples")
@@ -473,7 +473,7 @@ async def get_knowledge_item_code_examples(
         safe_logfire_error(
             f"Failed to fetch code examples | error={str(e)} | source_id={source_id}"
         )
-        raise HTTPException(status_code=500, detail={"error": str(e)}) from e
+        raise HTTPException(status_code=500, detail={"error": str(e)})
 
 
 @router.post("/knowledge-items/{source_id}/refresh")
@@ -489,7 +489,7 @@ async def refresh_knowledge_item(source_id: str):
         if not existing_item:
             raise HTTPException(
                 status_code=404, detail={"error": f"Knowledge item {source_id} not found"}
-            )
+            ) from None
 
         # Extract metadata
         metadata = existing_item.get("metadata", {})
@@ -500,7 +500,7 @@ async def refresh_knowledge_item(source_id: str):
         if not url:
             raise HTTPException(
                 status_code=400, detail={"error": "Knowledge item does not have a URL to refresh"}
-            )
+            ) from None
         knowledge_type = metadata.get("knowledge_type", "technical")
         tags = metadata.get("tags", [])
         max_depth = metadata.get("max_depth", 2)
@@ -530,7 +530,7 @@ async def refresh_knowledge_item(source_id: str):
             safe_logfire_error(f"Failed to get crawler | error={str(e)}")
             raise HTTPException(
                 status_code=500, detail={"error": f"Failed to initialize crawler: {str(e)}"}
-            )
+            ) from None
 
         # Use the same crawl orchestration as regular crawl
         crawl_service = CrawlingService(
@@ -591,11 +591,11 @@ async def crawl_knowledge_item(request: KnowledgeItemRequest):
     """Crawl a URL and add it to the knowledge base with progress tracking."""
     # Validate URL
     if not request.url:
-        raise HTTPException(status_code=422, detail="URL is required")
+        raise HTTPException(status_code=422, detail="URL is required") from None
 
     # Basic URL validation
     if not request.url.startswith(("http://", "https://")):
-        raise HTTPException(status_code=422, detail="URL must start with http:// or https://")
+        raise HTTPException(status_code=422, detail="URL must start with http:// or https://") from None
 
     try:
         safe_logfire_info(
@@ -653,7 +653,7 @@ async def crawl_knowledge_item(request: KnowledgeItemRequest):
         return response.model_dump(by_alias=True)
     except Exception as e:
         safe_logfire_error(f"Failed to start crawl | error={str(e)} | url={str(request.url)}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 async def _perform_crawl_with_progress(
@@ -766,9 +766,9 @@ async def upload_document(
                 tag_list = []
             # Validate tags is a list of strings
             if not isinstance(tag_list, list):
-                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"})
+                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"}) from None
             if not all(isinstance(tag, str) for tag in tag_list):
-                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"})
+                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"}) from None
         except json.JSONDecodeError as ex:
             raise HTTPException(status_code=422, detail={"error": f"Invalid tags JSON: {str(ex)}"})
 
@@ -937,10 +937,10 @@ async def search_knowledge_items(request: RagQueryRequest):
     """Search knowledge items - alias for RAG query."""
     # Validate query
     if not request.query:
-        raise HTTPException(status_code=422, detail="Query is required") from e
+        raise HTTPException(status_code=422, detail="Query is required") from None
 
     if not request.query.strip():
-        raise HTTPException(status_code=422, detail="Query cannot be empty") from e
+        raise HTTPException(status_code=422, detail="Query cannot be empty") from None
 
     # Delegate to the RAG query handler
     return await perform_rag_query(request)
@@ -951,10 +951,10 @@ async def perform_rag_query(request: RagQueryRequest):
     """Perform a RAG query on the knowledge base using service layer."""
     # Validate query
     if not request.query:
-        raise HTTPException(status_code=422, detail="Query is required")
+        raise HTTPException(status_code=422, detail="Query is required") from None
 
     if not request.query.strip():
-        raise HTTPException(status_code=422, detail="Query cannot be empty")
+        raise HTTPException(status_code=422, detail="Query cannot be empty") from None
 
     try:
         # Use RAGService for RAG query
@@ -1168,7 +1168,7 @@ async def stop_crawl_task(progress_id: str):
                 pass
 
         if not found:
-            raise HTTPException(status_code=404, detail={"error": "No active task for given progress_id"})
+            raise HTTPException(status_code=404, detail={"error": "No active task for given progress_id"}) from None
 
         safe_logfire_info(f"Successfully stopped crawl task | progress_id={progress_id}")
         return {

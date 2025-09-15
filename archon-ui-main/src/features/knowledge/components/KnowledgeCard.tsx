@@ -141,19 +141,11 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   };
 
   return (
-    <motion.div
-      className="relative group cursor-pointer"
-      role="button"
-      tabIndex={0}
+    <motion.button
+      className="relative group cursor-pointer w-full text-left"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onViewDocument}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onViewDocument();
-        }
-      }}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
@@ -313,6 +305,6 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.button>
   );
 };

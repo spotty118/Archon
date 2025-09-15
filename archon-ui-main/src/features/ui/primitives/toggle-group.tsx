@@ -22,24 +22,26 @@ export interface ToggleGroupMultipleProps extends ToggleGroupProps {
 }
 
 export const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>, 
+  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   ToggleGroupSingleProps | ToggleGroupMultipleProps
 >(({ className, variant = "subtle", size = "sm", ...props }, ref) => {
-    return (
-      <ToggleGroupPrimitive.Root
-        ref={ref}
-        className={cn(
-          "inline-flex items-center rounded-lg overflow-hidden",
-          variant === "subtle" &&
-            cn(glassmorphism.background.subtle, glassmorphism.border.default, glassmorphism.shadow.elevated),
-          variant === "solid" && cn(glassmorphism.background.cyan, glassmorphism.border.cyan, glassmorphism.shadow.lg),
-          className,
-        )}
-        {...(props as any)}
-      />
-    );
-  },
-);
+  // Extract our custom props to avoid passing them to the primitive
+  const { variant: _, size: __, ...radixProps } = { variant, size, ...props };
+
+  return (
+    <ToggleGroupPrimitive.Root
+      ref={ref}
+      className={cn(
+        "inline-flex items-center rounded-lg overflow-hidden",
+        variant === "subtle" &&
+          cn(glassmorphism.background.subtle, glassmorphism.border.default, glassmorphism.shadow.elevated),
+        variant === "solid" && cn(glassmorphism.background.cyan, glassmorphism.border.cyan, glassmorphism.shadow.lg),
+        className,
+      )}
+      {...radixProps}
+    />
+  );
+});
 ToggleGroup.displayName = "ToggleGroup";
 
 export interface ToggleGroupItemProps extends React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> {

@@ -19,8 +19,6 @@ from pydantic import BaseModel
 # Removed direct logging import - using unified config
 # Set up standard logger for background tasks
 from ..config.logfire_config import get_logger, logfire
-from ..utils import get_supabase_client
-from ..utils.etag_utils import check_etag, generate_etag
 
 # Service imports
 from ..services.projects import (
@@ -31,6 +29,8 @@ from ..services.projects import (
 )
 from ..services.projects.document_service import DocumentService
 from ..services.projects.versioning_service import VersioningService
+from ..utils import get_supabase_client
+from ..utils.etag_utils import check_etag, generate_etag
 
 logger = get_logger(__name__)
 
@@ -94,7 +94,7 @@ async def list_projects(
         success, result = project_service.list_projects(include_content=include_content)
 
         if not success:
-            raise HTTPException(status_code=500, detail=result) from e
+            raise HTTPException(status_code=500, detail=result) from None
 
         # Only format with sources if we have full content
         if include_content:
@@ -162,10 +162,10 @@ async def create_project(request: CreateProjectRequest):
     """Create a new project with streaming progress."""
     # Validate title
     if not request.title:
-        raise HTTPException(status_code=422, detail="Title is required") from e
+        raise HTTPException(status_code=422, detail="Title is required") from None
 
     if not request.title.strip():
-        raise HTTPException(status_code=422, detail="Title cannot be empty") from e
+        raise HTTPException(status_code=422, detail="Title cannot be empty") from None
 
     try:
         logfire.info(
@@ -200,7 +200,7 @@ async def create_project(request: CreateProjectRequest):
                 "message": f"Project '{request.title}' created successfully",
             }
         else:
-            raise HTTPException(status_code=500, detail=result) from e
+            raise HTTPException(status_code=500, detail=result) from None
 
     except Exception as e:
         logfire.error(f"Failed to start project creation | error={str(e)} | title={request.title}")
@@ -298,7 +298,7 @@ async def get_all_task_counts(
 
         if not success:
             logfire.error(f"Failed to get task counts | error={result.get('error')}")
-            raise HTTPException(status_code=500, detail=result) from e
+            raise HTTPException(status_code=500, detail=result) from None
 
         # Generate ETag from counts data
         etag_data = {
@@ -346,9 +346,9 @@ async def get_project(project_id: str):
         if not success:
             if "not found" in result.get("error", "").lower():
                 logfire.warning(f"Project not found | project_id={project_id}")
-                raise HTTPException(status_code=404, detail=result) from e
+                raise HTTPException(status_code=404, detail=result) from None
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         project = result["project"]
 
@@ -445,9 +445,9 @@ async def update_project(project_id: str, request: UpdateProjectRequest):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(
                     status_code=404, detail={"error": f"Project with ID {project_id} not found"}
-                ) from e
+                ) from None
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         project = result["project"]
 
@@ -496,9 +496,9 @@ async def delete_project(project_id: str):
 
         if not success:
             if "not found" in result.get("error", "").lower():
-                raise HTTPException(status_code=404, detail=result) from e
+                raise HTTPException(status_code=404, detail=result) from None
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Project deleted successfully | project_id={project_id} | deleted_tasks={result.get('deleted_tasks', 0)}"
@@ -529,9 +529,9 @@ async def get_project_features(project_id: str):
         if not success:
             if "not found" in result.get("error", "").lower():
                 logfire.warning(f"Project not found for features | project_id={project_id}")
-                raise HTTPException(status_code=404, detail=result) from e
+                raise HTTPException(status_code=404, detail=result) from None
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Project features retrieved | project_id={project_id} | feature_count={result.get('count', 0)}"
@@ -573,7 +573,7 @@ async def list_project_tasks(
         )
 
         if not success:
-            raise HTTPException(status_code=500, detail=result) from e
+            raise HTTPException(status_code=500, detail=result) from None
 
         tasks = result.get("tasks", [])
 
@@ -638,7 +638,7 @@ async def create_task(request: CreateTaskRequest):
         )
 
         if not success:
-            raise HTTPException(status_code=400, detail=result) from e
+            raise HTTPException(status_code=400, detail=result) from None
 
         created_task = result["task"]
 
@@ -682,7 +682,7 @@ async def list_tasks(
         )
 
         if not success:
-            raise HTTPException(status_code=500, detail=result) from e
+            raise HTTPException(status_code=500, detail=result) from None
 
         tasks = result.get("tasks", [])
 
@@ -748,7 +748,7 @@ async def get_task(task_id: str):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         task = result["task"]
 
@@ -829,7 +829,7 @@ async def update_task(task_id: str, request: UpdateTaskRequest):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         updated_task = result["task"]
 
@@ -860,7 +860,7 @@ async def delete_task(task_id: str):
             elif "already archived" in result.get("error", "").lower():
                 raise HTTPException(status_code=409, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(f"Task archived successfully | task_id={task_id}")
 
@@ -890,9 +890,9 @@ async def mcp_update_task_status(task_id: str, status: str):
 
         if not success:
             if "not found" in result.get("error", "").lower():
-                raise HTTPException(status_code=404, detail=f"Task {task_id} not found") from e
+                raise HTTPException(status_code=404, detail=f"Task {task_id} not found") from None
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         updated_task = result["task"]
         project_id = updated_task["project_id"]
@@ -940,7 +940,7 @@ async def list_project_documents(project_id: str, include_content: bool = False)
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Documents listed successfully | project_id={project_id} | count={result.get('total_count', 0)} | lightweight={not include_content}"
@@ -978,7 +978,7 @@ async def create_project_document(project_id: str, request: CreateDocumentReques
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=400, detail=result) from e
+                raise HTTPException(status_code=400, detail=result) from None
 
         logfire.info(
             f"Document created successfully | project_id={project_id} | doc_id={result['document']['id']}"
@@ -1007,7 +1007,7 @@ async def get_project_document(project_id: str, doc_id: str):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(f"Document retrieved successfully | project_id={project_id} | doc_id={doc_id}")
 
@@ -1047,7 +1047,7 @@ async def update_project_document(project_id: str, doc_id: str, request: UpdateD
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(f"Document updated successfully | project_id={project_id} | doc_id={doc_id}")
 
@@ -1076,7 +1076,7 @@ async def delete_project_document(project_id: str, doc_id: str):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(f"Document deleted successfully | project_id={project_id} | doc_id={doc_id}")
 
@@ -1110,7 +1110,7 @@ async def list_project_versions(project_id: str, field_name: str = None):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Versions listed successfully | project_id={project_id} | count={result.get('total_count', 0)}"
@@ -1149,7 +1149,7 @@ async def create_project_version(project_id: str, request: CreateVersionRequest)
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=400, detail=result) from e
+                raise HTTPException(status_code=400, detail=result) from None
 
         logfire.info(
             f"Version created successfully | project_id={project_id} | version_number={result['version_number']}"
@@ -1182,7 +1182,7 @@ async def get_project_version(project_id: str, field_name: str, version_number: 
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Version retrieved successfully | project_id={project_id} | field_name={field_name} | version_number={version_number}"
@@ -1222,7 +1222,7 @@ async def restore_project_version(
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(status_code=404, detail=result.get("error"))
             else:
-                raise HTTPException(status_code=500, detail=result) from e
+                raise HTTPException(status_code=500, detail=result) from None
 
         logfire.info(
             f"Version restored successfully | project_id={project_id} | field_name={field_name} | version_number={version_number}"

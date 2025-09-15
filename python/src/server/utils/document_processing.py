@@ -91,7 +91,7 @@ def extract_text_from_document(file_content: bytes, filename: str, content_type:
             error=str(e),
         )
         # Re-raise with context, preserving original exception chain
-        raise Exception(f"Failed to extract text from {filename}") from e
+        raise Exception(f"Failed to extract text from {filename}")
 
 
 def extract_text_from_pdf(file_content: bytes) -> str:
@@ -154,8 +154,8 @@ def extract_text_from_pdf(file_content: bytes) -> str:
                     "or scanned document without OCR"
                 )
 
-        except Exception as e:
-            raise Exception("PyPDF2 failed to extract text") from e
+        except Exception:
+            raise Exception("PyPDF2 failed to extract text")
 
     # If we get here, no libraries worked
     raise Exception("Failed to extract text from PDF - no working PDF libraries available")
@@ -197,5 +197,5 @@ def extract_text_from_docx(file_content: bytes) -> str:
 
         return "\n\n".join(text_content)
 
-    except Exception as e:
-        raise Exception("Failed to extract text from Word document") from e
+    except Exception:
+        raise Exception("Failed to extract text from Word document")

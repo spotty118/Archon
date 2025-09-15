@@ -55,7 +55,7 @@ class GitHubService:
         if not self.token:
             raise HTTPException(
                 status_code=500, detail="GitHub integration not configured - GITHUB_TOKEN not found"
-            )
+            ) from None
 
         # Format the issue body
         issue_body = self._format_issue_body(bug_report)
@@ -95,19 +95,19 @@ class GitHubService:
                     raise HTTPException(
                         status_code=500,
                         detail="GitHub authentication failed - check GITHUB_TOKEN permissions",
-                    )
+                    ) from None
                 else:
                     logger.error(f"GitHub API error: {response.status_code} - {response.text}")
                     raise HTTPException(
                         status_code=500, detail=f"GitHub API error: {response.status_code}"
-                    )
+                    ) from None
 
         except httpx.TimeoutException:
             logger.error("GitHub API request timed out")
             raise HTTPException(status_code=500, detail="GitHub API request timed out") from None
         except Exception as e:
             logger.error(f"Unexpected error creating GitHub issue: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to create GitHub issue: {str(e)}") from e
+            raise HTTPException(status_code=500, detail=f"Failed to create GitHub issue: {str(e)}")
 
     def _format_issue_body(self, bug_report: BugReportRequest) -> str:
         """Format the bug report as a GitHub issue body."""
