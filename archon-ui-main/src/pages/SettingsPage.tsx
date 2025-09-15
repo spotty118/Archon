@@ -3,7 +3,6 @@ import {
   Loader,
   Settings,
   ChevronDown,
-  ChevronUp,
   Palette,
   Key,
   Brain,
@@ -69,7 +68,7 @@ export const SettingsPage = () => {
     loadSettings();
   }, []);
 
-  const loadSettings = async (isRetry = false) => {
+  const loadSettings = async (_isRetry = false) => {
     try {
       setLoading(true);
       setError(null);

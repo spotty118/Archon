@@ -386,7 +386,7 @@ archon:manage_task(
     const elements: JSX.Element[] = [];
     let inCodeBlock = false;
     let codeBlockContent: string[] = [];
-    let _codeBlockLang = '';
+    const _codeBlockLang = '';
     const _listStack: string[] = [];
 
     lines.forEach((line, index) => {
