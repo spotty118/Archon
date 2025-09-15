@@ -108,7 +108,8 @@ class ProgressTracker:
             )
 
         # CRITICAL: Never allow progress to go backwards
-        current_progress = self.state.get("progress", 0)
+        current_progress_raw = self.state.get("progress", 0)
+        current_progress = int(current_progress_raw) if isinstance(current_progress_raw, (int, float)) else 0
         new_progress = min(100, max(0, progress))  # Ensure 0-100
 
         # Only update if new progress is greater than or equal to current
@@ -140,15 +141,17 @@ class ProgressTracker:
         # Add log entry
         if "logs" not in self.state:
             self.state["logs"] = []
-        self.state["logs"].append({
-            "timestamp": datetime.now().isoformat(),
-            "message": log,
-            "status": status,
-            "progress": actual_progress,  # Use the actual progress after "never go backwards" check
-        })
-        # Keep only the last 200 log entries
-        if len(self.state["logs"]) > 200:
-            self.state["logs"] = self.state["logs"][-200:]
+        logs_list = self.state["logs"]
+        if isinstance(logs_list, list):
+            logs_list.append({
+                "timestamp": datetime.now().isoformat(),
+                "message": log,
+                "status": status,
+                "progress": actual_progress,  # Use the actual progress after "never go backwards" check
+            })
+            # Keep only the last 200 log entries
+            if len(logs_list) > 200:
+                self.state["logs"] = logs_list[-200:]
 
         # Add any additional data (but don't allow overriding core fields)
         protected_fields = {"progress", "status", "log", "progress_id", "type", "start_time"}
