@@ -286,7 +286,7 @@ def register_task_tools(mcp: FastMCP):
                     if assignee is not None:
                         update_fields["assignee"] = assignee
                     if task_order is not None:
-                        update_fields["task_order"] = task_order
+                        update_fields["task_order"] = str(task_order)
                     if feature is not None:
                         update_fields["feature"] = feature
 

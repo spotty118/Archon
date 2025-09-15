@@ -470,7 +470,7 @@ export function useStopCrawl() {
     onError: (error, progressId) => {
       // If it's a 404, the operation might have already completed or been cancelled
       const is404Error =
-        (error as any)?.statusCode === 404 ||
+        (error as Error & { statusCode?: number })?.statusCode === 404 ||
         (error instanceof Error && (error.message.includes("404") || error.message.includes("not found")));
 
       if (is404Error) {

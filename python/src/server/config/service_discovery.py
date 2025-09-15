@@ -121,7 +121,9 @@ class ServiceDiscovery:
         """Get host and port separately for a service"""
         url = self.get_service_url(service)
         parsed = urlparse(url)
-        return parsed.hostname, parsed.port or 80
+        hostname = parsed.hostname or "localhost"
+        port = parsed.port or 80
+        return hostname, port
 
     async def health_check(self, service: str, timeout: float = 5.0) -> bool:
         """

@@ -87,7 +87,7 @@ class MCPClient:
                 error = result["error"]
                 raise Exception(f"MCP tool error: {error.get('message', 'Unknown error')}")
 
-            return result.get("result", {})
+            return result.get("result", {}) or {}
 
         except httpx.HTTPError as e:
             logger.error(f"HTTP error calling MCP tool {tool_name}: {e}")
@@ -98,7 +98,7 @@ class MCPClient:
 
     # Convenience methods for common MCP tools
 
-    async def perform_rag_query(self, query: str, source: str = None, match_count: int = 5) -> str:
+    async def perform_rag_query(self, query: str, source: str | None = None, match_count: int = 5) -> str:
         """Perform a RAG query through MCP."""
         result = await self.call_tool(
             "perform_rag_query", query=query, source=source, match_count=match_count
@@ -111,7 +111,7 @@ class MCPClient:
         return json.dumps(result) if isinstance(result, dict) else str(result)
 
     async def search_code_examples(
-        self, query: str, source_id: str = None, match_count: int = 5
+        self, query: str, source_id: str | None = None, match_count: int = 5
     ) -> str:
         """Search code examples through MCP."""
         result = await self.call_tool(
