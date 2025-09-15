@@ -1,10 +1,9 @@
 import React from 'react';
 /**
- * ArchonLoadingSpinner - A loading animation component with neon trail effects
+ * ArchonLoadingSpinner - A static loading indicator component
  *
- * This component displays the Archon logo with animated spinning circles
- * that create a neon trail effect. It's used to indicate loading states
- * throughout the application.
+ * This component displays the Archon logo with static neon effect rings.
+ * It's used to indicate loading states throughout the application.
  *
  * @param {Object} props - Component props
  * @param {string} props.size - Size variant ('sm', 'md', 'lg')
@@ -38,12 +37,12 @@ export const ArchonLoadingSpinner: React.FC<{
   return <div className={`relative ${sizeMap[size].container} flex items-center justify-center ${className}`}>
       {/* Central logo */}
       <img src={logoSrc} alt="Loading" className={`${sizeMap[size].logo} z-10 relative`} />
-      {/* Animated spinning circles with neon trail effects */}
+      {/* Static neon rings */}
       <div className="absolute inset-0 w-full h-full">
-        {/* First circle - cyan with clockwise rotation */}
-        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-400 animate-[spin_0.8s_linear_infinite] blur-[0.5px] after:content-[''] after:absolute after:inset-0 after:rounded-full after:border-2 after:border-transparent after:border-t-cyan-400/30 after:blur-[3px] after:scale-110"></div>
-        {/* Second circle - fuchsia with counter-clockwise rotation */}
-        <div className="absolute inset-0 rounded-full border-2 border-transparent border-r-fuchsia-400 animate-[spin_0.6s_linear_infinite_reverse] blur-[0.5px] after:content-[''] after:absolute after:inset-0 after:rounded-full after:border-2 after:border-transparent after:border-r-fuchsia-400/30 after:blur-[3px] after:scale-110"></div>
+        {/* First ring - cyan */}
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-400 opacity-70"></div>
+        {/* Second ring - fuchsia */}
+        <div className="absolute inset-1 rounded-full border-2 border-transparent border-r-fuchsia-400 opacity-50"></div>
       </div>
     </div>;
 };

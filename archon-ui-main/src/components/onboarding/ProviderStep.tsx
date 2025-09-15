@@ -146,7 +146,7 @@ export const ProviderStep = ({ onSaved, onSkip }: ProviderStepProps) => {
               disabled={saving || !apiKey.trim()}
               icon={
                 saving ? (
-                  <Loader className="w-4 h-4 animate-spin" />
+                  <Loader className="w-4 h-4 " />
                 ) : (
                   <Save className="w-4 h-4" />
                 )

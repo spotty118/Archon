@@ -82,7 +82,7 @@
   }
 }
 
-/* Animation delays (checked for usage) */
+/* Animation delays (kept for compatibility) */
 .animation-delay-150 {
   animation-delay: 150ms;
 }
@@ -90,22 +90,11 @@
   animation-delay: 300ms;
 }
 
-/* Pulse glow animation (used in GlassCrawlDepthSelector) */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow:
-      0 0 20px 10px hsl(var(--blue-accent) / 0.50),
-      0 0 40px 20px hsl(var(--blue-accent) / 0.30);
-  }
-  50% {
-    box-shadow:
-      0 0 30px 15px hsl(var(--blue-accent) / 0.70),
-      0 0 60px 30px hsl(var(--blue-accent) / 0.40);
-  }
-}
-
+/* Static glow effect (no animation) */
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  box-shadow:
+    0 0 25px 12px hsl(var(--blue-accent) / 0.60),
+    0 0 50px 25px hsl(var(--blue-accent) / 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {

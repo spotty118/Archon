@@ -304,7 +304,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
             {isLoading ? (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto mb-4"></div>
+                  <div className=" rounded-full h-12 w-12 border-b-2 border-pink-400 mx-auto mb-4"></div>
                   <p className="text-gray-400">Loading code examples...</p>
                 </div>
               </div>

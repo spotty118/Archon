@@ -30,7 +30,7 @@ function BackendStatus({ isHealthLoading, isBackendError, healthData }: BackendS
   if (isHealthLoading) {
     return (
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400 text-sm">
-        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+        <div className="w-2 h-2 bg-yellow-500 rounded-full " />
         <span>Connecting...</span>
       </div>
     );

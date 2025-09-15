@@ -823,7 +823,7 @@ export const RAGSettings = ({
                         
                         <div className="text-gray-400 text-sm">
                           {llmStatus.checking ? (
-                            <Loader className="w-4 h-4 animate-spin inline mr-1" />
+                            <Loader className="w-4 h-4  inline mr-1" />
                           ) : null}
                           {ollamaMetrics.loading ? 'Loading...' : `${ollamaMetrics.llmInstanceModels.total} models available`}
                         </div>
@@ -942,7 +942,7 @@ export const RAGSettings = ({
                         
                         <div className="text-gray-400 text-sm">
                           {embeddingStatus.checking ? (
-                            <Loader className="w-4 h-4 animate-spin inline mr-1" />
+                            <Loader className="w-4 h-4  inline mr-1" />
                           ) : null}
                           {ollamaMetrics.loading ? 'Loading...' : `${ollamaMetrics.embeddingInstanceModels.total} models available`}
                         </div>
@@ -1061,7 +1061,7 @@ export const RAGSettings = ({
                         <td className="py-2 text-gray-400">Available Models</td>
                         <td className="py-2">
                           {ollamaMetrics.loading ? (
-                            <Loader className="w-3 h-3 animate-spin inline" />
+                            <Loader className="w-3 h-3  inline" />
                           ) : (
                             <div className="text-white">
                               <div className="font-medium">{ollamaMetrics.llmInstanceModels.total} Total Models</div>
@@ -1080,7 +1080,7 @@ export const RAGSettings = ({
                         </td>
                         <td className="py-2">
                           {ollamaMetrics.loading ? (
-                            <Loader className="w-3 h-3 animate-spin inline" />
+                            <Loader className="w-3 h-3  inline" />
                           ) : (
                             <div className="text-white">
                               <div className="font-medium">{ollamaMetrics.embeddingInstanceModels.total} Total Models</div>
@@ -1120,7 +1120,7 @@ export const RAGSettings = ({
                         <span>Overall Available:</span>
                         <span className="text-white">
                           {ollamaMetrics.loading ? (
-                            <Loader className="w-3 h-3 animate-spin inline" />
+                            <Loader className="w-3 h-3  inline" />
                           ) : (
                             `${ollamaMetrics.totalModels} total (${ollamaMetrics.chatModels} chat, ${ollamaMetrics.embeddingModels} embedding)`
                           )}
@@ -1153,7 +1153,7 @@ export const RAGSettings = ({
             <Button 
               variant="outline" 
               accentColor="green" 
-              icon={saving ? <Loader className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+              icon={saving ? <Loader className="w-4 h-4 mr-1 " /> : <Save className="w-4 h-4 mr-1" />}
               className="whitespace-nowrap"
               size="md"
               onClick={async () => {

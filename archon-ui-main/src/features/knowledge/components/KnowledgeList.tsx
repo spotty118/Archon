@@ -88,7 +88,7 @@ export const KnowledgeList: React.FC<KnowledgeListProps> = ({
         className="flex items-center justify-center py-12"
       >
         <div className="text-center" aria-live="polite" aria-busy="true">
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 text-cyan-400  mx-auto mb-4" />
           <p className="text-gray-400">Loading knowledge base...</p>
         </div>
       </motion.div>

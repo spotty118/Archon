@@ -60,7 +60,7 @@ export const CrawlingProgress: React.FC<CrawlingProgressProps> = ({ onSwitchToBr
       case "cancelled":
         return <StopCircle className="w-4 h-4 text-yellow-400" />;
       default:
-        return <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />;
+        return <Loader2 className="w-4 h-4 text-cyan-400 " />;
     }
   };
 
@@ -92,7 +92,7 @@ export const CrawlingProgress: React.FC<CrawlingProgressProps> = ({ onSwitchToBr
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 text-cyan-400  mx-auto mb-4" />
           <p className="text-gray-400">Loading crawling operations...</p>
         </div>
       </div>
@@ -187,7 +187,7 @@ export const CrawlingProgress: React.FC<CrawlingProgressProps> = ({ onSwitchToBr
                         className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       >
                         {stoppingId === operation.operation_id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-4 h-4 " />
                         ) : (
                           <StopCircle className="w-4 h-4" />
                         )}

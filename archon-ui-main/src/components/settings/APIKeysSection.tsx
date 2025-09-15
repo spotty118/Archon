@@ -210,7 +210,7 @@ export const APIKeysSection = (): JSX.Element => {
     return (
       <div className="space-y-5">
         <Card accentColor="pink" className="space-y-5">
-          <div className="animate-pulse space-y-4">
+          <div className=" space-y-4">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -370,7 +370,7 @@ export const APIKeysSection = (): JSX.Element => {
               >
                 {saving ? (
                   <>
-                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full " />
                     Saving...
                   </>
                 ) : (

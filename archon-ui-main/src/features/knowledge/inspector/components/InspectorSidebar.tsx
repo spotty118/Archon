@@ -83,7 +83,7 @@ export const InspectorSidebar: React.FC<InspectorSidebarProps> = ({
       <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin">
         {isLoading ? (
           <div className="p-4 text-center text-gray-500" aria-live="polite">
-            <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" aria-hidden="true" />
+            <Loader2 className="w-5 h-5  mx-auto mb-2" aria-hidden="true" />
             <span>Loading {viewMode}...</span>
           </div>
         ) : items.length === 0 ? (
@@ -162,7 +162,7 @@ export const InspectorSidebar: React.FC<InspectorSidebarProps> = ({
                 >
                   {isFetchingNextPage ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                      <Loader2 className="w-4 h-4 mr-2 " aria-hidden="true" />
                       <span>Loading...</span>
                     </>
                   ) : (
