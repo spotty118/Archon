@@ -333,7 +333,7 @@ async def check_credential_status(request: dict[str, list[str]]):
     """
     try:
         credential_keys = request.get("keys", [])
-        logfire.info(f"Checking status for credentials: {credential_keys}")
+        safe_logfire_info(f"Checking status for credentials: {credential_keys}")
         
         result = {}
         
@@ -356,7 +356,7 @@ async def check_credential_status(request: dict[str, list[str]]):
                     }
                     
             except Exception as e:
-                logfire.warning(f"Failed to get credential for status check: {key} | error={str(e)}")
+                safe_logfire_error(f"Failed to get credential for status check: {key} | error={str(e)}")
                 result[key] = {
                     "key": key,
                     "value": None,
@@ -364,9 +364,9 @@ async def check_credential_status(request: dict[str, list[str]]):
                     "error": str(e)
                 }
         
-        logfire.info(f"Credential status check completed | checked={len(credential_keys)} | found={len([k for k, v in result.items() if v.get('has_value')])}")
+        safe_logfire_info(f"Credential status check completed | checked={len(credential_keys)} | found={len([k for k, v in result.items() if v.get('has_value')])}")
         return result
         
     except Exception as e:
-        logfire.error(f"Error in credential status check | error={str(e)}")
+        safe_logfire_error(f"Error in credential status check | error={str(e)}")
         raise HTTPException(status_code=500, detail={"error": str(e)})

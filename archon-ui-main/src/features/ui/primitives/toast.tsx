@@ -62,8 +62,7 @@ export const Toast = React.forwardRef<
         "data-[swipe=cancel]:transform-none",
         "data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]",
         "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
-        "data-[state=open]:slide-in-from-right",
-        "data-[state=closed]:fade-out-80",
+        // Removed slide animations for performance
         variantStyles[variant],
         className,
       )}

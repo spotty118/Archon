@@ -1,7 +1,6 @@
 import { BookOpen, Settings } from "lucide-react";
 import type React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { glassmorphism } from "../../features/ui/primitives/styles";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../features/ui/primitives/tooltip";
 // TEMPORARY: Use old SettingsContext until settings are migrated
 import { useSettings } from "../../hooks/useSettings";
@@ -68,11 +67,7 @@ export function Navigation({ className }: NavigationProps) {
     <nav
       className={cn(
         "flex flex-col items-center gap-6 py-6 px-3",
-        "rounded-xl w-[72px]",
-        // Using glassmorphism from primitives
-        glassmorphism.background.subtle,
-        "border border-gray-200 dark:border-zinc-800/50",
-        "shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_30px_-15px_rgba(0,0,0,0.7)]",
+        "rounded-xl w-[72px] glass-card",
         className,
       )}
     >
@@ -83,31 +78,19 @@ export function Navigation({ className }: NavigationProps) {
             <Link
               to="/projects"
               className={cn(
-                "relative p-2 rounded-lg transition-all duration-300",
+                "relative p-2 rounded-lg",
                 "flex items-center justify-center",
-                "hover:bg-white/10 dark:hover:bg-white/5",
+                "hover:bg-blue-500/10",
                 isProjectsActive && [
-                  "bg-gradient-to-b from-white/20 to-white/5 dark:from-white/10 dark:to-black/20",
-                  "shadow-[0_5px_15px_-5px_rgba(59,130,246,0.3)] dark:shadow-[0_5px_15px_-5px_rgba(59,130,246,0.5)]",
-                  "transform scale-110",
+                  "bg-blue-500/20",
                 ],
               )}
             >
               <img
                 src="/logo-neon.png"
                 alt="Archon"
-                className={cn(
-                  "w-8 h-8 transition-all duration-300",
-                  isProjectsActive && "filter drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]",
-                )}
+                className="w-8 h-8"
               />
-              {/* Active state decorations */}
-              {isProjectsActive && (
-                <>
-                  <span className="absolute inset-0 rounded-lg border border-blue-300 dark:border-blue-500/30" />
-                  <span className="absolute bottom-0 left-[15%] right-[15%] w-[70%] mx-auto h-[2px] bg-blue-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.4)] dark:shadow-[0_0_20px_5px_rgba(59,130,246,0.7)]" />
-                </>
-              )}
             </Link>
           ) : (
             <div className="p-2 rounded-lg opacity-50 cursor-not-allowed">
@@ -121,7 +104,7 @@ export function Navigation({ className }: NavigationProps) {
       </Tooltip>
 
       {/* Separator */}
-      <div className="w-8 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-700 to-transparent" />
+      <div className="w-8 h-px bg-gray-300 dark:bg-gray-700" />
 
       {/* Navigation Items */}
       <nav className="flex flex-col gap-4">
@@ -135,18 +118,17 @@ export function Navigation({ className }: NavigationProps) {
                 <Link
                   to={isEnabled ? item.path : "#"}
                   className={cn(
-                    "relative p-3 rounded-lg transition-all duration-300",
+                    "relative p-3 rounded-lg",
                     "flex items-center justify-center",
                     isActive
                       ? [
-                          "bg-gradient-to-b from-white/20 to-white/5 dark:from-white/10 dark:to-black/20",
+                          "bg-blue-500/20",
                           "text-blue-600 dark:text-blue-400",
-                          "shadow-[0_5px_15px_-5px_rgba(59,130,246,0.3)] dark:shadow-[0_5px_15px_-5px_rgba(59,130,246,0.5)]",
                         ]
                       : [
                           "text-gray-500 dark:text-zinc-500",
                           "hover:text-blue-600 dark:hover:text-blue-400",
-                          "hover:bg-white/10 dark:hover:bg-white/5",
+                          "hover:bg-blue-500/10",
                         ],
                     !isEnabled && "opacity-50 cursor-not-allowed pointer-events-none",
                   )}
@@ -157,13 +139,6 @@ export function Navigation({ className }: NavigationProps) {
                   }}
                 >
                   {item.icon}
-                  {/* Active state decorations with neon line */}
-                  {isActive && (
-                    <>
-                      <span className="absolute inset-0 rounded-lg border border-blue-300 dark:border-blue-500/30" />
-                      <span className="absolute bottom-0 left-[15%] right-[15%] w-[70%] mx-auto h-[2px] bg-blue-500 shadow-[0_0_10px_2px_rgba(59,130,246,0.4)] dark:shadow-[0_0_20px_5px_rgba(59,130,246,0.7)]" />
-                    </>
-                  )}
                 </Link>
               </TooltipTrigger>
               <TooltipContent>

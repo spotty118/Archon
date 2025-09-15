@@ -28,7 +28,7 @@ export const DisconnectScreenOverlay: React.FC<DisconnectScreenOverlayProps> = (
 
       {/* Override Button */}
       <div 
-        className={`absolute bottom-8 right-8 transition-opacity duration-500 ${
+        className={`absolute bottom-8 right-8 ${
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >

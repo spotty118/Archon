@@ -59,14 +59,7 @@ export const SelectContent = React.forwardRef<
         "shadow-cyan-500/5 dark:shadow-cyan-500/10",
         // Text colors matching rest of app
         "text-gray-900 dark:text-gray-100",
-        // Animation
-        "data-[state=open]:animate-in data-[state=closed]:animate-out",
-        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-        "data-[side=bottom]:slide-in-from-top-2",
-        "data-[side=left]:slide-in-from-right-2",
-        "data-[side=right]:slide-in-from-left-2",
-        "data-[side=top]:slide-in-from-bottom-2",
+        // Removed animations for performance
         className,
       )}
       position={position}

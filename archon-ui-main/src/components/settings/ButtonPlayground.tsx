@@ -184,7 +184,7 @@ export const ButtonPlayground: React.FC = () => {
   inset: -2px;
   background: linear-gradient(45deg, #f06292, #9c27b0, #3f51b5, #00bcd4, #4caf50, #ffeb3b, #ff5722);
   background-size: 400% 400%;
-  animation: gradient-rotate 15s ease infinite;
+  /* Removed animation for performance */
   border-radius: ${layer1BorderRadius};
   opacity: ${getGlowConfig(borderGlow).opacity};
   filter: blur(${parseInt(getGlowConfig(borderGlow).blur.toString()) / 2}px);
@@ -192,11 +192,7 @@ export const ButtonPlayground: React.FC = () => {
   z-index: -1;
 }
 
-@keyframes gradient-rotate {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}`;
+/* Removed gradient-rotate animation for performance */`;
     }
 
     return css;

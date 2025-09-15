@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+// Removed framer-motion import
 import { Sparkles, Key, Check, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -25,50 +25,28 @@ export const OnboardingPage = (): React.JSX.Element => {
     navigate('/');
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 }
-    }
-  };
+  // Removed animation variants for performance
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="w-full max-w-2xl"
-      >
+      <div className="w-full max-w-2xl">
         {/* Progress Indicators */}
-        <motion.div variants={itemVariants} className="flex justify-center mb-8 gap-3">
+        <div className="flex justify-center mb-8 gap-3">
           {[1, 2, 3].map((step) => (
             <div
               key={step}
-              className={`h-2 w-16 rounded-full transition-colors duration-300 ${
+              className={`h-2 w-16 rounded-full ${
                 step <= currentStep
                   ? 'bg-blue-500'
                   : 'bg-gray-200 dark:bg-zinc-800'
               }`}
             />
           ))}
-        </motion.div>
+        </div>
 
         {/* Step 1: Welcome */}
         {currentStep === 1 && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card className="p-12 text-center">
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -94,12 +72,12 @@ export const OnboardingPage = (): React.JSX.Element => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Card>
-          </motion.div>
+          </div>
         )}
 
         {/* Step 2: Provider Setup */}
         {currentStep === 2 && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card className="p-12">
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center mr-4">
@@ -115,26 +93,17 @@ export const OnboardingPage = (): React.JSX.Element => {
                 onSkip={handleProviderSkip}
               />
             </Card>
-          </motion.div>
+          </div>
         )}
 
         {/* Step 3: All Set */}
         {currentStep === 3 && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card className="p-12 text-center">
               <div className="flex justify-center mb-6">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20
-                  }}
-                  className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
-                >
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                   <Check className="w-10 h-10 text-white" />
-                </motion.div>
+                </div>
               </div>
               
               <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
@@ -154,9 +123,9 @@ export const OnboardingPage = (): React.JSX.Element => {
                 Start Using Archon
               </Button>
             </Card>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 };

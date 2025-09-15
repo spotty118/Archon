@@ -83,45 +83,26 @@ export const PowerButton: React.FC<PowerButtonProps> = ({
         ${isOn ? styles.glow : 'shadow-[0_0_5px_rgba(0,0,0,0.3)]'}
         ${styles.glowHover}
         bg-gradient-to-b from-gray-900 to-black
-        hover:scale-110
-        active:scale-95
+        /* Removed scale transforms for performance */
       `}
       style={{ width: size, height: size }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      /* Removed motion animations for performance */
     >
-      {/* Outer ring glow effect - keep this for the button border glow */}
-      <motion.div
+      {/* Static outer ring - no animation */}
+      <div
         className={`
           absolute inset-[-4px] rounded-full border-2
           ${isOn ? styles.border : 'border-transparent'}
-          blur-sm
         `}
-        animate={{
-          opacity: isOn ? [0.3, 0.6, 0.3] : 0,
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       />
 
-      {/* Inner glow effect - glows inside the button */}
-      <motion.div
+      {/* Static inner glow - no animation */}
+      <div
         className={`
           absolute inset-[2px] rounded-full
           ${isOn ? styles.fill : ''}
-          blur-md opacity-20
+          opacity-20
         `}
-        animate={{
-          opacity: isOn ? [0.1, 0.3, 0.1] : 0,
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
       />
 
       {/* Inner power symbol container */}

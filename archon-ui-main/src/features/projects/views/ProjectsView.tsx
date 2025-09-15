@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStaggeredEntrance } from "../../../hooks/useStaggeredEntrance";
+// Removed useStaggeredEntrance import - no longer using animations
 import { DeleteConfirmModal } from "../../ui/components/DeleteConfirmModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/primitives";
 import { NewProjectModal } from "../components/NewProjectModal";
@@ -162,8 +162,8 @@ export function ProjectsView({ className = "", "data-id": dataId }: ProjectsView
     setProjectToDelete(null);
   };
 
-  // Staggered entrance animation
-  const isVisible = useStaggeredEntrance([1, 2, 3], 0.15);
+  // Removed staggered entrance animation for performance
+  const isVisible = { 1: true, 2: true, 3: true };
 
   return (
     <motion.div

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import { motion } from 'framer-motion'
 import {
   X,
   Copy,
@@ -111,17 +110,8 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
 
   // Using React Portal to render the modal at the root level
   return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
         className="relative bg-gray-900/95 border border-gray-800 rounded-xl w-full max-w-7xl h-[85vh] flex overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -129,7 +119,7 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-500 shadow-[0_0_20px_5px_rgba(236,72,153,0.5)]"></div>
         
         {/* Sidebar */}
-        <div className={`${sidebarCollapsed ? 'w-0' : 'w-80'} transition-all duration-300 bg-gray-950/50 border-r border-gray-800 flex flex-col overflow-hidden`}>
+        <div className={`${sidebarCollapsed ? 'w-0' : 'w-80'} bg-gray-950/50 border-r border-gray-800 flex flex-col overflow-hidden`}>
           {/* Sidebar Header */}
           <div className="p-4 border-b border-gray-800">
             <div className="flex items-center justify-between mb-3">
@@ -393,8 +383,8 @@ export const CodeViewerModal: React.FC<CodeViewerModalProps> = ({
             )}
           </div>
         </div>
-      </motion.div>
-    </motion.div>,
+      </div>
+    </div>,
     document.body,
   )
 }
