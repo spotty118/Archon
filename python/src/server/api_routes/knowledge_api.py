@@ -525,7 +525,7 @@ async def refresh_knowledge_item(source_id: str):
         try:
             crawler = await get_crawler()
             if crawler is None:
-                raise Exception("Crawler not available - initialization may have failed") from e
+                raise Exception("Crawler not available - initialization may have failed")
         except Exception as e:
             safe_logfire_error(f"Failed to get crawler | error={str(e)}")
             raise HTTPException(
@@ -591,11 +591,11 @@ async def crawl_knowledge_item(request: KnowledgeItemRequest):
     """Crawl a URL and add it to the knowledge base with progress tracking."""
     # Validate URL
     if not request.url:
-        raise HTTPException(status_code=422, detail="URL is required") from e
+        raise HTTPException(status_code=422, detail="URL is required")
 
     # Basic URL validation
     if not request.url.startswith(("http://", "https://")):
-        raise HTTPException(status_code=422, detail="URL must start with http:// or https://") from e
+        raise HTTPException(status_code=422, detail="URL must start with http:// or https://")
 
     try:
         safe_logfire_info(
@@ -674,7 +674,7 @@ async def _perform_crawl_with_progress(
             try:
                 crawler = await get_crawler()
                 if crawler is None:
-                    raise Exception("Crawler not available - initialization may have failed") from e
+                    raise Exception("Crawler not available - initialization may have failed")
             except Exception as e:
                 safe_logfire_error(f"Failed to get crawler | error={str(e)}")
                 await tracker.error(f"Failed to initialize crawler: {str(e)}")
@@ -766,9 +766,9 @@ async def upload_document(
                 tag_list = []
             # Validate tags is a list of strings
             if not isinstance(tag_list, list):
-                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"}) from e
+                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"})
             if not all(isinstance(tag, str) for tag in tag_list):
-                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"}) from e
+                raise HTTPException(status_code=422, detail={"error": "tags must be a JSON array of strings"})
         except json.JSONDecodeError as ex:
             raise HTTPException(status_code=422, detail={"error": f"Invalid tags JSON: {str(ex)}"})
 
@@ -951,10 +951,10 @@ async def perform_rag_query(request: RagQueryRequest):
     """Perform a RAG query on the knowledge base using service layer."""
     # Validate query
     if not request.query:
-        raise HTTPException(status_code=422, detail="Query is required") from e
+        raise HTTPException(status_code=422, detail="Query is required")
 
     if not request.query.strip():
-        raise HTTPException(status_code=422, detail="Query cannot be empty") from e
+        raise HTTPException(status_code=422, detail="Query cannot be empty")
 
     try:
         # Use RAGService for RAG query
@@ -1168,7 +1168,7 @@ async def stop_crawl_task(progress_id: str):
                 pass
 
         if not found:
-            raise HTTPException(status_code=404, detail={"error": "No active task for given progress_id"}) from e
+            raise HTTPException(status_code=404, detail={"error": "No active task for given progress_id"})
 
         safe_logfire_info(f"Successfully stopped crawl task | progress_id={progress_id}")
         return {

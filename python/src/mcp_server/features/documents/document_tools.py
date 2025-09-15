@@ -218,9 +218,9 @@ def register_document_tools(mcp: FastMCP):
                     if title is not None:
                         update_data["title"] = title
                     if content is not None:
-                        update_data["content"] = content
+                        update_data["content"] = json.dumps(content) if isinstance(content, dict) else str(content)
                     if tags is not None:
-                        update_data["tags"] = tags
+                        update_data["tags"] = json.dumps(tags) if isinstance(tags, list) else str(tags)
                     if author is not None:
                         update_data["author"] = author
 
