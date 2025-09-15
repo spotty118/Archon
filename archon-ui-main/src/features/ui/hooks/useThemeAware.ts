@@ -3,7 +3,7 @@
  * Works with existing ThemeContext
  */
 
-import { useTheme } from "../../../contexts/ThemeContext";
+import { useTheme } from "../../../hooks/useTheme";
 
 export function useThemeAware() {
   const { theme, setTheme } = useTheme();

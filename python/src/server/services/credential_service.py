@@ -57,9 +57,7 @@ class CredentialService:
             key = os.getenv("SUPABASE_SERVICE_KEY")
 
             if not url or not key:
-                raise ValueError(
-                    "SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in environment variables"
-                )
+                raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in environment variables")
 
             try:
                 # Initialize with standard Supabase client - no need for custom headers
@@ -116,7 +114,7 @@ class CredentialService:
             fernet = Fernet(self._get_encryption_key())
             encrypted_bytes = base64.urlsafe_b64decode(encrypted_value.encode("utf-8"))
             decrypted_bytes = fernet.decrypt(encrypted_bytes)
-            return decrypted_bytes.decode("utf-8")
+            return str(decrypted_bytes.decode("utf-8"))
         except Exception as e:
             logger.error(f"Error decrypting value: {e}")
             raise
@@ -239,9 +237,7 @@ class CredentialService:
                 self._rag_cache_timestamp = None
                 logger.debug(f"Invalidated RAG settings cache due to update of {key}")
 
-            logger.info(
-                f"Successfully {'encrypted and ' if is_encrypted else ''}stored credential: {key}"
-            )
+            logger.info(f"Successfully {'encrypted and ' if is_encrypted else ''}stored credential: {key}")
             return True
 
         except Exception as e:
@@ -294,9 +290,7 @@ class CredentialService:
 
         try:
             supabase = self._get_supabase_client()
-            result = (
-                supabase.table("archon_settings").select("*").eq("category", category).execute()
-            )
+            result = supabase.table("archon_settings").select("*").eq("category", category).execute()
 
             credentials = {}
             for item in result.data:
@@ -434,13 +428,14 @@ class CredentialService:
 
         key_name = key_mapping.get(provider)
         if key_name:
-            return await self.get_credential(key_name)
+            result = await self.get_credential(key_name)
+            return str(result) if result is not None else None
         return "ollama" if provider == "ollama" else None
 
     def _get_provider_base_url(self, provider: str, rag_settings: dict) -> str | None:
         """Get base URL for provider."""
         if provider == "ollama":
-            return rag_settings.get("LLM_BASE_URL", "http://localhost:11434/v1")
+            return str(rag_settings.get("LLM_BASE_URL", "http://localhost:11434/v1"))
         elif provider == "google":
             return "https://generativelanguage.googleapis.com/v1beta/openai/"
         return None  # Use default for OpenAI

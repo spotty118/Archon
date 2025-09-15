@@ -38,16 +38,12 @@ class DocumentOperation(BaseModel):
 
     operation_type: str = Field(description="Type of operation: create, update, delete, query")
     document_id: str | None = Field(description="ID of the document affected")
-    document_type: str | None = Field(
-        description="Type of document: prd, technical_spec, meeting_notes, etc."
-    )
+    document_type: str | None = Field(description="Type of document: prd, technical_spec, meeting_notes, etc.")
     title: str | None = Field(description="Document title")
     changes_made: list[str] = Field(description="List of specific changes made")
     success: bool = Field(description="Whether the operation was successful")
     message: str = Field(description="Human-readable message about the operation")
-    content_preview: str | None = Field(
-        description="Preview of the document content (first 200 chars)"
-    )
+    content_preview: str | None = Field(description="Preview of the document content (first 200 chars)")
 
 
 class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
@@ -62,14 +58,12 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
     - Version control tracking
     """
 
-    def __init__(self, model: str = None, **kwargs):
+    def __init__(self, model: str | None = None, **kwargs):
         # Use provided model or fall back to default
         if model is None:
             model = os.getenv("DOCUMENT_AGENT_MODEL", "openai:gpt-4o")
 
-        super().__init__(
-            model=model, name="DocumentAgent", retries=3, enable_rate_limiting=True, **kwargs
-        )
+        super().__init__(model=model, name="DocumentAgent", retries=3, enable_rate_limiting=True, **kwargs)
 
     def _create_agent(self, **kwargs) -> Agent:
         """Create the PydanticAI agent with tools and prompts."""
@@ -149,12 +143,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                     return "No project is currently selected. Please specify a project or create one first to manage documents."
 
                 supabase = get_supabase_client()
-                response = (
-                    supabase.table("archon_projects")
-                    .select("docs")
-                    .eq("id", ctx.deps.project_id)
-                    .execute()
-                )
+                response = supabase.table("archon_projects").select("docs").eq("id", ctx.deps.project_id).execute()
 
                 if not response.data:
                     return "No project found with the given ID."
@@ -180,20 +169,13 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
             """Get the content of a specific document by title."""
             try:
                 supabase = get_supabase_client()
-                response = (
-                    supabase.table("archon_projects")
-                    .select("docs")
-                    .eq("id", ctx.deps.project_id)
-                    .execute()
-                )
+                response = supabase.table("archon_projects").select("docs").eq("id", ctx.deps.project_id).execute()
 
                 if not response.data:
                     return "No project found."
 
                 docs = response.data[0].get("docs", [])
-                matching_docs = [
-                    doc for doc in docs if document_title.lower() in doc.get("title", "").lower()
-                ]
+                matching_docs = [doc for doc in docs if document_title.lower() in doc.get("title", "").lower()]
 
                 if not matching_docs:
                     available_docs = [doc.get("title", "Untitled") for doc in docs[:5]]
@@ -207,9 +189,9 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                 if isinstance(content, dict):
                     for key, value in content.items():
                         if isinstance(value, list):
-                            content_str += f"\n**{key.replace('_', ' ').title()}:**\n" + "\n".join([
-                                f"- {item}" for item in value
-                            ])
+                            content_str += f"\n**{key.replace('_', ' ').title()}:**\n" + "\n".join(
+                                [f"- {item}" for item in value]
+                            )
                         elif isinstance(value, dict):
                             content_str += f"\n**{key.replace('_', ' ').title()}:**\n"
                             for subkey, subvalue in value.items():
@@ -236,10 +218,12 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
             try:
                 # Send progress update if callback available
                 if ctx.deps.progress_callback:
-                    await ctx.deps.progress_callback({
-                        "step": "ai_generation",
-                        "log": f"📝 Creating {document_type}: {title}",
-                    })
+                    await ctx.deps.progress_callback(
+                        {
+                            "step": "ai_generation",
+                            "log": f"📝 Creating {document_type}: {title}",
+                        }
+                    )
 
                 # Generate blocks for the document
                 blocks = self._convert_to_blocks(title, document_type, content_description)
@@ -265,10 +249,12 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
                     # Send success progress update if callback available
                     if ctx.deps.progress_callback:
-                        await ctx.deps.progress_callback({
-                            "step": "ai_generation",
-                            "log": f"✅ Successfully created {document_type}: {title}",
-                        })
+                        await ctx.deps.progress_callback(
+                            {
+                                "step": "ai_generation",
+                                "log": f"✅ Successfully created {document_type}: {title}",
+                            }
+                        )
 
                     return f"Successfully created document '{title}' of type '{document_type}'. Document ID: {doc_id}"
                 else:
@@ -276,10 +262,12 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
                     # Send error progress update if callback available
                     if ctx.deps.progress_callback:
-                        await ctx.deps.progress_callback({
-                            "step": "ai_generation",
-                            "log": f"❌ Failed to create document: {error_msg}",
-                        })
+                        await ctx.deps.progress_callback(
+                            {
+                                "step": "ai_generation",
+                                "log": f"❌ Failed to create document: {error_msg}",
+                            }
+                        )
 
                     return f"Failed to create document: {error_msg}"
 
@@ -481,10 +469,10 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
             """Create an Entity Relationship Diagram description and schema."""
             try:
                 # Parse entity descriptions to create database schema
-                entities = []
+                entities: list[dict[str, Any]] = []
                 entity_lines = entity_descriptions.split("\n")
 
-                current_entity = None
+                current_entity: dict[str, Any] | None = None
                 for line in entity_lines:
                     line = line.strip()
                     if line and not line.startswith("-"):
@@ -517,22 +505,27 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
                         elif "active" in attr_name.lower() or "enabled" in attr_name.lower():
                             attr_type = "BOOLEAN"
 
-                        current_entity["attributes"].append({
-                            "name": attr_name,
-                            "type": attr_type,
-                            "nullable": True,
-                            "description": f"The {attr_name.replace('_', ' ')} field",
-                        })
+                        current_entity["attributes"].append(
+                            {
+                                "name": attr_name,
+                                "type": attr_type,
+                                "nullable": True,
+                                "description": f"The {attr_name.replace('_', ' ')} field",
+                            }
+                        )
 
                 # Generate SQL schema
                 sql_schema = []
                 for entity in entities:
-                    table_sql = f"CREATE TABLE {entity['name'].lower().replace(' ', '_')} (\n"
+                    entity_name = str(entity["name"]).lower().replace(" ", "_")
+                    table_sql = f"CREATE TABLE {entity_name} (\n"
                     table_sql += "    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n"
 
                     for attr in entity["attributes"]:
                         nullable = "NULL" if attr["nullable"] else "NOT NULL"
-                        table_sql += f"    {attr['name'].lower().replace(' ', '_')} {attr['type']} {nullable},\n"
+                        attr_name = str(attr["name"]).lower().replace(" ", "_")
+                        attr_type = str(attr["type"])
+                        table_sql += f"    {attr_name} {attr_type} {nullable},\n"
 
                     table_sql += "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n"
                     table_sql += "    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n"
@@ -664,9 +657,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
         """Generate a unique block ID."""
         return str(uuid.uuid4())
 
-    def _create_block(
-        self, block_type: str, content: str, properties: dict = None
-    ) -> dict[str, Any]:
+    def _create_block(self, block_type: str, content: str, properties: dict[str, Any] | None = None) -> dict[str, Any]:
         """Create a block in the document format."""
         return {
             "id": self._generate_block_id(),
@@ -675,9 +666,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
             "properties": properties or {"text": content},
         }
 
-    def _convert_to_blocks(
-        self, title: str, document_type: str, content_description: str
-    ) -> list[dict[str, Any]]:
+    def _convert_to_blocks(self, title: str, document_type: str, content_description: str) -> list[dict[str, Any]]:
         """Convert content to block-based format for PRD documents."""
         blocks = []
 
@@ -691,26 +680,14 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
             # Goals section
             blocks.append(self._create_block("heading_2", "Goals"))
-            blocks.append(
-                self._create_block(
-                    "bulleted_list", "Define clear project objectives and success metrics"
-                )
-            )
-            blocks.append(
-                self._create_block(
-                    "bulleted_list", "Establish technical requirements and constraints"
-                )
-            )
-            blocks.append(
-                self._create_block("bulleted_list", "Identify key stakeholders and their needs")
-            )
+            blocks.append(self._create_block("bulleted_list", "Define clear project objectives and success metrics"))
+            blocks.append(self._create_block("bulleted_list", "Establish technical requirements and constraints"))
+            blocks.append(self._create_block("bulleted_list", "Identify key stakeholders and their needs"))
 
             # Scope section
             blocks.append(self._create_block("heading_2", "Scope"))
             blocks.append(
-                self._create_block(
-                    "paragraph", "**In Scope:** Core features and functionality to be delivered"
-                )
+                self._create_block("paragraph", "**In Scope:** Core features and functionality to be delivered")
             )
             blocks.append(
                 self._create_block(
@@ -722,28 +699,18 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
             # Technical Requirements section
             blocks.append(self._create_block("heading_2", "Technical Requirements"))
             blocks.append(self._create_block("heading_3", "Technology Stack"))
-            blocks.append(
-                self._create_block("bulleted_list", "Frontend: React, TypeScript, Tailwind CSS")
-            )
+            blocks.append(self._create_block("bulleted_list", "Frontend: React, TypeScript, Tailwind CSS"))
             blocks.append(self._create_block("bulleted_list", "Backend: FastAPI, Python"))
             blocks.append(self._create_block("bulleted_list", "Database: Supabase (PostgreSQL)"))
-            blocks.append(
-                self._create_block("bulleted_list", "Infrastructure: Docker, Cloud deployment")
-            )
+            blocks.append(self._create_block("bulleted_list", "Infrastructure: Docker, Cloud deployment"))
 
             # Architecture section
             blocks.append(self._create_block("heading_2", "Architecture"))
-            blocks.append(
-                self._create_block(
-                    "paragraph", "High-level system architecture and component interactions"
-                )
-            )
+            blocks.append(self._create_block("paragraph", "High-level system architecture and component interactions"))
 
             # User Stories section
             blocks.append(self._create_block("heading_2", "User Stories"))
-            blocks.append(
-                self._create_block("paragraph", "Key user stories and acceptance criteria")
-            )
+            blocks.append(self._create_block("paragraph", "Key user stories and acceptance criteria"))
 
             # Timeline section
             blocks.append(self._create_block("heading_2", "Timeline & Milestones"))
@@ -751,18 +718,14 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
             # Risks section
             blocks.append(self._create_block("heading_2", "Risks & Mitigations"))
-            blocks.append(
-                self._create_block("paragraph", "Identified risks and mitigation strategies")
-            )
+            blocks.append(self._create_block("paragraph", "Identified risks and mitigation strategies"))
 
         elif document_type == "technical_spec":
             blocks.append(self._create_block("heading_2", "Overview"))
             blocks.append(self._create_block("paragraph", content_description))
 
             blocks.append(self._create_block("heading_2", "Technical Architecture"))
-            blocks.append(
-                self._create_block("paragraph", "System architecture and design decisions")
-            )
+            blocks.append(self._create_block("paragraph", "System architecture and design decisions"))
 
             blocks.append(self._create_block("heading_2", "API Design"))
             blocks.append(self._create_block("paragraph", "API endpoints and data models"))
@@ -772,9 +735,7 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
         elif document_type == "meeting_notes":
             blocks.append(self._create_block("heading_2", "Meeting Details"))
-            blocks.append(
-                self._create_block("paragraph", f"Date: {datetime.now().strftime('%Y-%m-%d')}")
-            )
+            blocks.append(self._create_block("paragraph", f"Date: {datetime.now().strftime('%Y-%m-%d')}"))
             blocks.append(self._create_block("paragraph", f"Topic: {content_description}"))
 
             blocks.append(self._create_block("heading_2", "Attendees"))
@@ -800,10 +761,10 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
 
             # For now, use document_builder as default
             # In future, could make this configurable based on operation type
-            return prompt_service.get_prompt(
-                "document_builder",
-                default="Document Management Assistant for conversational document operations.",
+            result = prompt_service.get_prompt(
+                "document_builder", default="Document agent for creating and managing structured documents."
             )
+            return str(result)
         except Exception as e:
             logger.warning(f"Could not load prompt from service: {e}")
             return "Document Management Assistant for conversational document operations."
@@ -812,8 +773,8 @@ class DocumentAgent(BaseAgent[DocumentDependencies, DocumentOperation]):
         self,
         user_message: str,
         project_id: str,
-        user_id: str = None,
-        current_document_id: str = None,
+        user_id: str | None = None,
+        current_document_id: str | None = None,
         progress_callback: Any = None,
     ) -> DocumentOperation:
         """

@@ -5,6 +5,23 @@ import { afterEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
+// Polyfill AbortController and AbortSignal for Node.js environment
+if (!globalThis.AbortController) {
+  // Simple polyfill for AbortController in test environment
+  class MockAbortController {
+    signal = {
+      aborted: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }
+    abort() {
+      this.signal.aborted = true
+    }
+  }
+  globalThis.AbortController = MockAbortController as any
+}
+
 // Set required environment variables for tests  
 process.env.ARCHON_SERVER_PORT = '8181'
 process.env.VITE_HOST = 'localhost'

@@ -50,8 +50,8 @@ class TaskService:
         assignee: str = "User",
         task_order: int = 0,
         feature: str | None = None,
-        sources: list[dict[str, Any]] = None,
-        code_examples: list[dict[str, Any]] = None,
+        sources: list[dict[str, Any]] | None = None,
+        code_examples: list[dict[str, Any]] | None = None,
     ) -> tuple[bool, dict[str, Any]]:
         """
         Create a new task under a project with automatic reordering.
@@ -92,10 +92,12 @@ class TaskService:
                     # Increment task_order for all affected tasks
                     for existing_task in existing_tasks_response.data:
                         new_order = existing_task["task_order"] + 1
-                        self.supabase_client.table("archon_tasks").update({
-                            "task_order": new_order,
-                            "updated_at": datetime.now().isoformat(),
-                        }).eq("id", existing_task["id"]).execute()
+                        self.supabase_client.table("archon_tasks").update(
+                            {
+                                "task_order": new_order,
+                                "updated_at": datetime.now().isoformat(),
+                            }
+                        ).eq("id", existing_task["id"]).execute()
 
             task_data = {
                 "project_id": project_id,
@@ -118,7 +120,6 @@ class TaskService:
             if response.data:
                 task = response.data[0]
 
-
                 return True, {
                     "task": {
                         "id": task["id"],
@@ -140,12 +141,12 @@ class TaskService:
 
     def list_tasks(
         self,
-        project_id: str = None,
-        status: str = None,
+        project_id: str | None = None,
+        status: str | None = None,
         include_closed: bool = False,
         exclude_large_fields: bool = False,
         include_archived: bool = False,
-        search_query: str = None
+        search_query: str | None = None,
     ) -> tuple[bool, dict[str, Any]]:
         """
         List tasks with various filters.
@@ -206,20 +207,14 @@ class TaskService:
                 if len(search_terms) == 1:
                     # Single term: simple OR across fields
                     term = search_terms[0]
-                    query = query.or_(
-                        f"title.ilike.%{term}%,"
-                        f"description.ilike.%{term}%,"
-                        f"feature.ilike.%{term}%"
-                    )
+                    query = query.or_(f"title.ilike.%{term}%,description.ilike.%{term}%,feature.ilike.%{term}%")
                 else:
                     # Multiple terms: use text search for proper AND logic
                     # Note: This requires full-text search columns to be set up in the database
                     # For now, we'll search for the full phrase in any field
                     full_query = search_query.lower()
                     query = query.or_(
-                        f"title.ilike.%{full_query}%,"
-                        f"description.ilike.%{full_query}%,"
-                        f"feature.ilike.%{full_query}%"
+                        f"title.ilike.%{full_query}%,description.ilike.%{full_query}%,feature.ilike.%{full_query}%"
                     )
                 filters_applied.append(f"search={search_query}")
 
@@ -233,13 +228,11 @@ class TaskService:
             logger.debug(f"Listing tasks with filters: {', '.join(filters_applied)}")
 
             # Execute query and get raw response
-            response = (
-                query.order("task_order", desc=False).order("created_at", desc=False).execute()
-            )
+            response = query.order("task_order", desc=False).order("created_at", desc=False).execute()
 
             # Debug: Log task status distribution and filter effectiveness
             if response.data:
-                status_counts = {}
+                status_counts: dict[str, int] = {}
                 archived_counts = {"null": 0, "true": 0, "false": 0}
 
                 for task in response.data:
@@ -255,9 +248,7 @@ class TaskService:
                     else:
                         archived_counts["false"] += 1
 
-                logger.debug(
-                    f"Retrieved {len(response.data)} tasks. Status distribution: {status_counts}"
-                )
+                logger.debug(f"Retrieved {len(response.data)} tasks. Status distribution: {status_counts}")
                 logger.debug(f"Archived field distribution: {archived_counts}")
 
                 # If we're filtering by status and getting wrong results, log sample
@@ -293,7 +284,7 @@ class TaskService:
                     # Add counts instead of full content
                     task_data["stats"] = {
                         "sources_count": len(task.get("sources", [])),
-                        "code_examples_count": len(task.get("code_examples", []))
+                        "code_examples_count": len(task.get("code_examples", [])),
                     }
 
                 tasks.append(task_data)
@@ -325,9 +316,7 @@ class TaskService:
             Tuple of (success, result_dict)
         """
         try:
-            response = (
-                self.supabase_client.table("archon_tasks").select("*").eq("id", task_id).execute()
-            )
+            response = self.supabase_client.table("archon_tasks").select("*").eq("id", task_id).execute()
 
             if response.data:
                 task = response.data[0]
@@ -339,9 +328,7 @@ class TaskService:
             logger.error(f"Error getting task: {e}")
             return False, {"error": f"Error getting task: {str(e)}"}
 
-    async def update_task(
-        self, task_id: str, update_fields: dict[str, Any]
-    ) -> tuple[bool, dict[str, Any]]:
+    async def update_task(self, task_id: str, update_fields: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
         """
         Update task with specified fields.
 
@@ -378,16 +365,10 @@ class TaskService:
                 update_data["feature"] = update_fields["feature"]
 
             # Update task
-            response = (
-                self.supabase_client.table("archon_tasks")
-                .update(update_data)
-                .eq("id", task_id)
-                .execute()
-            )
+            response = self.supabase_client.table("archon_tasks").update(update_data).eq("id", task_id).execute()
 
             if response.data:
                 task = response.data[0]
-
 
                 return True, {"task": task, "message": "Task updated successfully"}
             else:
@@ -397,9 +378,7 @@ class TaskService:
             logger.error(f"Error updating task: {e}")
             return False, {"error": f"Error updating task: {str(e)}"}
 
-    async def archive_task(
-        self, task_id: str, archived_by: str = "mcp"
-    ) -> tuple[bool, dict[str, Any]]:
+    async def archive_task(self, task_id: str, archived_by: str = "mcp") -> tuple[bool, dict[str, Any]]:
         """
         Archive a task and all its subtasks (soft delete).
 
@@ -408,9 +387,7 @@ class TaskService:
         """
         try:
             # First, check if task exists and is not already archived
-            task_response = (
-                self.supabase_client.table("archon_tasks").select("*").eq("id", task_id).execute()
-            )
+            task_response = self.supabase_client.table("archon_tasks").select("*").eq("id", task_id).execute()
             if not task_response.data:
                 return False, {"error": f"Task with ID {task_id} not found"}
 
@@ -427,15 +404,9 @@ class TaskService:
             }
 
             # Archive the main task
-            response = (
-                self.supabase_client.table("archon_tasks")
-                .update(archive_data)
-                .eq("id", task_id)
-                .execute()
-            )
+            response = self.supabase_client.table("archon_tasks").update(archive_data).eq("id", task_id).execute()
 
             if response.data:
-
                 return True, {"task_id": task_id, "message": "Task archived successfully"}
             else:
                 return False, {"error": f"Failed to archive task {task_id}"}
@@ -444,7 +415,7 @@ class TaskService:
             logger.error(f"Error archiving task: {e}")
             return False, {"error": f"Error archiving task: {str(e)}"}
 
-    def get_all_project_task_counts(self) -> tuple[bool, dict[str, dict[str, int]]]:
+    def get_all_project_task_counts(self) -> tuple[bool, dict[str, dict[str, int]] | dict[str, str]]:
         """
         Get task counts for all projects in a single optimized query.
 
@@ -470,7 +441,7 @@ class TaskService:
                 return True, {}
 
             # Process results into counts by project and status
-            counts_by_project = {}
+            counts_by_project: dict[str, dict[str, int]] = {}
 
             for task in response.data:
                 project_id = task.get("project_id")
@@ -481,12 +452,7 @@ class TaskService:
 
                 # Initialize project counts if not exists
                 if project_id not in counts_by_project:
-                    counts_by_project[project_id] = {
-                        "todo": 0,
-                        "doing": 0,
-                        "review": 0,
-                        "done": 0
-                    }
+                    counts_by_project[project_id] = {"todo": 0, "doing": 0, "review": 0, "done": 0}
 
                 # Count all statuses separately
                 if status in ["todo", "doing", "review", "done"]:

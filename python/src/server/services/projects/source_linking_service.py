@@ -22,7 +22,7 @@ class SourceLinkingService:
         """Initialize with optional supabase client"""
         self.supabase_client = supabase_client or get_supabase_client()
 
-    def get_project_sources(self, project_id: str) -> tuple[bool, dict[str, list[str]]]:
+    def get_project_sources(self, project_id: str) -> tuple[bool, dict[str, list[str] | str]]:
         """
         Get all linked sources for a project, separated by type.
 
@@ -81,18 +81,20 @@ class SourceLinkingService:
             # Update technical sources if provided
             if technical_sources is not None:
                 # Remove existing technical sources
-                self.supabase_client.table("archon_project_sources").delete().eq(
-                    "project_id", project_id
-                ).eq("notes", "technical").execute()
+                self.supabase_client.table("archon_project_sources").delete().eq("project_id", project_id).eq(
+                    "notes", "technical"
+                ).execute()
 
                 # Add new technical sources
                 for source_id in technical_sources:
                     try:
-                        self.supabase_client.table("archon_project_sources").insert({
-                            "project_id": project_id,
-                            "source_id": source_id,
-                            "notes": "technical",
-                        }).execute()
+                        self.supabase_client.table("archon_project_sources").insert(
+                            {
+                                "project_id": project_id,
+                                "source_id": source_id,
+                                "notes": "technical",
+                            }
+                        ).execute()
                         result["technical_success"] += 1
                     except Exception as e:
                         result["technical_failed"] += 1
@@ -101,18 +103,20 @@ class SourceLinkingService:
             # Update business sources if provided
             if business_sources is not None:
                 # Remove existing business sources
-                self.supabase_client.table("archon_project_sources").delete().eq(
-                    "project_id", project_id
-                ).eq("notes", "business").execute()
+                self.supabase_client.table("archon_project_sources").delete().eq("project_id", project_id).eq(
+                    "notes", "business"
+                ).execute()
 
                 # Add new business sources
                 for source_id in business_sources:
                     try:
-                        self.supabase_client.table("archon_project_sources").insert({
-                            "project_id": project_id,
-                            "source_id": source_id,
-                            "notes": "business",
-                        }).execute()
+                        self.supabase_client.table("archon_project_sources").insert(
+                            {
+                                "project_id": project_id,
+                                "source_id": source_id,
+                                "notes": "business",
+                            }
+                        ).execute()
                         result["business_success"] += 1
                     except Exception as e:
                         result["business_failed"] += 1

@@ -86,7 +86,9 @@ class RecursiveCrawlStrategy:
             raw_memory_threshold = float(settings.get("MEMORY_THRESHOLD_PERCENT", "80"))
             memory_threshold = min(99.0, max(10.0, raw_memory_threshold))
             if memory_threshold != raw_memory_threshold:
-                logger.warning(f"Invalid MEMORY_THRESHOLD_PERCENT={raw_memory_threshold}, clamped to {memory_threshold}")
+                logger.warning(
+                    f"Invalid MEMORY_THRESHOLD_PERCENT={raw_memory_threshold}, clamped to {memory_threshold}"
+                )
             check_interval = float(settings.get("DISPATCHER_CHECK_INTERVAL", "0.5"))
         except (ValueError, KeyError, TypeError) as e:
             # Critical configuration errors should fail fast
@@ -94,9 +96,7 @@ class RecursiveCrawlStrategy:
             raise ValueError(f"Failed to load crawler configuration: {e}") from e
         except Exception as e:
             # For non-critical errors (e.g., network issues), use defaults but log prominently
-            logger.error(
-                f"Failed to load crawl settings from database: {e}, using defaults", exc_info=True
-            )
+            logger.error(f"Failed to load crawl settings from database: {e}, using defaults", exc_info=True)
             batch_size = 50
             if max_concurrent is None:
                 max_concurrent = 10  # Safe default to prevent memory issues
@@ -108,9 +108,7 @@ class RecursiveCrawlStrategy:
         has_doc_sites = any(is_documentation_site_func(url) for url in start_urls)
 
         if has_doc_sites:
-            logger.info(
-                "Detected documentation sites for recursive crawl, using enhanced configuration"
-            )
+            logger.info("Detected documentation sites for recursive crawl, using enhanced configuration")
             run_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 stream=True,  # Enable streaming for faster parallel processing
@@ -147,12 +145,7 @@ class RecursiveCrawlStrategy:
             if progress_callback:
                 # Pass step information as flattened kwargs for consistency
                 await progress_callback(
-                    status,
-                    progress_val,
-                    message,
-                    current_step=message,
-                    step_message=message,
-                    **kwargs
+                    status, progress_val, message, current_step=message, step_message=message, **kwargs
                 )
 
         visited = set()
@@ -185,9 +178,7 @@ class RecursiveCrawlStrategy:
                     logger.exception("Unexpected error from cancellation_check()")
                     raise
 
-            urls_to_crawl = [
-                normalize_url(url) for url in current_urls if normalize_url(url) not in visited
-            ]
+            urls_to_crawl = [normalize_url(url) for url in current_urls if normalize_url(url) not in visited]
             if not urls_to_crawl:
                 break
 
@@ -277,11 +268,13 @@ class RecursiveCrawlStrategy:
                     total_processed += 1
 
                     if result.success and result.markdown:
-                        results_all.append({
-                            "url": original_url,
-                            "markdown": result.markdown,
-                            "html": result.html,  # Always use raw HTML for code extraction
-                        })
+                        results_all.append(
+                            {
+                                "url": original_url,
+                                "markdown": result.markdown,
+                                "html": result.html,  # Always use raw HTML for code extraction
+                            }
+                        )
                         depth_successful += 1
 
                         # Find internal links for next depth

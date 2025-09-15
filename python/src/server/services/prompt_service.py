@@ -40,9 +40,7 @@ class PromptService:
             response = supabase.table("archon_prompts").select("*").execute()
 
             if response.data:
-                self._prompts = {
-                    prompt["prompt_name"]: prompt["prompt"] for prompt in response.data
-                }
+                self._prompts = {prompt["prompt_name"]: prompt["prompt"] for prompt in response.data}
                 self._last_loaded = datetime.now()
                 logger.info(f"Loaded {len(self._prompts)} prompts into memory")
             else:

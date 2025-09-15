@@ -1,10 +1,10 @@
 import { BookOpen, Settings } from "lucide-react";
 import type React from "react";
 import { Link, useLocation } from "react-router-dom";
-// TEMPORARY: Use old SettingsContext until settings are migrated
-import { useSettings } from "../../contexts/SettingsContext";
 import { glassmorphism } from "../../features/ui/primitives/styles";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../features/ui/primitives/tooltip";
+// TEMPORARY: Use old SettingsContext until settings are migrated
+import { useSettings } from "../../hooks/useSettings";
 import { cn } from "../../lib/utils";
 
 interface NavigationItem {

@@ -14,7 +14,7 @@ import { progressService } from '../../src/features/knowledge/progress/services/
 if (typeof fetch === "undefined") {
   // Use dynamic import for ESM compatibility
   const nodeFetch = await import('node-fetch');
-  globalThis.fetch = nodeFetch.default as any;
+  globalThis.fetch = nodeFetch.default as unknown as typeof globalThis.fetch;
 }
 
 async function testKnowledgeAPI(): Promise<void> {
@@ -30,17 +30,15 @@ async function testKnowledgeAPI(): Promise<void> {
   // console.log(`✅ Success! Found ${items.total} total items`);
   // console.log(`   Returned ${items.items.length} items on page ${items.page}`);
     if (items.items.length > 0) {
-      const _first = items.items[0];
-  // console.log(`   First item: ${first.title || first.source_id}`);
+  // console.log(`   First item: ${items.items[0].title || items.items[0].source_id}`);
     }
   // console.log('');
 
     // Test 2: Filter by type
   // console.log('🔍 Test 2: Filtering by knowledge type...');
-    const _technicalItems = await knowledgeService.getKnowledgeSummaries({
-      knowledge_type: 'technical',
+    await knowledgeService.getKnowledgeSummaries({
       page: 1,
-      per_page: 3,
+      per_page: 5
     });
   // console.log(`✅ Found ${technicalItems.total} technical items`);
   // console.log('');
@@ -49,13 +47,13 @@ async function testKnowledgeAPI(): Promise<void> {
     if (items.items.length > 0) {
       const sourceId = items.items[0].source_id;
   // console.log(`📄 Test 3: Getting chunks for ${sourceId}...`);
-      const _chunks = await knowledgeService.getKnowledgeItemChunks(sourceId);
+      await knowledgeService.getKnowledgeItemChunks(sourceId);
   // console.log(`✅ Found ${chunks.total} chunks`);
   // console.log('');
 
       // Test 4: Get code examples
   // console.log(`💻 Test 4: Getting code examples for ${sourceId}...`);
-      const _examples = await knowledgeService.getCodeExamples(sourceId);
+      await knowledgeService.getCodeExamples(sourceId);
   // console.log(`✅ Found ${examples.total} code examples`);
   // console.log('');
     }
@@ -63,9 +61,9 @@ async function testKnowledgeAPI(): Promise<void> {
     // Test 5: Search
   // console.log('🔎 Test 5: Searching knowledge base...');
     try {
-      const _searchResults = await knowledgeService.searchKnowledgeBase({
-        query: 'API',
-        limit: 3,
+      await knowledgeService.searchKnowledgeBase({
+        query: 'authentication',
+        limit: 10
       });
   // console.log(`✅ Found ${searchResults.results.length} search results`);
   // console.log('✅ Search completed');
@@ -86,7 +84,7 @@ async function testKnowledgeAPI(): Promise<void> {
   // console.log(`✅ Crawl started with progress ID: ${crawlResponse.progressId}`);
       
       // Get progress
-      const _progress = await progressService.getProgress(crawlResponse.progressId);
+      await progressService.getProgress(crawlResponse.progressId);
   // console.log(`   Status: ${progress.status}, Progress: ${progress.progress}%`);
       
       // Stop the crawl

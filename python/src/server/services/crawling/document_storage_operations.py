@@ -69,7 +69,7 @@ class DocumentStorageOperations:
         all_chunk_numbers = []
         all_contents = []
         all_metadatas = []
-        source_word_counts = {}
+        source_word_counts: dict[str, int] = {}
         url_to_full_document = {}
         processed_docs = 0
 
@@ -84,12 +84,12 @@ class DocumentStorageOperations:
                         await progress_callback(
                             "cancelled",
                             99,
-                            f"Document processing cancelled at document {doc_index + 1}/{len(crawl_results)}"
+                            f"Document processing cancelled at document {doc_index + 1}/{len(crawl_results)}",
                         )
                     raise
 
-            doc_url = (doc.get('url') or '').strip()
-            markdown_content = (doc.get('markdown') or '').strip()
+            doc_url = (doc.get("url") or "").strip()
+            markdown_content = (doc.get("markdown") or "").strip()
 
             # Skip documents with empty or whitespace-only content or missing URLs
             if not markdown_content or not doc_url:
@@ -120,7 +120,7 @@ class DocumentStorageOperations:
                             await progress_callback(
                                 "cancelled",
                                 99,
-                                f"Chunk processing cancelled at chunk {i + 1}/{len(chunks)} of document {doc_index + 1}"
+                                f"Chunk processing cancelled at chunk {i + 1}/{len(chunks)} of document {doc_index + 1}",
                             )
                         raise
 
@@ -158,8 +158,7 @@ class DocumentStorageOperations:
         # Create/update source record FIRST before storing documents
         if all_contents and all_metadatas:
             await self._create_source_records(
-                all_metadatas, all_contents, source_word_counts, request,
-                source_url, source_display_name
+                all_metadatas, all_contents, source_word_counts, request, source_url, source_display_name
             )
 
         safe_logfire_info(f"url_to_full_document keys: {list(url_to_full_document.keys())[:5]}")
@@ -190,11 +189,11 @@ class DocumentStorageOperations:
         chunks_stored = storage_stats.get("chunks_stored", 0)
 
         return {
-            'chunk_count': chunk_count,
-            'chunks_stored': chunks_stored,
-            'total_word_count': sum(source_word_counts.values()),
-            'url_to_full_document': url_to_full_document,
-            'source_id': original_source_id
+            "chunk_count": chunk_count,
+            "chunks_stored": chunks_stored,
+            "total_word_count": sum(source_word_counts.values()),
+            "url_to_full_document": url_to_full_document,
+            "source_id": original_source_id,
         }
 
     async def _create_source_records(
@@ -217,7 +216,7 @@ class DocumentStorageOperations:
         """
         # Find ALL unique source_ids in the crawl results
         unique_source_ids = set()
-        source_id_contents = {}
+        source_id_contents: dict[str, list[str]] = {}
         source_id_word_counts = {}
 
         for i, metadata in enumerate(all_metadatas):
@@ -232,11 +231,9 @@ class DocumentStorageOperations:
             # Track word counts per source_id
             if source_id not in source_id_word_counts:
                 source_id_word_counts[source_id] = 0
-            source_id_word_counts[source_id] += metadata.get('word_count', 0)
+            source_id_word_counts[source_id] += metadata.get("word_count", 0)
 
-        safe_logfire_info(
-            f"Found {len(unique_source_ids)} unique source_ids: {list(unique_source_ids)}"
-        )
+        safe_logfire_info(f"Found {len(unique_source_ids)} unique source_ids: {list(unique_source_ids)}")
 
         # Create source records for ALL unique source_ids
         for source_id in unique_source_ids:
@@ -255,9 +252,7 @@ class DocumentStorageOperations:
                 summary = await extract_source_summary(source_id, combined_content)
             except Exception as e:
                 logger.error(f"Failed to generate AI summary for '{source_id}'", exc_info=True)
-                safe_logfire_error(
-                    f"Failed to generate AI summary for '{source_id}': {str(e)}, using fallback"
-                )
+                safe_logfire_error(f"Failed to generate AI summary for '{source_id}': {str(e)}, using fallback")
                 # Fallback to simple summary
                 summary = f"Documentation from {source_id} - {len(source_contents)} pages crawled"
 
@@ -283,9 +278,7 @@ class DocumentStorageOperations:
                 safe_logfire_info(f"Successfully created/updated source record for '{source_id}'")
             except Exception as e:
                 logger.error(f"Failed to create/update source record for '{source_id}'", exc_info=True)
-                safe_logfire_error(
-                    f"Failed to create/update source record for '{source_id}': {str(e)}"
-                )
+                safe_logfire_error(f"Failed to create/update source record for '{source_id}': {str(e)}")
                 # Try a simpler approach with minimal data
                 try:
                     safe_logfire_info(f"Attempting fallback source creation for '{source_id}'")
@@ -313,9 +306,7 @@ class DocumentStorageOperations:
                     safe_logfire_info(f"Fallback source creation succeeded for '{source_id}'")
                 except Exception as fallback_error:
                     logger.error(f"Both source creation attempts failed for '{source_id}'", exc_info=True)
-                    safe_logfire_error(
-                        f"Both source creation attempts failed for '{source_id}': {str(fallback_error)}"
-                    )
+                    safe_logfire_error(f"Both source creation attempts failed for '{source_id}': {str(fallback_error)}")
                     raise RuntimeError(
                         f"Unable to create source record for '{source_id}'. This will cause foreign key violations."
                     ) from fallback_error

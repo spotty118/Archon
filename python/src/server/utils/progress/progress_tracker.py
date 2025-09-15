@@ -70,7 +70,9 @@ class ProgressTracker:
             # Only clean up if still in terminal state (prevent cleanup of reused IDs)
             if status in ["completed", "failed", "error", "cancelled"]:
                 del cls._progress_states[progress_id]
-                safe_logfire_info(f"Progress state cleaned up after delay | progress_id={progress_id} | status={status}")
+                safe_logfire_info(
+                    f"Progress state cleaned up after delay | progress_id={progress_id} | status={status}"
+                )
 
     async def start(self, initial_data: dict[str, Any] | None = None):
         """
@@ -86,9 +88,7 @@ class ProgressTracker:
             self.state.update(initial_data)
 
         self._update_state()
-        safe_logfire_info(
-            f"Progress tracking started | progress_id={self.progress_id} | type={self.operation_type}"
-        )
+        safe_logfire_info(f"Progress tracking started | progress_id={self.progress_id} | type={self.operation_type}")
 
     async def update(self, status: str, progress: int, log: str, **kwargs):
         """
@@ -124,12 +124,14 @@ class ProgressTracker:
         else:
             actual_progress = new_progress
 
-        self.state.update({
-            "status": status,
-            "progress": actual_progress,
-            "log": log,
-            "timestamp": datetime.now().isoformat(),
-        })
+        self.state.update(
+            {
+                "status": status,
+                "progress": actual_progress,
+                "log": log,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
         # DEBUG: Log final state for document_storage
         if status == "document_storage" and actual_progress >= 35:
@@ -143,12 +145,14 @@ class ProgressTracker:
             self.state["logs"] = []
         logs_list = self.state["logs"]
         if isinstance(logs_list, list):
-            logs_list.append({
-                "timestamp": datetime.now().isoformat(),
-                "message": log,
-                "status": status,
-                "progress": actual_progress,  # Use the actual progress after "never go backwards" check
-            })
+            logs_list.append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "message": log,
+                    "status": status,
+                    "progress": actual_progress,  # Use the actual progress after "never go backwards" check
+                }
+            )
             # Keep only the last 200 log entries
             if len(logs_list) > 200:
                 self.state["logs"] = logs_list[-200:]
@@ -158,7 +162,6 @@ class ProgressTracker:
         for key, value in kwargs.items():
             if key not in protected_fields:
                 self.state[key] = value
-
 
         self._update_state()
 
@@ -182,8 +185,8 @@ class ProgressTracker:
 
         # Calculate duration
         if "start_time" in self.state:
-            start = datetime.fromisoformat(self.state["start_time"])
-            end = datetime.fromisoformat(self.state["end_time"])
+            start = datetime.fromisoformat(str(self.state["start_time"]))
+            end = datetime.fromisoformat(str(self.state["end_time"]))
             duration = (end - start).total_seconds()
             self.state["duration"] = str(duration)  # Convert to string for Pydantic model
             self.state["duration_formatted"] = self._format_duration(duration)
@@ -204,11 +207,13 @@ class ProgressTracker:
             error_message: Error message
             error_details: Optional additional error details
         """
-        self.state.update({
-            "status": "error",
-            "error": error_message,
-            "error_time": datetime.now().isoformat(),
-        })
+        self.state.update(
+            {
+                "status": "error",
+                "error": error_message,
+                "error_time": datetime.now().isoformat(),
+            }
+        )
 
         if error_details:
             self.state["error_details"] = error_details
@@ -221,9 +226,7 @@ class ProgressTracker:
         # Schedule cleanup after delay to allow clients to see final state
         asyncio.create_task(self._delayed_cleanup(self.progress_id))
 
-    async def update_batch_progress(
-        self, current_batch: int, total_batches: int, batch_size: int, message: str
-    ):
+    async def update_batch_progress(self, current_batch: int, total_batches: int, batch_size: int, message: str):
         """
         Update progress for batch operations.
 
@@ -244,11 +247,7 @@ class ProgressTracker:
         )
 
     async def update_crawl_stats(
-        self,
-        processed_pages: int,
-        total_pages: int,
-        current_url: str | None = None,
-        pages_found: int | None = None
+        self, processed_pages: int, total_pages: int, current_url: str | None = None, pages_found: int | None = None
     ):
         """
         Update crawling statistics with detailed metrics.
@@ -264,19 +263,16 @@ class ProgressTracker:
         if current_url:
             log += f": {current_url}"
 
-        update_data = {
-            "status": "crawling",
-            "progress": progress_val,
-            "log": log,
+        kwargs = {
             "processed_pages": processed_pages,
             "total_pages": total_pages,
             "current_url": current_url,
         }
 
         if pages_found is not None:
-            update_data["pages_found"] = pages_found
+            kwargs["pages_found"] = pages_found
 
-        await self.update(**update_data)
+        await self.update("crawling", progress_val, log, **kwargs)
 
     async def update_storage_progress(
         self,
@@ -284,7 +280,7 @@ class ProgressTracker:
         total_chunks: int,
         operation: str = "storing",
         word_count: int | None = None,
-        embeddings_created: int | None = None
+        embeddings_created: int | None = None,
     ):
         """
         Update document storage progress with detailed metrics.
@@ -298,27 +294,22 @@ class ProgressTracker:
         """
         progress_val = int((chunks_stored / max(total_chunks, 1)) * 100)
 
-        update_data = {
-            "status": "document_storage",
-            "progress": progress_val,
-            "log": f"{operation}: {chunks_stored}/{total_chunks} chunks",
+        kwargs = {
             "chunks_stored": chunks_stored,
             "total_chunks": total_chunks,
         }
 
         if word_count is not None:
-            update_data["word_count"] = word_count
+            kwargs["word_count"] = word_count
         if embeddings_created is not None:
-            update_data["embeddings_created"] = embeddings_created
+            kwargs["embeddings_created"] = embeddings_created
 
-        await self.update(**update_data)
+        await self.update(
+            "document_storage", progress_val, f"{operation}: {chunks_stored}/{total_chunks} chunks", **kwargs
+        )
 
     async def update_code_extraction_progress(
-        self,
-        completed_summaries: int,
-        total_summaries: int,
-        code_blocks_found: int,
-        current_file: str | None = None
+        self, completed_summaries: int, total_summaries: int, code_blocks_found: int, current_file: str | None = None
     ):
         """
         Update code extraction progress with detailed metrics.
@@ -342,7 +333,7 @@ class ProgressTracker:
             completed_summaries=completed_summaries,
             total_summaries=total_summaries,
             code_blocks_found=code_blocks_found,
-            current_file=current_file
+            current_file=current_file,
         )
 
     def _update_state(self):

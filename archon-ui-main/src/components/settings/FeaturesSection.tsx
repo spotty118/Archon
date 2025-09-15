@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Moon, Sun, FileText, Flame, Monitor } from 'lucide-react';
 import { Toggle } from '../ui/Toggle';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import { credentialsService } from '../../services/credentialsService';
 import { useToast } from '../../features/ui/hooks/useToast';
 import { serverHealthService } from '../../services/serverHealthService';

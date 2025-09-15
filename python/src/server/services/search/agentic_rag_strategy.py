@@ -25,7 +25,7 @@ logger = get_logger(__name__)
 class AgenticRAGStrategy:
     """Strategy class implementing agentic RAG for code example search and extraction"""
 
-    def __init__(self, supabase_client: Client, base_strategy):
+    def __init__(self, supabase_client: Client, base_strategy=None):
         """
         Initialize agentic RAG strategy.
 
@@ -84,9 +84,7 @@ class AgenticRAGStrategy:
         Returns:
             List of matching code examples
         """
-        with safe_span(
-            "agentic_code_search", query_length=len(query), match_count=match_count
-        ) as span:
+        with safe_span("agentic_code_search", query_length=len(query), match_count=match_count) as span:
             try:
                 # Create embedding for the query (no enhancement)
                 query_embedding = await create_embedding(query)
@@ -110,11 +108,9 @@ class AgenticRAGStrategy:
 
                 span.set_attribute("results_found", len(results))
 
-                logger.debug(
-                    f"Agentic code search found {len(results)} results for query: {query[:50]}..."
-                )
+                logger.debug(f"Agentic code search found {len(results)} results for query: {query[:50]}...")
 
-                return results
+                return list(results)
 
             except Exception as e:
                 logger.error(f"Error in agentic code example search: {e}")
@@ -165,7 +161,6 @@ class AgenticRAGStrategy:
                     match_count=match_count,
                     filter_metadata=filter_metadata,
                     source_id=source_id,
-                    use_enhancement=True,
                 )
 
                 # Format results for API response
@@ -200,9 +195,7 @@ class AgenticRAGStrategy:
                 span.set_attribute("results_returned", len(formatted_results))
                 span.set_attribute("success", True)
 
-                logger.info(
-                    f"Agentic RAG search completed - {len(formatted_results)} code examples found"
-                )
+                logger.info(f"Agentic RAG search completed - {len(formatted_results)} code examples found")
 
                 return True, response_data
 
@@ -347,9 +340,7 @@ class AgenticRAGStrategy:
         code_indicators = [kw for kw in code_keywords if kw in query_lower]
 
         # Determine if query is code-related
-        is_code_query = (
-            len(detected_languages) > 0 or len(detected_frameworks) > 0 or len(code_indicators) > 0
-        )
+        is_code_query = len(detected_languages) > 0 or len(detected_frameworks) > 0 or len(code_indicators) > 0
 
         return {
             "is_code_query": is_code_query,
@@ -367,7 +358,7 @@ class AgenticRAGStrategy:
 # Utility functions for standalone usage
 def create_agentic_rag_strategy(supabase_client: Client) -> AgenticRAGStrategy:
     """Create an agentic RAG strategy instance."""
-    return AgenticRAGStrategy(supabase_client)
+    return AgenticRAGStrategy(supabase_client, None)
 
 
 async def search_code_examples_agentic(
@@ -390,8 +381,8 @@ async def search_code_examples_agentic(
     Returns:
         List of code example results
     """
-    strategy = AgenticRAGStrategy(client)
-    return await strategy.search_code_examples_async(query, match_count, filter_metadata, source_id)
+    strategy = AgenticRAGStrategy(client, None)
+    return await strategy.search_code_examples(query, match_count, filter_metadata, source_id)
 
 
 def analyze_query_for_code_search(query: str) -> dict[str, Any]:

@@ -37,9 +37,7 @@ async def generate_contextual_embedding(
         model_choice = await credential_service.get_credential("MODEL_CHOICE", "gpt-4.1-nano")
     except Exception as e:
         # Fallback to environment variable or default
-        search_logger.warning(
-            f"Failed to get MODEL_CHOICE from credential service: {e}, using fallback"
-        )
+        search_logger.warning(f"Failed to get MODEL_CHOICE from credential service: {e}, using fallback")
         model_choice = os.getenv("MODEL_CHOICE", "gpt-4.1-nano")
 
     search_logger.debug(f"Using MODEL_CHOICE: {model_choice}")
@@ -91,9 +89,7 @@ Please give a short succinct context to situate this chunk within the overall do
         return chunk, False
 
 
-async def process_chunk_with_context(
-    url: str, content: str, full_document: str
-) -> tuple[str, bool]:
+async def process_chunk_with_context(url: str, content: str, full_document: str) -> tuple[str, bool]:
     """
     Process a single chunk with contextual embedding using async/await.
 
@@ -116,7 +112,7 @@ async def _get_model_choice(provider: str | None = None) -> str:
 
     # Get the active provider configuration
     provider_config = await credential_service.get_active_provider("llm")
-    model = provider_config.get("chat_model", "gpt-4.1-nano")
+    model = str(provider_config.get("chat_model", "gpt-4.1-nano"))
 
     search_logger.debug(f"Using model from credential service: {model}")
 
@@ -148,9 +144,7 @@ async def generate_contextual_embeddings_batch(
             model_choice = await _get_model_choice(provider)
 
             # Build batch prompt for ALL chunks at once
-            batch_prompt = (
-                "Process the following chunks and provide contextual information for each:\\n\\n"
-            )
+            batch_prompt = "Process the following chunks and provide contextual information for each:\\n\\n"
 
             for i, (doc, chunk) in enumerate(zip(full_documents, chunks, strict=False)):
                 # Use only 2000 chars of document context to save tokens
@@ -205,14 +199,10 @@ async def generate_contextual_embeddings_batch(
     except openai.RateLimitError as e:
         if "insufficient_quota" in str(e):
             search_logger.warning(f"⚠️ QUOTA EXHAUSTED in contextual embeddings: {e}")
-            search_logger.warning(
-                "OpenAI quota exhausted - proceeding without contextual embeddings"
-            )
+            search_logger.warning("OpenAI quota exhausted - proceeding without contextual embeddings")
         else:
             search_logger.warning(f"Rate limit hit in contextual embeddings batch: {e}")
-            search_logger.warning(
-                "Rate limit hit - proceeding without contextual embeddings for this batch"
-            )
+            search_logger.warning("Rate limit hit - proceeding without contextual embeddings for this batch")
         # Return non-contextual for all chunks
         return [(chunk, False) for chunk in chunks]
 

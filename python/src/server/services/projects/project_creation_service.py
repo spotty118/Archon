@@ -80,16 +80,11 @@ class ProjectCreationService:
             # AI processing step
 
             # Generate AI documentation if API key is available
-            ai_success = await self._generate_ai_documentation(
-                progress_id, project_id, title, description, github_repo
-            )
+            ai_success = await self._generate_ai_documentation(progress_id, project_id, title, description, github_repo)
 
             # Final success - fetch complete project data
             final_project_response = (
-                self.supabase_client.table("archon_projects")
-                .select("*")
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").select("*").eq("id", project_id).execute()
             )
             if final_project_response.data:
                 final_project = final_project_response.data[0]
@@ -109,7 +104,6 @@ class ProjectCreationService:
                     "technical_sources": [],  # Empty initially
                     "business_sources": [],  # Empty initially
                 }
-
 
                 return True, {
                     "project_id": project_id,
@@ -145,6 +139,7 @@ class ProjectCreationService:
         try:
             # Check if LLM provider is configured
             from ..credential_service import credential_service
+
             provider_config = await credential_service.get_active_provider("llm")
 
             if not provider_config:
@@ -154,13 +149,13 @@ class ProjectCreationService:
             # Import DocumentAgent (lazy import to avoid startup issues)
             from ...agents.document_agent import DocumentAgent
 
-
-
             # Initialize DocumentAgent
             document_agent = DocumentAgent()
 
             # Generate comprehensive PRD using conversation
-            prd_request = f"Create a PRD document titled '{title} - Product Requirements Document' for a project called '{title}'"
+            prd_request = (
+                f"Create a PRD document titled '{title} - Product Requirements Document' for a project called '{title}'"
+            )
             if description:
                 prd_request += f" with the following description: {description}"
             if github_repo:
@@ -179,7 +174,6 @@ class ProjectCreationService:
             )
 
             if agent_result.success:
-
                 return True
             else:
                 return False

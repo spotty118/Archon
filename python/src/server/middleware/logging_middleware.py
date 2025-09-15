@@ -112,9 +112,7 @@ class LoggingRoute(APIRoute):
                 duration = time.time() - start_time
 
                 # Log successful endpoint execution
-                logger.info(
-                    f"Endpoint: {endpoint_name} | duration_ms={round(duration * 1000, 2)} | status=success"
-                )
+                logger.info(f"Endpoint: {endpoint_name} | duration_ms={round(duration * 1000, 2)} | status=success")
 
                 return response
 

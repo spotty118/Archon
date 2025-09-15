@@ -54,9 +54,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("/tmp/mcp_server.log", mode="a")
-        if os.path.exists("/tmp")
-        else logging.NullHandler(),
+        logging.FileHandler("/tmp/mcp_server.log", mode="a") if os.path.exists("/tmp") else logging.NullHandler(),
     ],
 )
 logger = logging.getLogger(__name__)
@@ -87,8 +85,8 @@ class ArchonContext:
     """
 
     service_client: Any
-    health_status: dict = None
-    startup_time: float = None
+    health_status: dict[str, Any] | None = None
+    startup_time: float | None = None
 
     def __post_init__(self):
         if self.health_status is None:
@@ -108,6 +106,7 @@ async def perform_health_checks(context: ArchonContext):
         # Check dependent services
         service_health = await context.service_client.health_check()
 
+        assert context.health_status is not None
         context.health_status["api_service"] = service_health.get("api_service", False)
         context.health_status["agents_service"] = service_health.get("agents_service", False)
 
@@ -124,6 +123,7 @@ async def perform_health_checks(context: ArchonContext):
 
     except Exception as e:
         logger.error(f"Health check error: {e}")
+        assert context.health_status is not None
         context.health_status["status"] = "unhealthy"
         context.health_status["last_health_check"] = datetime.now().isoformat()
 
@@ -312,38 +312,46 @@ async def health_check(ctx: Context) -> str:
 
         if context is None:
             # Server starting up
-            return json.dumps({
-                "success": True,
-                "status": "starting",
-                "message": "MCP server is initializing...",
-                "timestamp": datetime.now().isoformat(),
-            })
+            return json.dumps(
+                {
+                    "success": True,
+                    "status": "starting",
+                    "message": "MCP server is initializing...",
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
         # Server is ready - perform health checks
         if hasattr(context, "health_status") and context.health_status:
             await perform_health_checks(context)
 
-            return json.dumps({
-                "success": True,
-                "health": context.health_status,
-                "uptime_seconds": time.time() - context.startup_time,
-                "timestamp": datetime.now().isoformat(),
-            })
+            return json.dumps(
+                {
+                    "success": True,
+                    "health": context.health_status,
+                    "uptime_seconds": time.time() - context.startup_time,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
         else:
-            return json.dumps({
-                "success": True,
-                "status": "ready",
-                "message": "MCP server is running",
-                "timestamp": datetime.now().isoformat(),
-            })
+            return json.dumps(
+                {
+                    "success": True,
+                    "status": "ready",
+                    "message": "MCP server is running",
+                    "timestamp": datetime.now().isoformat(),
+                }
+            )
 
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return json.dumps({
-            "success": False,
-            "error": f"Health check failed: {str(e)}",
-            "timestamp": datetime.now().isoformat(),
-        })
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Health check failed: {str(e)}",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
 
 # Session management endpoint
@@ -369,19 +377,23 @@ async def session_info(ctx: Context) -> str:
         if context and hasattr(context, "startup_time"):
             session_info_data["server_uptime_seconds"] = time.time() - context.startup_time
 
-        return json.dumps({
-            "success": True,
-            "session_management": session_info_data,
-            "timestamp": datetime.now().isoformat(),
-        })
+        return json.dumps(
+            {
+                "success": True,
+                "session_management": session_info_data,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
     except Exception as e:
         logger.error(f"Session info failed: {e}")
-        return json.dumps({
-            "success": False,
-            "error": f"Failed to get session info: {str(e)}",
-            "timestamp": datetime.now().isoformat(),
-        })
+        return json.dumps(
+            {
+                "success": False,
+                "error": f"Failed to get session info: {str(e)}",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
 
 # Import and register modules

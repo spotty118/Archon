@@ -22,11 +22,13 @@ logger = logging.getLogger(__name__)
 MAX_DESCRIPTION_LENGTH = 1000
 DEFAULT_PAGE_SIZE = 10  # Reduced from 50
 
+
 def truncate_text(text: str, max_length: int = MAX_DESCRIPTION_LENGTH) -> str:
     """Truncate text to maximum length with ellipsis."""
     if text and len(text) > max_length:
-        return text[:max_length - 3] + "..."
+        return text[: max_length - 3] + "..."
     return text
+
 
 def optimize_task_response(task: dict) -> dict:
     """Optimize task object for MCP response."""
@@ -173,13 +175,15 @@ def register_task_tools(mcp: FastMCP):
                 # Optimize task responses
                 optimized_tasks = [optimize_task_response(task) for task in tasks]
 
-                return json.dumps({
-                    "success": True,
-                    "tasks": optimized_tasks,
-                    "total_count": total_count,
-                    "count": len(optimized_tasks),
-                    "query": query,  # Include search query in response
-                })
+                return json.dumps(
+                    {
+                        "success": True,
+                        "tasks": optimized_tasks,
+                        "total_count": total_count,
+                        "count": len(optimized_tasks),
+                        "query": query,  # Include search query in response
+                    }
+                )
 
         except httpx.RequestError as e:
             return MCPErrorFormatter.from_exception(
@@ -200,7 +204,7 @@ def register_task_tools(mcp: FastMCP):
         status: str | None = None,
         assignee: str | None = None,
         task_order: int | None = None,
-        feature: str | None = None
+        feature: str | None = None,
     ) -> str:
         """
         Manage tasks (consolidated: create/update/delete).
@@ -233,7 +237,7 @@ def register_task_tools(mcp: FastMCP):
                         return MCPErrorFormatter.format_error(
                             "validation_error",
                             "project_id and title required for create",
-                            suggestion="Provide both project_id and title"
+                            suggestion="Provide both project_id and title",
                         )
 
                     response = await client.post(
@@ -258,21 +262,21 @@ def register_task_tools(mcp: FastMCP):
                         if task:
                             task = optimize_task_response(task)
 
-                        return json.dumps({
-                            "success": True,
-                            "task": task,
-                            "task_id": task.get("id") if task else None,
-                            "message": result.get("message", "Task created successfully"),
-                        })
+                        return json.dumps(
+                            {
+                                "success": True,
+                                "task": task,
+                                "task_id": task.get("id") if task else None,
+                                "message": result.get("message", "Task created successfully"),
+                            }
+                        )
                     else:
                         return MCPErrorFormatter.from_http_error(response, "create task")
 
                 elif action == "update":
                     if not task_id:
                         return MCPErrorFormatter.format_error(
-                            "validation_error",
-                            "task_id required for update",
-                            suggestion="Provide task_id to update"
+                            "validation_error", "task_id required for update", suggestion="Provide task_id to update"
                         )
 
                     # Build update fields
@@ -297,10 +301,7 @@ def register_task_tools(mcp: FastMCP):
                             suggestion="Provide at least one field to update",
                         )
 
-                    response = await client.put(
-                        urljoin(api_url, f"/api/tasks/{task_id}"),
-                        json=update_fields
-                    )
+                    response = await client.put(urljoin(api_url, f"/api/tasks/{task_id}"), json=update_fields)
 
                     if response.status_code == 200:
                         result = response.json()
@@ -310,46 +311,42 @@ def register_task_tools(mcp: FastMCP):
                         if task:
                             task = optimize_task_response(task)
 
-                        return json.dumps({
-                            "success": True,
-                            "task": task,
-                            "message": result.get("message", "Task updated successfully"),
-                        })
+                        return json.dumps(
+                            {
+                                "success": True,
+                                "task": task,
+                                "message": result.get("message", "Task updated successfully"),
+                            }
+                        )
                     else:
                         return MCPErrorFormatter.from_http_error(response, "update task")
 
                 elif action == "delete":
                     if not task_id:
                         return MCPErrorFormatter.format_error(
-                            "validation_error",
-                            "task_id required for delete",
-                            suggestion="Provide task_id to delete"
+                            "validation_error", "task_id required for delete", suggestion="Provide task_id to delete"
                         )
 
-                    response = await client.delete(
-                        urljoin(api_url, f"/api/tasks/{task_id}")
-                    )
+                    response = await client.delete(urljoin(api_url, f"/api/tasks/{task_id}"))
 
                     if response.status_code == 200:
                         result = response.json()
-                        return json.dumps({
-                            "success": True,
-                            "message": result.get("message", "Task deleted successfully"),
-                        })
+                        return json.dumps(
+                            {
+                                "success": True,
+                                "message": result.get("message", "Task deleted successfully"),
+                            }
+                        )
                     else:
                         return MCPErrorFormatter.from_http_error(response, "delete task")
 
                 else:
                     return MCPErrorFormatter.format_error(
-                        "invalid_action",
-                        f"Unknown action: {action}",
-                        suggestion="Use 'create', 'update', or 'delete'"
+                        "invalid_action", f"Unknown action: {action}", suggestion="Use 'create', 'update', or 'delete'"
                     )
 
         except httpx.RequestError as e:
-            return MCPErrorFormatter.from_exception(
-                e, f"{action} task", {"task_id": task_id, "project_id": project_id}
-            )
+            return MCPErrorFormatter.from_exception(e, f"{action} task", {"task_id": task_id, "project_id": project_id})
         except Exception as e:
             logger.error(f"Error managing task ({action}): {e}", exc_info=True)
             return MCPErrorFormatter.from_exception(e, f"{action} task")

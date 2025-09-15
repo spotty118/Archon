@@ -84,7 +84,7 @@ export class ErrorBoundaryWithBugReport extends Component<Props, State> {
     if (this.state.hasError && this.state.error) {
       // Custom fallback if provided
       if (this.props.fallback) {
-        return this.props.fallback(this.state.error, this.state.errorInfo ?? null);
+        return this.props.fallback(this.state.error, this.state.errorInfo || { componentStack: '' });
       }
 
       // Default error UI
