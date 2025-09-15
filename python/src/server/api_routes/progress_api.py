@@ -42,7 +42,7 @@ async def get_progress(
             raise HTTPException(
                 status_code=404,
                 detail={"error": f"Operation {operation_id} not found"}
-            )
+            ) from None
 
 
         # Ensure we have the progress_id in the response without mutating shared state

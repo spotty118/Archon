@@ -445,7 +445,7 @@ async def update_project(project_id: str, request: UpdateProjectRequest):
             if "not found" in result.get("error", "").lower():
                 raise HTTPException(
                     status_code=404, detail={"error": f"Project with ID {project_id} not found"}
-                )
+                ) from None
             else:
                 raise HTTPException(status_code=500, detail=result) from None
 

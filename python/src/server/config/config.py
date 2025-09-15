@@ -199,7 +199,7 @@ def load_environment_config() -> EnvironmentConfig:
     # Validate and convert port
     try:
         port = int(port_str)
-    except ValueError as e:
+    except ValueError:
         raise ConfigurationError(f"PORT must be a valid integer, got: {port_str}")
 
     return EnvironmentConfig(

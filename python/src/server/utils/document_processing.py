@@ -154,7 +154,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
                     "or scanned document without OCR"
                 )
 
-        except Exception as e:
+        except Exception:
             raise Exception("PyPDF2 failed to extract text")
 
     # If we get here, no libraries worked
@@ -197,5 +197,5 @@ def extract_text_from_docx(file_content: bytes) -> str:
 
         return "\n\n".join(text_content)
 
-    except Exception as e:
+    except Exception:
         raise Exception("Failed to extract text from Word document")
