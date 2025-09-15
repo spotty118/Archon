@@ -26,17 +26,6 @@ export const APIKeysSection = () => {
 
   const { showToast } = useToast();
 
-  // Load credentials on mount
-  useEffect(() => {
-    loadCredentials();
-  }, [loadCredentials]);
-
-  // Track unsaved changes
-  useEffect(() => {
-    const hasChanges = customCredentials.some(cred => cred.hasChanges || cred.isNew);
-    setHasUnsavedChanges(hasChanges);
-  }, [customCredentials]);
-
   const loadCredentials = useCallback(async () => {
     try {
       setLoading(true);
@@ -76,6 +65,17 @@ export const APIKeysSection = () => {
       setLoading(false);
     }
   }, [showToast]);
+
+  // Load credentials on mount
+  useEffect(() => {
+    loadCredentials();
+  }, [loadCredentials]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = customCredentials.some(cred => cred.hasChanges || cred.isNew);
+    setHasUnsavedChanges(hasChanges);
+  }, [customCredentials]);
 
   const handleAddNewRow = () => {
     const newCred: CustomCredential = {
