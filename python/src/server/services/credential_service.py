@@ -190,8 +190,8 @@ class CredentialService:
         key: str,
         value: str,
         is_encrypted: bool = False,
-        category: str = None,
-        description: str = None,
+        category: str | None = None,
+        description: str | None = None,
     ) -> bool:
         """Set a credential value."""
         try:
@@ -470,7 +470,7 @@ async def get_credential(key: str, default: Any = None) -> Any:
 
 
 async def set_credential(
-    key: str, value: str, is_encrypted: bool = False, category: str = None, description: str = None
+    key: str, value: str, is_encrypted: bool = False, category: str | None = None, description: str | None = None
 ) -> bool:
     """Convenience function to set a credential."""
     return await credential_service.set_credential(key, value, is_encrypted, category, description)
