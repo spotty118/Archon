@@ -105,7 +105,7 @@ export const ComboBox = React.forwardRef<HTMLButtonElement, ComboBoxProps>(
             <span className="truncate">
               {isLoading ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <Loader2 className="h-3 w-3 " />
                   Loading...
                 </span>
               ) : (
@@ -162,7 +162,7 @@ export const ComboBox = React.forwardRef<HTMLButtonElement, ComboBoxProps>(
             <div className="overflow-y-auto max-h-[200px] p-1">
               {isLoading ? (
                 <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                  <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                  <Loader2 className="h-4 w-4  mx-auto mb-2" />
                   Loading options...
                 </div>
               ) : filteredOptions.length === 0 ? (

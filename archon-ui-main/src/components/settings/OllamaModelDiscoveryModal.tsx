@@ -670,7 +670,7 @@ const OllamaModelDiscoveryModal: React.FC<OllamaModelDiscoveryModalProps> = ({
                 className="flex items-center gap-1"
               >
                 {loading ? (
-                  <Loader className="w-4 h-4 animate-spin" />
+                  <Loader className="w-4 h-4 " />
                 ) : (
                   <Activity className="w-4 h-4" />
                 )}
@@ -690,14 +690,14 @@ const OllamaModelDiscoveryModal: React.FC<OllamaModelDiscoveryModalProps> = ({
               </div>
             ) : loading ? (
               <div className="p-6 text-center">
-                <Loader className="w-12 h-12 text-green-500 mx-auto mb-4 animate-spin" />
+                <Loader className="w-12 h-12 text-green-500 mx-auto mb-4 " />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Discovering Models</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-2">
                   {discoveryProgress || `Scanning ${enabledInstanceUrls.length} Ollama instances...`}
                 </p>
                 <div className="mt-4">
                   <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div className="bg-green-500 h-full animate-pulse" style={{width: '100%'}}></div>
+                    <div className="bg-green-500 h-full " style={{width: '100%'}}></div>
                   </div>
                 </div>
               </div>
@@ -833,7 +833,7 @@ const OllamaModelDiscoveryModal: React.FC<OllamaModelDiscoveryModalProps> = ({
                               >
                                 {isTesting ? (
                                   <>
-                                    <Loader className="w-3 h-3 mr-1 animate-spin" />
+                                    <Loader className="w-3 h-3 mr-1 " />
                                     Testing...
                                   </>
                                 ) : (

@@ -107,7 +107,7 @@ export const SettingsPage = (): JSX.Element => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader className="animate-spin text-gray-500" size={32} />
+        <Loader className=" text-gray-500" size={32} />
       </div>
     );
   }

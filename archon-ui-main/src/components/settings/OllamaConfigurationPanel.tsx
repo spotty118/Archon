@@ -479,13 +479,13 @@ const OllamaConfigurationPanel: React.FC<OllamaConfigurationPanelProps> = ({
 
   const getConnectionStatusBadge = (instance: OllamaInstance) => {
     if (testingConnections.has(instance.id)) {
-      return <Badge variant="outline" color="gray" className="animate-pulse">Testing...</Badge>;
+      return <Badge variant="outline" color="gray" className="">Testing...</Badge>;
     }
     
     if (instance.isHealthy === true) {
       return (
         <Badge variant="solid" color="green" className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-green-500 " />
           Online
           {instance.responseTimeMs && (
             <span className="text-xs opacity-75">
@@ -508,7 +508,7 @@ const OllamaConfigurationPanel: React.FC<OllamaConfigurationPanelProps> = ({
     // For instances that haven't been tested yet (isHealthy === undefined)
     // Show a "checking" status until manually tested via "Test" button
     return (
-      <Badge variant="outline" color="blue" className="animate-pulse">
+      <Badge variant="outline" color="blue" className="">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping mr-1" />
         Checking...
       </Badge>
@@ -605,7 +605,7 @@ const OllamaConfigurationPanel: React.FC<OllamaConfigurationPanelProps> = ({
                   />
                   {tempUrls[instance.id] !== undefined && tempUrls[instance.id] !== instance.baseUrl && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" title="Changes will be saved after you stop typing" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-400 " title="Changes will be saved after you stop typing" />
                     </div>
                   )}
                 </div>

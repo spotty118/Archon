@@ -57,7 +57,7 @@ export const OllamaInstanceHealthIndicator: React.FC<HealthIndicatorProps> = ({
   const getHealthStatusBadge = () => {
     if (isRefreshing) {
       return (
-        <Badge variant="outline" className="animate-pulse">
+        <Badge variant="outline" className="">
           <div className="w-2 h-2 rounded-full bg-gray-500 animate-ping mr-1" />
           Checking...
         </Badge>
@@ -70,7 +70,7 @@ export const OllamaInstanceHealthIndicator: React.FC<HealthIndicatorProps> = ({
           variant="solid" 
           className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-100 dark:border-green-700"
         >
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-green-500 " />
           Online
         </Badge>
       );
@@ -92,7 +92,7 @@ export const OllamaInstanceHealthIndicator: React.FC<HealthIndicatorProps> = ({
     return (
       <Badge 
         variant="outline" 
-        className="animate-pulse flex items-center gap-1 bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700"
+        className=" flex items-center gap-1 bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700"
       >
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
         Checking...
@@ -140,7 +140,7 @@ export const OllamaInstanceHealthIndicator: React.FC<HealthIndicatorProps> = ({
           title={`Refresh health status for ${instance.name}`}
         >
           <svg
-            className={cn("w-3 h-3", isRefreshing && "animate-spin")}
+            className={cn("w-3 h-3", isRefreshing && "")}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -186,7 +186,7 @@ export const OllamaInstanceHealthIndicator: React.FC<HealthIndicatorProps> = ({
             title={`Refresh health status for ${instance.name}`}
           >
             <svg
-              className={cn("w-4 h-4", isRefreshing && "animate-spin")}
+              className={cn("w-4 h-4", isRefreshing && "")}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

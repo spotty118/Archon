@@ -293,7 +293,7 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
                   disabled={isReconnecting}
                   className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 bg-blue-100/80 hover:bg-blue-200/80 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 px-2 py-1 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <RefreshCw className={`w-3 h-3 ${isReconnecting ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3 h-3 ${isReconnecting ? '' : ''}`} />
                   {isReconnecting ? 'Connecting...' : 'Reconnect'}
                 </button>
               </div>
@@ -302,7 +302,7 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
             {connectionStatus === 'connecting' && (
               <div className="text-xs text-blue-500 bg-blue-100/80 dark:bg-blue-900/30 px-2 py-1 rounded">
                 <div className="flex items-center">
-                  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                  <RefreshCw className="w-3 h-3 mr-1 " />
                   Connecting...
                 </div>
               </div>
@@ -387,7 +387,7 @@ export const ArchonChatPanel: React.FC<ArchonChatPanelProps> = props => {
                   <span className="text-xs text-gray-500 dark:text-zinc-400">
                     {formatTime(new Date())}
                   </span>
-                  <div className="ml-2 w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
+                  <div className="ml-2 w-1 h-1 bg-blue-500 rounded-full " />
                 </div>
                 <p className="text-gray-800 dark:text-white text-sm whitespace-pre-wrap">
                   {streamingMessage}

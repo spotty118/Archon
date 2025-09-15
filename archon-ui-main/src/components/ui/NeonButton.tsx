@@ -240,7 +240,7 @@ export const NeonButton = React.forwardRef<HTMLButtonElement, NeonButtonProps>((
               }}
             >
               <div 
-                className="absolute -inset-[100px] blur-3xl animate-[pulse_4s_ease-in-out_infinite]"
+                className="absolute -inset-[100px] blur-3xl "
                 style={{
                   background: `radial-gradient(circle, ${layer1Config.aurora} 0%, ${layer1Config.auroraDark} 40%, transparent 70%)`
                 }}
@@ -295,7 +295,7 @@ export const NeonButton = React.forwardRef<HTMLButtonElement, NeonButtonProps>((
                 }}
               >
                 <div 
-                  className="absolute -inset-[50px] blur-2xl animate-[pulse_6s_ease-in-out_infinite]"
+                  className="absolute -inset-[50px] blur-2xl "
                   style={{
                     background: `radial-gradient(circle, ${layer2Config.aurora} 0%, ${layer2Config.auroraDark} 30%, transparent 60%)`
                   }}

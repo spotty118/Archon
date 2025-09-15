@@ -130,7 +130,7 @@ export const KnowledgeView = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white/90">Active Operations ({activeOperations.length})</h3>
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-cyan-400 rounded-full " />
                 Live Updates
               </div>
             </div>

@@ -107,7 +107,7 @@ export const KnowledgeCardActions: React.FC<KnowledgeCardActionsProps> = ({
             disabled={isDeleting}
             title={isRefreshing ? "Recrawling..." : "More actions"}
           >
-            {isRefreshing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <MoreHorizontal className="w-4 h-4" />}
+            {isRefreshing ? <RefreshCw className="w-4 h-4 " /> : <MoreHorizontal className="w-4 h-4" />}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">

@@ -58,7 +58,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mb-10">
         <div className="flex items-center justify-center py-12">
           <div className="text-center" aria-live="polite" aria-busy="true">
-            <Loader2 className="w-8 h-8 text-purple-500 mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-8 h-8 text-purple-500 mx-auto mb-4 " />
             <p className="text-gray-600 dark:text-gray-400">Loading your projects...</p>
           </div>
         </div>

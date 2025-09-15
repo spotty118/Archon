@@ -43,7 +43,7 @@ export const KnowledgeCardProgress: React.FC<KnowledgeCardProgressProps> = ({ op
       case "error":
         return <AlertCircle className="w-3 h-3" />;
       default:
-        return <Loader2 className="w-3 h-3 animate-spin" />;
+        return <Loader2 className="w-3 h-3 " />;
     }
   };
 

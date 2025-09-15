@@ -45,7 +45,7 @@ export const CodeExtractionSettings = ({
           <Button 
             variant="outline" 
             accentColor="orange" 
-            icon={saving ? <Loader className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+            icon={saving ? <Loader className="w-4 h-4 mr-1 " /> : <Save className="w-4 h-4 mr-1" />}
             className="whitespace-nowrap"
             size="md"
             onClick={handleSave}

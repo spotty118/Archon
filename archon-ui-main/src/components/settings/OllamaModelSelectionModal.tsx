@@ -962,7 +962,7 @@ export const OllamaModelSelectionModal: React.FC<OllamaModelSelectionModalProps>
               disabled={refreshing}
               className="text-blue-400 border-blue-400"
             >
-              <RotateCcw className={`w-4 h-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+              <RotateCcw className={`w-4 h-4 mr-1 ${refreshing ? '' : ''}`} />
               Refresh
             </Button>
             <button

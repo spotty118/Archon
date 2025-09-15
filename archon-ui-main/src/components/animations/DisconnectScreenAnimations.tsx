@@ -1,117 +1,44 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 /**
  * Disconnect Screen
- * Frosted glass medallion with aurora borealis light show behind it
+ * Static frosted glass medallion without CPU-intensive animations
  */
 export const DisconnectScreen: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    let time = 0;
-
-    const drawAurora = () => {
-      // Create dark background with vignette
-      const gradient = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 0,
-        canvas.width / 2, canvas.height / 2, canvas.width / 1.5
-      );
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.95)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw aurora waves with varying opacity
-      const colors = [
-        { r: 34, g: 211, b: 238, a: 0.4 },  // Cyan
-        { r: 168, g: 85, b: 247, a: 0.4 },  // Purple
-        { r: 236, g: 72, b: 153, a: 0.4 },  // Pink
-        { r: 59, g: 130, b: 246, a: 0.4 },  // Blue
-        { r: 16, g: 185, b: 129, a: 0.4 },  // Green
-      ];
-
-      colors.forEach((color, index) => {
-        ctx.beginPath();
-        
-        const waveHeight = 250;
-        const waveOffset = index * 60;
-        const speed = 0.001 + index * 0.0002;
-        
-        // Animate opacity for ethereal effect
-        const opacityWave = Math.sin(time * 0.0005 + index) * 0.2 + 0.3;
-        
-        for (let x = 0; x <= canvas.width; x += 5) {
-          const y = canvas.height / 2 + 
-            Math.sin(x * 0.003 + time * speed) * waveHeight +
-            Math.sin(x * 0.005 + time * speed * 1.5) * (waveHeight / 2) +
-            Math.sin(x * 0.002 + time * speed * 0.5) * (waveHeight / 3) +
-            waveOffset - 100;
-          
-          if (x === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-        
-        // Create gradient for each wave with animated opacity
-        const waveGradient = ctx.createLinearGradient(0, canvas.height / 2 - 300, 0, canvas.height / 2 + 300);
-        waveGradient.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-        waveGradient.addColorStop(0.5, `rgba(${color.r}, ${color.g}, ${color.b}, ${opacityWave})`);
-        waveGradient.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-        
-        ctx.strokeStyle = waveGradient;
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        
-        // Add enhanced glow effect
-        ctx.shadowBlur = 40;
-        ctx.shadowColor = `rgba(${color.r}, ${color.g}, ${color.b}, 0.6)`;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      });
-
-      time += 16;
-      requestAnimationFrame(drawAurora);
-    };
-
-    drawAurora();
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
-      <canvas ref={canvasRef} className="absolute inset-0" />
+      {/* Static background with gradient */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.95) 100%)'
+        }}
+      />
       
-      {/* Glass medallion with frosted effect - made bigger */}
+      {/* Static aurora-like background elements */}
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: `
+              linear-gradient(45deg, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+              linear-gradient(-45deg, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+              linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+              linear-gradient(-135deg, rgba(59, 130, 246, 0.1) 0%, transparent 50%)
+            `
+          }}
+        />
+      </div>
+      
+      {/* Glass medallion with frosted effect */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative">
-          {/* Glowing orb effect */}
+          {/* Static glowing orb effect */}
           <div 
             className="absolute inset-0 w-96 h-96 rounded-full"
             style={{
               background: 'radial-gradient(circle, rgba(34, 211, 238, 0.3) 0%, rgba(168, 85, 247, 0.2) 40%, transparent 70%)',
               filter: 'blur(40px)',
-              animation: 'glow 4s ease-in-out infinite',
             }}
           />
           
@@ -132,7 +59,7 @@ export const DisconnectScreen: React.FC = () => {
             }}
           />
           
-          {/* Embossed logo - made bigger */}
+          {/* Embossed logo */}
           <div className="relative w-96 h-96 flex items-center justify-center">
             <img 
               src="/logo-neon.png" 

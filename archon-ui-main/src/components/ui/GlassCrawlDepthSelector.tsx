@@ -87,7 +87,7 @@ export const GlassCrawlDepthSelector: React.FC<GlassCrawlDepthSelectorProps> = (
                   isSelected
                     ? "bg-blue-500/30 blur-lg"
                     : "bg-red-500/20 blur-md",
-                  isCurrentValue && "animate-pulse-glow"
+                  isCurrentValue && "-glow"
                 )} />
               </div>
               
