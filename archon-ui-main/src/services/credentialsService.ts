@@ -329,17 +329,19 @@ class CredentialsService {
     codeExtractionCredentials.forEach((cred) => {
       if (cred.key in settings) {
         const key = cred.key as keyof CodeExtractionSettings;
-        if (typeof settings[key] === "number") {
+        const currentValue = settings[key];
+        
+        if (typeof currentValue === "number") {
           if (key === "MAX_PROSE_RATIO") {
-            settings[key] = parseFloat(cred.value || "0.15");
+            (settings as any)[key] = parseFloat(cred.value || "0.15");
           } else {
-            settings[key] = parseInt(
-              cred.value || settings[key].toString(),
+            (settings as any)[key] = parseInt(
+              cred.value || currentValue.toString(),
               10,
             );
           }
-        } else if (typeof settings[key] === "boolean") {
-          settings[key] = cred.value === "true";
+        } else if (typeof currentValue === "boolean") {
+          (settings as any)[key] = cred.value === "true";
         }
       }
     });

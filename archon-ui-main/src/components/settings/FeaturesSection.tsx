@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Moon, Sun, FileText, Flame, Monitor } from 'lucide-react';
 import { Toggle } from '../ui/Toggle';
 import { useTheme } from '../../contexts/ThemeContext';

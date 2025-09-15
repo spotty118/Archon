@@ -22,8 +22,6 @@ from ..config.logfire_config import get_logger, logfire
 from ..utils import get_supabase_client
 from ..utils.etag_utils import check_etag, generate_etag
 
-logger = get_logger(__name__)
-
 # Service imports
 from ..services.projects import (
     ProjectCreationService,
@@ -33,6 +31,8 @@ from ..services.projects import (
 )
 from ..services.projects.document_service import DocumentService
 from ..services.projects.versioning_service import VersioningService
+
+logger = get_logger(__name__)
 
 # Using HTTP polling for real-time updates
 
