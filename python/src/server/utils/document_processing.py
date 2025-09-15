@@ -31,7 +31,7 @@ try:
 except ImportError:
     DOCX_AVAILABLE = False
 
-from ..config.logfire_config import get_logger, logfire
+from ..config.logfire_config import get_logger, safe_logfire_error, safe_logfire_warning
 
 logger = get_logger(__name__)
 
@@ -84,7 +84,7 @@ def extract_text_from_document(file_content: bytes, filename: str, content_type:
         # Re-raise ValueError with original message for unsupported formats
         raise
     except Exception as e:
-        logfire.error(
+        safe_logfire_error(
             "Document text extraction failed",
             filename=filename,
             content_type=content_type,
@@ -121,7 +121,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
                         if page_text:
                             text_content.append(f"--- Page {page_num + 1} ---\n{page_text}")
                     except Exception as e:
-                        logfire.warning(f"pdfplumber failed on page {page_num + 1}: {e}")
+                        safe_logfire_warning(f"pdfplumber failed on page {page_num + 1}: {e}")
                         continue
 
             # If pdfplumber got good results, use them
@@ -129,7 +129,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
                 return "\n\n".join(text_content)
 
         except Exception as e:
-            logfire.warning(f"pdfplumber extraction failed: {e}, trying PyPDF2")
+            safe_logfire_warning(f"pdfplumber extraction failed: {e}, trying PyPDF2")
 
     # Fallback to PyPDF2
     if PYPDF2_AVAILABLE:
@@ -143,7 +143,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
                     if page_text:
                         text_content.append(f"--- Page {page_num + 1} ---\n{page_text}")
                 except Exception as e:
-                    logfire.warning(f"PyPDF2 failed on page {page_num + 1}: {e}")
+                    safe_logfire_warning(f"PyPDF2 failed on page {page_num + 1}: {e}")
                     continue
 
             if text_content:

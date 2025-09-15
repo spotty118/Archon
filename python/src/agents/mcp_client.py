@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class MCPClient:
     """Client for calling MCP tools via HTTP."""
 
-    def __init__(self, mcp_url: str = None):
+    def __init__(self, mcp_url: str | None = None):
         """
         Initialize MCP client.
 
@@ -91,7 +91,7 @@ class MCPClient:
 
         except httpx.HTTPError as e:
             logger.error(f"HTTP error calling MCP tool {tool_name}: {e}")
-            raise Exception(f"Failed to call MCP tool: {str(e)}")
+            raise Exception(f"Failed to call MCP tool: {str(e)}") from e
         except Exception as e:
             logger.error(f"Error calling MCP tool {tool_name}: {e}")
             raise

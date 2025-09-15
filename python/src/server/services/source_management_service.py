@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 
 async def extract_source_summary(
-    source_id: str, content: str, max_length: int = 500, provider: str = None
+    source_id: str, content: str, max_length: int = 500, provider: str | None = None
 ) -> str:
     """
     Extract a summary for a source from its content using an LLM.
@@ -101,7 +101,7 @@ async def generate_source_title_and_metadata(
     content: str,
     knowledge_type: str = "technical",
     tags: list[str] | None = None,
-    provider: str = None,
+    provider: str | None = None,
     original_url: str | None = None,
     source_display_name: str | None = None,
     source_type: str | None = None,
@@ -168,7 +168,7 @@ Requirements:
 - Use proper capitalization
 
 Examples:
-- "Anthropic Documentation" 
+- "Anthropic Documentation"
 - "OpenAI API Reference"
 - "Mem0 llms.txt"
 - "Supabase Docs"
@@ -284,7 +284,7 @@ async def update_source_info(
             if source_display_name:
                 update_data["source_display_name"] = source_display_name
 
-            result = (
+            (
                 client.table("archon_sources")
                 .update(update_data)
                 .eq("source_id", source_id)
@@ -468,11 +468,11 @@ class SourceManagementService:
     def update_source_metadata(
         self,
         source_id: str,
-        title: str = None,
-        summary: str = None,
-        word_count: int = None,
-        knowledge_type: str = None,
-        tags: list[str] = None,
+        title: str | None = None,
+        summary: str | None = None,
+        word_count: int | None = None,
+        knowledge_type: str | None = None,
+        tags: list[str] | None = None,
     ) -> tuple[bool, dict[str, Any]]:
         """
         Update source metadata.
@@ -542,7 +542,7 @@ class SourceManagementService:
         content_sample: str,
         word_count: int = 0,
         knowledge_type: str = "technical",
-        tags: list[str] = None,
+        tags: list[str] | None = None,
         update_frequency: int = 7,
     ) -> tuple[bool, dict[str, Any]]:
         """
@@ -642,7 +642,7 @@ class SourceManagementService:
             logger.error(f"Error getting source details: {e}")
             return False, {"error": f"Error getting source details: {str(e)}"}
 
-    def list_sources_by_type(self, knowledge_type: str = None) -> tuple[bool, dict[str, Any]]:
+    def list_sources_by_type(self, knowledge_type: str | None = None) -> tuple[bool, dict[str, Any]]:
         """
         List sources filtered by knowledge type.
 
