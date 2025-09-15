@@ -169,11 +169,10 @@ class RAGService:
             match_count=match_count,
             filter_metadata=filter_metadata,
             source_id=source_id,
-            use_enhancement=True,
         )
 
     async def perform_rag_query(
-        self, query: str, source: str = None, match_count: int = 5
+        self, query: str, source: str | None = None, match_count: int = 5
     ) -> tuple[bool, dict[str, Any]]:
         """
         Perform a comprehensive RAG query that combines all enabled strategies.
@@ -191,9 +190,7 @@ class RAGService:
         Returns:
             Tuple of (success, result_dict)
         """
-        with safe_span(
-            "rag_query_pipeline", query_length=len(query), source=source, match_count=match_count
-        ) as span:
+        with safe_span("rag_query_pipeline", query_length=len(query), source=source, match_count=match_count) as span:
             try:
                 logger.info(f"RAG query started: {query[:100]}{'...' if len(query) > 100 else ''}")
 
@@ -211,7 +208,9 @@ class RAGService:
                     # Fetch 5x the requested amount when reranking is enabled
                     # The reranker will select the best from this larger pool
                     search_match_count = match_count * 5
-                    logger.debug(f"Reranking enabled - fetching {search_match_count} candidates for {match_count} final results")
+                    logger.debug(
+                        f"Reranking enabled - fetching {search_match_count} candidates for {match_count} final results"
+                    )
 
                 # Step 1 & 2: Get results (with hybrid search if enabled)
                 results = await self.search_documents(
@@ -248,7 +247,9 @@ class RAGService:
                             query, formatted_results, content_key="content", top_k=match_count
                         )
                         reranking_applied = True
-                        logger.debug(f"Reranking applied: {search_match_count} candidates -> {len(formatted_results)} final results")
+                        logger.debug(
+                            f"Reranking applied: {search_match_count} candidates -> {len(formatted_results)} final results"
+                        )
                     except Exception as e:
                         logger.warning(f"Reranking failed: {e}")
                         reranking_applied = False
@@ -358,7 +359,9 @@ class RAGService:
                         results = await self.reranking_strategy.rerank_results(
                             query, results, content_key="content", top_k=match_count
                         )
-                        logger.debug(f"Code reranking applied: {search_match_count} candidates -> {len(results)} final results")
+                        logger.debug(
+                            f"Code reranking applied: {search_match_count} candidates -> {len(results)} final results"
+                        )
                     except Exception as e:
                         logger.warning(f"Code reranking failed: {e}")
                         # If reranking fails but we fetched extra results, trim to requested count

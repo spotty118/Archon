@@ -15,22 +15,20 @@ class ProgressMapper:
         # Common stages
         "starting": (0, 1),
         "initializing": (0, 1),
-        "error": (-1, -1),            # Special case for errors
-        "cancelled": (-1, -1),        # Special case for cancellation
+        "error": (-1, -1),  # Special case for errors
+        "cancelled": (-1, -1),  # Special case for cancellation
         "completed": (100, 100),
-
         # Crawl-specific stages - rebalanced based on actual time taken
-        "analyzing": (1, 3),          # URL analysis is quick
-        "crawling": (3, 15),          # Crawling can take time for deep/many URLs
-        "processing": (15, 20),       # Content processing/chunking
+        "analyzing": (1, 3),  # URL analysis is quick
+        "crawling": (3, 15),  # Crawling can take time for deep/many URLs
+        "processing": (15, 20),  # Content processing/chunking
         "source_creation": (20, 25),  # DB operations
-        "document_storage": (25, 40), # Embeddings generation takes significant time
+        "document_storage": (25, 40),  # Embeddings generation takes significant time
         "code_extraction": (40, 90),  # Code extraction + summaries - still longest but more balanced
-        "finalization": (90, 100),    # Final steps and cleanup
-
+        "finalization": (90, 100),  # Final steps and cleanup
         # Upload-specific stages
         "reading": (0, 5),
-        "text_extraction": (5, 10),   # Clear name for text extraction from files
+        "text_extraction": (5, 10),  # Clear name for text extraction from files
         "chunking": (10, 15),
         # Note: source_creation is defined above at (20, 25) for all operations
         "summarizing": (25, 35),
@@ -77,6 +75,7 @@ class ProgressMapper:
         # Debug logging for document_storage
         if stage == "document_storage" and stage_progress >= 90:
             import logging
+
             logger = logging.getLogger(__name__)
             logger.info(
                 f"DEBUG: ProgressMapper.map_progress | stage={stage} | stage_progress={stage_progress}% | "

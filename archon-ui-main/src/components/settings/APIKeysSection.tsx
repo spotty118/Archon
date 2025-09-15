@@ -18,7 +18,7 @@ interface CustomCredential {
   isFromBackend?: boolean; // Track if credential came from backend (write-only once encrypted)
 }
 
-export const APIKeysSection = (): void => {
+export const APIKeysSection = (): JSX.Element => {
   const [customCredentials, setCustomCredentials] = useState<CustomCredential[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

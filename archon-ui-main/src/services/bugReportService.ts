@@ -95,7 +95,7 @@ class BugReportService {
    */
   private getMemoryInfo(): string {
     try {
-      const memory = (performance as any).memory;
+      const memory = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
       if (memory) {
         return `${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB used`;
       }

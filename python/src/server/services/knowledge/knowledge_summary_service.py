@@ -63,23 +63,17 @@ class KnowledgeSummaryService:
 
             if search:
                 search_pattern = f"%{search}%"
-                query = query.or_(
-                    f"title.ilike.{search_pattern},summary.ilike.{search_pattern}"
-                )
+                query = query.or_(f"title.ilike.{search_pattern},summary.ilike.{search_pattern}")
 
             # Get total count
-            count_query = self.supabase.from_("archon_sources").select(
-                "*", count="exact", head=True
-            )
+            count_query = self.supabase.from_("archon_sources").select("*", count="exact", head=True)
 
             if knowledge_type:
                 count_query = count_query.contains("metadata", {"knowledge_type": knowledge_type})
 
             if search:
                 search_pattern = f"%{search}%"
-                count_query = count_query.or_(
-                    f"title.ilike.{search_pattern},summary.ilike.{search_pattern}"
-                )
+                count_query = count_query.or_(f"title.ilike.{search_pattern},summary.ilike.{search_pattern}")
 
             count_result = count_query.execute()
             total = count_result.count if hasattr(count_result, "count") else 0
@@ -130,7 +124,9 @@ class KnowledgeSummaryService:
                     if not knowledge_type:
                         # Fallback: If not in metadata, default to "technical" for now
                         # This handles legacy data that might not have knowledge_type set
-                        safe_logfire_info(f"Knowledge type not found in metadata for {source_id}, defaulting to technical")
+                        safe_logfire_info(
+                            f"Knowledge type not found in metadata for {source_id}, defaulting to technical"
+                        )
                         knowledge_type = "technical"
 
                     summary = {
@@ -149,9 +145,7 @@ class KnowledgeSummaryService:
                     }
                     summaries.append(summary)
 
-            safe_logfire_info(
-                f"Knowledge summaries fetched | count={len(summaries)} | total={total}"
-            )
+            safe_logfire_info(f"Knowledge summaries fetched | count={len(summaries)} | total={total}")
 
             return {
                 "items": summaries,

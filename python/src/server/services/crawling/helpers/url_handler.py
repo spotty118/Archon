@@ -51,7 +51,7 @@ class URLHandler:
             parsed = urlparse(url)
             # Normalize to lowercase and ignore query/fragment
             path = parsed.path.lower()
-            return path.endswith(('.md', '.mdx', '.markdown'))
+            return path.endswith((".md", ".mdx", ".markdown"))
         except Exception as e:
             logger.warning(f"Error checking if URL is markdown file: {e}", exc_info=True)
             return False
@@ -70,7 +70,7 @@ class URLHandler:
         try:
             parsed = urlparse(url)
             # Normalize to lowercase and ignore query/fragment
-            return parsed.path.lower().endswith('.txt')
+            return parsed.path.lower().endswith(".txt")
         except Exception as e:
             logger.warning(f"Error checking if URL is text file: {e}", exc_info=True)
             return False
@@ -201,9 +201,7 @@ class URLHandler:
         if match:
             # For directories, we can't directly get raw content
             # Return original URL but log a warning
-            logger.warning(
-                f"GitHub directory URL detected: {url} - consider using specific file URLs or GitHub API"
-            )
+            logger.warning(f"GitHub directory URL detected: {url} - consider using specific file URLs or GitHub API")
 
         return url
 
@@ -249,12 +247,18 @@ class URLHandler:
 
             # Remove common tracking parameters and sort remaining
             tracking_params = {
-                "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
-                "gclid", "fbclid", "ref", "source"
+                "utm_source",
+                "utm_medium",
+                "utm_campaign",
+                "utm_term",
+                "utm_content",
+                "gclid",
+                "fbclid",
+                "ref",
+                "source",
             }
             query_items = [
-                (k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True)
-                if k not in tracking_params
+                (k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True) if k not in tracking_params
             ]
             query = urlencode(sorted(query_items))
 
@@ -300,47 +304,48 @@ class URLHandler:
             #  4) //example.com - protocol-relative URLs
             #  5) www.example.com - scheme-less www URLs
             combined_pattern = re.compile(
-                r'\[(?P<text>[^\]]*)\]\((?P<md>[^)]+)\)'      # named: md
-                r'|<\s*(?P<auto>https?://[^>\s]+)\s*>'        # named: auto
-                r'|(?P<bare>https?://[^\s<>()\[\]"]+)'        # named: bare
-                r'|(?P<proto>//[^\s<>()\[\]"]+)'              # named: protocol-relative
-                r'|(?P<www>www\.[^\s<>()\[\]"]+)'             # named: www.* without scheme
+                r"\[(?P<text>[^\]]*)\]\((?P<md>[^)]+)\)"  # named: md
+                r"|<\s*(?P<auto>https?://[^>\s]+)\s*>"  # named: auto
+                r'|(?P<bare>https?://[^\s<>()\[\]"]+)'  # named: bare
+                r'|(?P<proto>//[^\s<>()\[\]"]+)'  # named: protocol-relative
+                r'|(?P<www>www\.[^\s<>()\[\]"]+)'  # named: www.* without scheme
             )
 
             def _clean_url(u: str) -> str:
                 # Trim whitespace and comprehensive trailing punctuation
                 # Also remove invisible Unicode characters that can break URLs
                 import unicodedata
-                cleaned = u.strip().rstrip('.,;:)]>')
+
+                cleaned = u.strip().rstrip(".,;:)]>")
                 # Remove invisible/control characters but keep valid URL characters
-                cleaned = ''.join(c for c in cleaned if unicodedata.category(c) not in ('Cf', 'Cc'))
+                cleaned = "".join(c for c in cleaned if unicodedata.category(c) not in ("Cf", "Cc"))
                 return cleaned
 
             urls = []
             for match in re.finditer(combined_pattern, content):
                 url = (
-                    match.group('md')
-                    or match.group('auto')
-                    or match.group('bare')
-                    or match.group('proto')
-                    or match.group('www')
+                    match.group("md")
+                    or match.group("auto")
+                    or match.group("bare")
+                    or match.group("proto")
+                    or match.group("www")
                 )
                 if not url:
                     continue
                 url = _clean_url(url)
 
                 # Skip empty URLs, anchors, and mailto links
-                if not url or url.startswith('#') or url.startswith('mailto:'):
+                if not url or url.startswith("#") or url.startswith("mailto:"):
                     continue
 
                 # Normalize all URL formats to https://
-                if url.startswith('//'):
-                    url = f'https:{url}'
-                elif url.startswith('www.'):
-                    url = f'https://{url}'
+                if url.startswith("//"):
+                    url = f"https:{url}"
+                elif url.startswith("www."):
+                    url = f"https://{url}"
 
                 # Convert relative URLs to absolute if base_url provided
-                if base_url and not url.startswith(('http://', 'https://')):
+                if base_url and not url.startswith(("http://", "https://")):
                     try:
                         url = urljoin(base_url, url)
                     except Exception as e:
@@ -348,7 +353,7 @@ class URLHandler:
                         continue
 
                 # Only include HTTP/HTTPS URLs
-                if url.startswith(('http://', 'https://')):
+                if url.startswith(("http://", "https://")):
                     urls.append(url)
 
             # Remove duplicates while preserving order
@@ -381,17 +386,29 @@ class URLHandler:
         try:
             # Extract filename from URL
             parsed = urlparse(url)
-            filename = parsed.path.split('/')[-1].lower()
+            filename = parsed.path.split("/")[-1].lower()
 
             # Check for specific link collection filenames
             # Note: "full-*" or "*-full" patterns are NOT link collections - they contain complete content, not just links
             link_collection_patterns = [
                 # .txt variants - files that typically contain lists of links
-                'llms.txt', 'links.txt', 'resources.txt', 'references.txt',
+                "llms.txt",
+                "links.txt",
+                "resources.txt",
+                "references.txt",
                 # .md/.mdx/.markdown variants
-                'llms.md', 'links.md', 'resources.md', 'references.md',
-                'llms.mdx', 'links.mdx', 'resources.mdx', 'references.mdx',
-                'llms.markdown', 'links.markdown', 'resources.markdown', 'references.markdown',
+                "llms.md",
+                "links.md",
+                "resources.md",
+                "references.md",
+                "llms.mdx",
+                "links.mdx",
+                "resources.mdx",
+                "references.mdx",
+                "llms.markdown",
+                "links.markdown",
+                "resources.markdown",
+                "references.markdown",
             ]
 
             # Direct filename match
@@ -401,19 +418,22 @@ class URLHandler:
 
             # Pattern-based detection for variations, but exclude "full" variants
             # Only match files that are likely link collections, not complete content files
-            if filename.endswith(('.txt', '.md', '.mdx', '.markdown')):
+            if filename.endswith((".txt", ".md", ".mdx", ".markdown")):
                 # Exclude files with "full" in the name - these typically contain complete content, not just links
-                if 'full' not in filename:
+                if "full" not in filename:
                     # Match files that start with common link collection prefixes
-                    base_patterns = ['llms', 'links', 'resources', 'references']
-                    if any(filename.startswith(pattern + '.') or filename.startswith(pattern + '-') for pattern in base_patterns):
+                    base_patterns = ["llms", "links", "resources", "references"]
+                    if any(
+                        filename.startswith(pattern + ".") or filename.startswith(pattern + "-")
+                        for pattern in base_patterns
+                    ):
                         logger.info(f"Detected potential link collection file: {filename}")
                         return True
 
             # Content-based detection if content is provided
             if content:
                 # Never treat "full" variants as link collections to preserve single-page behavior
-                if 'full' in filename:
+                if "full" in filename:
                     logger.info(f"Skipping content-based link-collection detection for full-content file: {filename}")
                     return False
                 # Reuse extractor to avoid regex divergence and maintain consistency
@@ -427,7 +447,9 @@ class URLHandler:
 
                     # If more than 2% of content is links, likely a link collection
                     if link_density > 2.0 and total_links > 3:
-                        logger.info(f"Detected link collection by content analysis: {total_links} links, density {link_density:.2f}%")
+                        logger.info(
+                            f"Detected link collection by content analysis: {total_links} links, density {link_density:.2f}%"
+                        )
                         return True
 
             return False
@@ -435,7 +457,6 @@ class URLHandler:
         except Exception as e:
             logger.warning(f"Error checking if file is link collection: {e}", exc_info=True)
             return False
-
 
     @staticmethod
     def extract_display_name(url: str) -> str:
@@ -547,7 +568,7 @@ class URLHandler:
                     display = domain
                     for tld in [".com", ".org", ".io", ".dev", ".net", ".ai", ".app"]:
                         if display.endswith(tld):
-                            display = display[:-len(tld)]
+                            display = display[: -len(tld)]
                             break
                     display_parts = display.replace("-", " ").replace("_", " ").split(".")
                     formatted = " ".join(part.title() for part in display_parts)
@@ -557,7 +578,7 @@ class URLHandler:
                     display = domain
                     for tld in [".com", ".org", ".io", ".dev", ".net", ".ai", ".app"]:
                         if display.endswith(tld):
-                            display = display[:-len(tld)]
+                            display = display[: -len(tld)]
                             break
                     display_parts = display.replace("-", " ").replace("_", " ").split(".")
                     formatted = " ".join(part.title() for part in display_parts)

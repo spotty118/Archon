@@ -61,9 +61,7 @@ def register_rag_tools(mcp: FastMCP):
                     result = response.json()
                     sources = result.get("sources", [])
 
-                    return json.dumps(
-                        {"success": True, "sources": sources, "count": len(sources)}, indent=2
-                    )
+                    return json.dumps({"success": True, "sources": sources, "count": len(sources)}, indent=2)
                 else:
                     error_detail = response.text
                     return json.dumps(
@@ -162,9 +160,7 @@ def register_rag_tools(mcp: FastMCP):
                     request_data["source"] = source_domain
 
                 # Call the dedicated code examples endpoint
-                response = await client.post(
-                    urljoin(api_url, "/api/rag/code-examples"), json=request_data
-                )
+                response = await client.post(urljoin(api_url, "/api/rag/code-examples"), json=request_data)
 
                 if response.status_code == 200:
                     result = response.json()

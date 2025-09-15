@@ -10,6 +10,12 @@ export interface Credential {
   updated_at?: string;
 }
 
+interface CredentialApiValue {
+  is_encrypted: boolean;
+  description?: string;
+  [key: string]: unknown;
+}
+
 export interface RagSettings {
   USE_CONTEXTUAL_EMBEDDINGS: boolean;
   CONTEXTUAL_EMBEDDINGS_MAX_WORKERS: number;
@@ -20,6 +26,7 @@ export interface RagSettings {
   LLM_PROVIDER?: string;
   LLM_BASE_URL?: string;
   EMBEDDING_MODEL?: string;
+  [key: string]: string | number | boolean | undefined;
   // Crawling Performance Settings
   CRAWL_BATCH_SIZE?: number;
   CRAWL_MAX_CONCURRENT?: number;
@@ -51,6 +58,7 @@ export interface CodeExtractionSettings {
   CODE_EXTRACTION_MAX_WORKERS: number;
   CONTEXT_WINDOW_SIZE: number;
   ENABLE_CODE_SUMMARIES: boolean;
+  [key: string]: string | number | boolean | undefined;
 }
 
 import { getApiUrl } from "../config/api";
@@ -98,20 +106,21 @@ class CredentialsService {
     // Convert to array format expected by frontend
     if (result.credentials && typeof result.credentials === "object") {
       return Object.entries(result.credentials).map(
-        ([key, value]: [string, any]) => {
-          if (value && typeof value === "object" && value.is_encrypted) {
+        ([key, value]: [string, unknown]) => {
+          const apiValue = value as CredentialApiValue;
+          if (value && typeof value === "object" && apiValue.is_encrypted) {
             return {
               key,
               value: "[ENCRYPTED]",
               encrypted_value: undefined,
               is_encrypted: true,
               category,
-              description: value.description,
+              description: apiValue.description || "",
             };
           } else {
             return {
               key,
-              value: value,
+              value: String(value || ""),
               encrypted_value: undefined,
               is_encrypted: false,
               category,
@@ -184,7 +193,7 @@ class CredentialsService {
             "CRAWL_WAIT_STRATEGY",
           ].includes(cred.key)
         ) {
-          (settings as any)[cred.key] = cred.value || "";
+          settings[cred.key] = cred.value || "";
         }
         // Number fields
         else if (
@@ -202,8 +211,8 @@ class CredentialsService {
             "CODE_SUMMARY_MAX_WORKERS",
           ].includes(cred.key)
         ) {
-          (settings as any)[cred.key] =
-            parseInt(cred.value || "0", 10) || (settings as any)[cred.key];
+          settings[cred.key] =
+            parseInt(cred.value || "0", 10) || settings[cred.key];
         }
         // Float fields
         else if (cred.key === "CRAWL_DELAY_BEFORE_HTML") {
@@ -211,7 +220,7 @@ class CredentialsService {
         }
         // Boolean fields
         else {
-          (settings as any)[cred.key] = cred.value === "true";
+          settings[cred.key] = cred.value === "true";
         }
       }
     });
@@ -333,15 +342,15 @@ class CredentialsService {
         
         if (typeof currentValue === "number") {
           if (key === "MAX_PROSE_RATIO") {
-            (settings as any)[key] = parseFloat(cred.value || "0.15");
+            settings[key] = parseFloat(cred.value || "0.15");
           } else {
-            (settings as any)[key] = parseInt(
+            settings[key] = parseInt(
               cred.value || currentValue.toString(),
               10,
             );
           }
         } else if (typeof currentValue === "boolean") {
-          (settings as any)[key] = cred.value === "true";
+          settings[key] = cred.value === "true";
         }
       }
     });
@@ -356,6 +365,9 @@ class CredentialsService {
 
     // Update all code extraction settings
     for (const [key, value] of Object.entries(settings)) {
+      // Skip undefined values
+      if (value === undefined) continue;
+      
       promises.push(
         this.updateCredential({
           key,

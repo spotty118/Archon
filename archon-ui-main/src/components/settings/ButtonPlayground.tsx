@@ -57,8 +57,8 @@ export const ButtonPlayground: React.FC = () => {
     layer: 'layer1' | 'layer2',
     corner: keyof CornerRadius,
     value: number,
-    linked: unknown,
-    setRadius: unknown
+    linked: Record<keyof CornerRadius, boolean>,
+    setRadius: React.Dispatch<React.SetStateAction<CornerRadius>>
   ) => {
     if (layer === 'layer1') {
       if (linked[corner]) {
@@ -101,7 +101,7 @@ export const ButtonPlayground: React.FC = () => {
     }
   };
 
-  const generateCSS = (): void => {
+  const generateCSS = (): string => {
     const layer1BorderRadius = `${layer1Radius.topLeft}px ${layer1Radius.topRight}px ${layer1Radius.bottomRight}px ${layer1Radius.bottomLeft}px`;
     const layer2BorderRadius = `${layer2Radius.topLeft}px ${layer2Radius.topRight}px ${layer2Radius.bottomRight}px ${layer2Radius.bottomLeft}px`;
     

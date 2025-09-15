@@ -4,8 +4,8 @@ import { KnowledgeViewWithBoundary } from '../features/knowledge';
 // All implementation is in features/knowledge/components/KnowledgeView.tsx
 // Uses KnowledgeViewWithBoundary for proper error handling
 
-function KnowledgeBasePage(props: unknown): React.JSX.Element {
-  return <KnowledgeViewWithBoundary {...props} />;
+function KnowledgeBasePage(): React.JSX.Element {
+  return <KnowledgeViewWithBoundary />;
 }
 
 export { KnowledgeBasePage };

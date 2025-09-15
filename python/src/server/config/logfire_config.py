@@ -26,6 +26,7 @@ logfire = None
 
 try:
     import logfire as _logfire
+
     logfire = _logfire
     LOGFIRE_AVAILABLE = True
 except ImportError:
@@ -134,9 +135,7 @@ def setup_logfire(
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
     _logfire_configured = True
-    logging.info(
-        f"📋 Logging configured (Logfire: {'enabled' if _logfire_enabled else 'disabled'})"
-    )
+    logging.info(f"📋 Logging configured (Logfire: {'enabled' if _logfire_enabled else 'disabled'})")
 
 
 def get_logger(name: str) -> logging.Logger:

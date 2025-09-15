@@ -28,9 +28,9 @@ class VersioningService:
         project_id: str,
         field_name: str,
         content: dict[str, Any],
-        change_summary: str = None,
+        change_summary: str | None = None,
         change_type: str = "update",
-        document_id: str = None,
+        document_id: str | None = None,
         created_by: str = "system",
     ) -> tuple[bool, dict[str, Any]]:
         """
@@ -68,11 +68,7 @@ class VersioningService:
                 "created_at": datetime.now().isoformat(),
             }
 
-            result = (
-                self.supabase_client.table("archon_document_versions")
-                .insert(version_data)
-                .execute()
-            )
+            result = self.supabase_client.table("archon_document_versions").insert(version_data).execute()
 
             if result.data:
                 return True, {
@@ -88,7 +84,7 @@ class VersioningService:
             logger.error(f"Error creating version: {e}")
             return False, {"error": f"Error creating version: {str(e)}"}
 
-    def list_versions(self, project_id: str, field_name: str = None) -> tuple[bool, dict[str, Any]]:
+    def list_versions(self, project_id: str, field_name: str | None = None) -> tuple[bool, dict[str, Any]]:
         """
         Get version history for project JSONB fields.
 
@@ -97,11 +93,7 @@ class VersioningService:
         """
         try:
             # Build query
-            query = (
-                self.supabase_client.table("archon_document_versions")
-                .select("*")
-                .eq("project_id", project_id)
-            )
+            query = self.supabase_client.table("archon_document_versions").select("*").eq("project_id", project_id)
 
             if field_name:
                 query = query.eq("field_name", field_name)
@@ -123,9 +115,7 @@ class VersioningService:
             logger.error(f"Error getting version history: {e}")
             return False, {"error": f"Error getting version history: {str(e)}"}
 
-    def get_version_content(
-        self, project_id: str, field_name: str, version_number: int
-    ) -> tuple[bool, dict[str, Any]]:
+    def get_version_content(self, project_id: str, field_name: str, version_number: int) -> tuple[bool, dict[str, Any]]:
         """
         Get the content of a specific version.
 
@@ -179,19 +169,14 @@ class VersioningService:
             )
 
             if not version_result.data:
-                return False, {
-                    "error": f"Version {version_number} not found for {field_name} in project {project_id}"
-                }
+                return False, {"error": f"Version {version_number} not found for {field_name} in project {project_id}"}
 
             version_to_restore = version_result.data[0]
             content_to_restore = version_to_restore["content"]
 
             # Get current content to create backup
             current_project = (
-                self.supabase_client.table("archon_projects")
-                .select(field_name)
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").select(field_name).eq("id", project_id).execute()
             )
             if current_project.data:
                 current_content = current_project.data[0].get(field_name, {})
@@ -213,10 +198,7 @@ class VersioningService:
             update_data = {field_name: content_to_restore, "updated_at": datetime.now().isoformat()}
 
             restore_result = (
-                self.supabase_client.table("archon_projects")
-                .update(update_data)
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").update(update_data).eq("id", project_id).execute()
             )
 
             if restore_result.data:

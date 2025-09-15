@@ -6,7 +6,7 @@ from email.utils import formatdate
 from fastapi import APIRouter, Header, HTTPException, Response
 from fastapi import status as http_status
 
-from ..config.logfire_config import get_logger, logfire
+from ..config.logfire_config import get_logger, safe_logfire_error, safe_logfire_info, safe_logfire_warning
 from ..models.progress_models import create_progress_response
 from ..utils.etag_utils import check_etag, generate_etag
 from ..utils.progress import ProgressTracker
@@ -20,11 +20,7 @@ TERMINAL_STATES = {"completed", "failed", "error", "cancelled"}
 
 
 @router.get("/{operation_id}")
-async def get_progress(
-    operation_id: str,
-    response: Response,
-    if_none_match: str | None = Header(None)
-):
+async def get_progress(operation_id: str, response: Response, if_none_match: str | None = Header(None)):
     """
     Get progress for an operation with ETag support.
 
@@ -32,18 +28,14 @@ async def get_progress(
     Clients should poll this endpoint to track long-running operations.
     """
     try:
-        logfire.info(f"Getting progress for operation | operation_id={operation_id}")
+        safe_logfire_info(f"Getting progress for operation | operation_id={operation_id}")
 
         # Get operation progress from ProgressTracker
         operation = ProgressTracker.get_progress(operation_id)
 
         if not operation:
-            logfire.warning(f"Operation not found | operation_id={operation_id}")
-            raise HTTPException(
-                status_code=404,
-                detail={"error": f"Operation {operation_id} not found"}
-            ) from None
-
+            safe_logfire_warning(f"Operation not found | operation_id={operation_id}")
+            raise HTTPException(status_code=404, detail={"error": f"Operation {operation_id} not found"}) from None
 
         # Ensure we have the progress_id in the response without mutating shared state
         operation_with_id = {**operation, "progress_id": operation_id}
@@ -54,13 +46,14 @@ async def get_progress(
         # Create standardized response using Pydantic model
         progress_response = create_progress_response(operation_type, operation_with_id)
 
-
         # Convert to dict with camelCase fields for API response
         response_data = progress_response.model_dump(by_alias=True, exclude_none=True)
 
         # Debug logging for code extraction fields
         if operation_type == "crawl" and operation.get("status") == "code_extraction":
-            logger.info(f"Code extraction response fields: completedSummaries={response_data.get('completedSummaries')}, totalSummaries={response_data.get('totalSummaries')}, codeBlocksFound={response_data.get('codeBlocksFound')}")
+            logger.info(
+                f"Code extraction response fields: completedSummaries={response_data.get('completedSummaries')}, totalSummaries={response_data.get('totalSummaries')}, codeBlocksFound={response_data.get('codeBlocksFound')}"
+            )
 
         # Generate ETag from stable data (excluding timestamp)
         etag_data = {k: v for k, v in response_data.items() if k != "timestamp"}
@@ -86,14 +79,16 @@ async def get_progress(
             # No need to poll terminal operations
             response.headers["X-Poll-Interval"] = "0"
 
-        logfire.info(f"Progress retrieved | operation_id={operation_id} | status={response_data.get('status')} | progress={response_data.get('progress')}")
+        safe_logfire_info(
+            f"Progress retrieved | operation_id={operation_id} | status={response_data.get('status')} | progress={response_data.get('progress')}"
+        )
 
         return response_data
 
     except HTTPException:
         raise
     except Exception as e:
-        logfire.error(f"Failed to get progress | error={e!s} | operation_id={operation_id}", exc_info=True)
+        safe_logfire_error(f"Failed to get progress | error={e!s} | operation_id={operation_id}")
         raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
@@ -105,7 +100,7 @@ async def list_active_operations():
     This endpoint is useful for debugging and monitoring active operations.
     """
     try:
-        logfire.info("Listing active operations")
+        safe_logfire_info("Listing active operations")
 
         # Get all active operations from ProgressTracker
         active_operations = []
@@ -139,14 +134,14 @@ async def list_active_operations():
                 # Only include non-None values to keep response clean
                 active_operations.append({k: v for k, v in operation_data.items() if v is not None})
 
-        logfire.info(f"Active operations listed | count={len(active_operations)}")
+        safe_logfire_info(f"Active operations listed | count={len(active_operations)}")
 
         return {
             "operations": active_operations,
             "count": len(active_operations),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
-        logfire.error(f"Failed to list active operations | error={e!s}", exc_info=True)
+        safe_logfire_error(f"Failed to list active operations | error={e!s}")
         raise HTTPException(status_code=500, detail={"error": str(e)}) from e

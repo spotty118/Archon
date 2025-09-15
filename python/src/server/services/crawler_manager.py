@@ -156,12 +156,8 @@ async def get_crawler() -> AsyncWebCrawler | None:
     if crawler is None:
         logger.warning("get_crawler() returning None")
         logger.warning(f"_crawler_manager: {_crawler_manager}")
-        logger.warning(
-            f"_crawler_manager._crawler: {_crawler_manager._crawler if _crawler_manager else 'N/A'}"
-        )
-        logger.warning(
-            f"_crawler_manager._initialized: {_crawler_manager._initialized if _crawler_manager else 'N/A'}"
-        )
+        logger.warning(f"_crawler_manager._crawler: {_crawler_manager._crawler if _crawler_manager else 'N/A'}")
+        logger.warning(f"_crawler_manager._initialized: {_crawler_manager._initialized if _crawler_manager else 'N/A'}")
     return crawler
 
 

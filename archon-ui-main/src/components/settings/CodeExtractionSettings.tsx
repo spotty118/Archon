@@ -6,26 +6,11 @@ import { Button } from '../ui/Button';
 import { useToast } from '../../features/ui/hooks/useToast';
 import { credentialsService } from '../../services/credentialsService';
 
+import { CodeExtractionSettings as CodeExtractionSettingsType } from '../../services/credentialsService';
+
 interface CodeExtractionSettingsProps {
-  codeExtractionSettings: {
-    MIN_CODE_BLOCK_LENGTH: number;
-    MAX_CODE_BLOCK_LENGTH: number;
-    ENABLE_COMPLETE_BLOCK_DETECTION: boolean;
-    ENABLE_LANGUAGE_SPECIFIC_PATTERNS: boolean;
-    ENABLE_PROSE_FILTERING: boolean;
-    MAX_PROSE_RATIO: number;
-    MIN_CODE_INDICATORS: number;
-    ENABLE_DIAGRAM_FILTERING: boolean;
-    ENABLE_CONTEXTUAL_LENGTH: boolean;
-    CODE_EXTRACTION_MAX_WORKERS: number;
-    CONTEXT_WINDOW_SIZE: number;
-    ENABLE_CODE_SUMMARIES: boolean;
-  };
-  setCodeExtractionSettings: (settings: {
-    CODE_EXTRACTION_MAX_WORKERS: number;
-    CONTEXT_WINDOW_SIZE: number;
-    ENABLE_CODE_SUMMARIES: boolean;
-  }) => void;
+  codeExtractionSettings: CodeExtractionSettingsType;
+  setCodeExtractionSettings: (settings: Partial<CodeExtractionSettingsType>) => void;
 }
 
 export const CodeExtractionSettings = ({

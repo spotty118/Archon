@@ -167,7 +167,7 @@ async def get_embedding_model(provider: str | None = None) -> str:
 
         # Use custom model if specified
         if custom_model:
-            return custom_model
+            return str(custom_model)
 
         # Return provider-specific defaults
         if provider_name == "openai":

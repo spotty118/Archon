@@ -97,9 +97,7 @@ async def fetch_credentials_from_server():
 
         except (httpx.HTTPError, httpx.RequestError) as e:
             if attempt < max_retries - 1:
-                logger.warning(
-                    f"Failed to fetch credentials (attempt {attempt + 1}/{max_retries}): {e}"
-                )
+                logger.warning(f"Failed to fetch credentials (attempt {attempt + 1}/{max_retries}): {e}")
                 logger.info(f"Retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
             else:
@@ -231,7 +229,7 @@ async def stream_agent(agent_type: str, request: AgentRequest):
             if agent_type == "rag":
                 from .rag_agent import RagDependencies
 
-                deps = RagDependencies(
+                deps: Any = RagDependencies(
                     source_filter=request.context.get("source_filter") if request.context else None,
                     match_count=request.context.get("match_count", 5) if request.context else 5,
                     project_id=request.context.get("project_id") if request.context else None,
@@ -239,9 +237,11 @@ async def stream_agent(agent_type: str, request: AgentRequest):
             elif agent_type == "document":
                 from .document_agent import DocumentDependencies
 
+                project_id = request.context.get("project_id") if request.context else None
+                user_id = request.context.get("user_id") if request.context else None
                 deps = DocumentDependencies(
-                    project_id=request.context.get("project_id") if request.context else None,
-                    user_id=request.context.get("user_id") if request.context else None,
+                    project_id=str(project_id) if project_id else "",
+                    user_id=str(user_id) if user_id else "",
                 )
             else:
                 # Default dependencies

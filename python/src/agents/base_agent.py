@@ -9,12 +9,13 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 from pydantic_ai import Agent
 
 logger = logging.getLogger(__name__)
+
 
 
 @dataclass
@@ -61,7 +62,7 @@ class RateLimitHandler:
                 if time_since_last < self.min_request_interval:
                     await asyncio.sleep(self.min_request_interval - time_since_last)
 
-                self.last_request_time = time.time()
+                self.last_request_time = int(time.time())
                 return await func(*args, **kwargs)
 
             except Exception as e:
@@ -85,13 +86,13 @@ class RateLimitHandler:
                     if retries > self.max_retries:
                         logger.debug(f"Max retries exceeded for rate limit: {full_error}")
                         if progress_callback:
-                            await progress_callback({
-                                "step": "ai_generation",
-                                "log": f"❌ Rate limit exceeded after {self.max_retries} retries",
-                            })
-                        raise Exception(
-                            f"Rate limit exceeded after {self.max_retries} retries: {full_error}"
-                        ) from e
+                            await progress_callback(
+                                {
+                                    "step": "ai_generation",
+                                    "log": f"❌ Rate limit exceeded after {self.max_retries} retries",
+                                }
+                            )
+                        raise Exception(f"Rate limit exceeded after {self.max_retries} retries: {full_error}") from e
 
                     # Extract wait time from error message if available
                     wait_time = self._extract_wait_time(full_error)
@@ -105,10 +106,12 @@ class RateLimitHandler:
 
                     # Send progress update if callback provided
                     if progress_callback:
-                        await progress_callback({
-                            "step": "ai_generation",
-                            "log": f"⏱️ Rate limit hit. Waiting {wait_time:.0f}s before retry {retries}/{self.max_retries}",
-                        })
+                        await progress_callback(
+                            {
+                                "step": "ai_generation",
+                                "log": f"⏱️ Rate limit hit. Waiting {wait_time:.0f}s before retry {retries}/{self.max_retries}",
+                            }
+                        )
 
                     await asyncio.sleep(wait_time)
                     continue
@@ -116,10 +119,12 @@ class RateLimitHandler:
                     # Non-rate-limit error, re-raise immediately
                     logger.debug(f"Non-rate-limit error, re-raising: {full_error}")
                     if progress_callback:
-                        await progress_callback({
-                            "step": "ai_generation",
-                            "log": f"❌ Error: {str(e)}",
-                        })
+                        await progress_callback(
+                            {
+                                "step": "ai_generation",
+                                "log": f"❌ Error: {str(e)}",
+                            }
+                        )
                     raise
 
         raise Exception(f"Failed after {self.max_retries} retries")
@@ -138,7 +143,7 @@ class RateLimitHandler:
         return None
 
 
-class BaseAgent[DepsT, OutputT](ABC):
+class BaseAgent(Generic[DepsT, OutputT], ABC):  # noqa: UP046
     """
     Base class for all PydanticAI agents in the Archon system.
 
@@ -165,7 +170,7 @@ class BaseAgent[DepsT, OutputT](ABC):
 
         # Initialize rate limiting
         if self.enable_rate_limiting:
-            self.rate_limiter = RateLimitHandler(max_retries=retries)
+            self.rate_limiter: RateLimitHandler | None = RateLimitHandler(max_retries=retries)
         else:
             self.rate_limiter = None
 
@@ -199,9 +204,10 @@ class BaseAgent[DepsT, OutputT](ABC):
         if self.rate_limiter:
             # Extract progress callback from deps if available
             progress_callback = getattr(deps, "progress_callback", None)
-            return await self.rate_limiter.execute_with_rate_limit(
+            result = await self.rate_limiter.execute_with_rate_limit(
                 self._run_agent, user_prompt, deps, progress_callback=progress_callback
             )
+            return result  # type: ignore[no-any-return]
         else:
             return await self._run_agent(user_prompt, deps)
 
@@ -215,7 +221,7 @@ class BaseAgent[DepsT, OutputT](ABC):
             )
             self.logger.info(f"Agent {self.name} completed successfully")
             # PydanticAI returns a RunResult with data attribute
-            return result.data
+            return result.data  # type: ignore[no-any-return]
         except TimeoutError:
             self.logger.error(f"Agent {self.name} timed out after 120 seconds")
             raise Exception(f"Agent {self.name} operation timed out - taking too long to respond") from None

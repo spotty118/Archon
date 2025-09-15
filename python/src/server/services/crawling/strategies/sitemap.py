@@ -3,6 +3,7 @@ Sitemap Crawling Strategy
 
 Handles crawling of URLs from XML sitemaps.
 """
+
 import asyncio
 from collections.abc import Callable
 from xml.etree import ElementTree
@@ -28,7 +29,7 @@ class SitemapCrawlStrategy:
         Returns:
             List of URLs extracted from the sitemap
         """
-        urls = []
+        urls: list[str] = []
 
         try:
             # Check for cancellation before making the request
@@ -48,7 +49,7 @@ class SitemapCrawlStrategy:
 
             try:
                 tree = ElementTree.fromstring(resp.content)
-                urls = [loc.text for loc in tree.findall('.//{*}loc') if loc.text]
+                urls = [loc.text for loc in tree.findall(".//{*}loc") if loc.text]
                 logger.info(f"Successfully extracted {len(urls)} URLs from sitemap")
 
             except ElementTree.ParseError:

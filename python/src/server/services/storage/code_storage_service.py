@@ -32,7 +32,7 @@ def _get_model_choice() -> str:
         else:
             model = os.getenv("MODEL_CHOICE", "gpt-4.1-nano")
         search_logger.debug(f"Using model choice: {model}")
-        return model
+        return str(model)
     except Exception as e:
         search_logger.warning(f"Error getting model choice: {e}, using default")
         return "gpt-4.1-nano"
@@ -123,12 +123,12 @@ def _select_best_code_variant(similar_blocks: list[dict[str, Any]]) -> dict[str,
             score += 10
 
         # Prefer longer code (more comprehensive examples)
-        score += len(block["code"]) * 0.01
+        score += int(len(block["code"]) * 0.01)
 
         # Prefer blocks with better context
         context_before_len = len(block.get("context_before", ""))
         context_after_len = len(block.get("context_after", ""))
-        score += (context_before_len + context_after_len) * 0.005
+        score += int((context_before_len + context_after_len) * 0.005)
 
         # Slight preference for Python 3.10+ syntax (most modern)
         if "python 3.10" in block.get("full_context", "").lower():
@@ -155,7 +155,7 @@ def _select_best_code_variant(similar_blocks: list[dict[str, Any]]) -> dict[str,
     return best_block
 
 
-def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[dict[str, Any]]:
+def extract_code_blocks(markdown_content: str, min_length: int | None = None) -> list[dict[str, Any]]:
     """
     Extract code blocks from markdown content along with context.
 
@@ -172,7 +172,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
         def _get_setting_fallback(key: str, default: str) -> str:
             if credential_service._cache_initialized and key in credential_service._cache:
-                return credential_service._cache[key]
+                return str(credential_service._cache[key])
             return os.getenv(key, default)
 
         # Get all relevant settings with defaults
@@ -180,14 +180,10 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
             min_length = int(_get_setting_fallback("MIN_CODE_BLOCK_LENGTH", "250"))
 
         max_length = int(_get_setting_fallback("MAX_CODE_BLOCK_LENGTH", "5000"))
-        enable_prose_filtering = (
-            _get_setting_fallback("ENABLE_PROSE_FILTERING", "true").lower() == "true"
-        )
+        enable_prose_filtering = _get_setting_fallback("ENABLE_PROSE_FILTERING", "true").lower() == "true"
         max_prose_ratio = float(_get_setting_fallback("MAX_PROSE_RATIO", "0.15"))
         min_code_indicators = int(_get_setting_fallback("MIN_CODE_INDICATORS", "3"))
-        enable_diagram_filtering = (
-            _get_setting_fallback("ENABLE_DIAGRAM_FILTERING", "true").lower() == "true"
-        )
+        enable_diagram_filtering = _get_setting_fallback("ENABLE_DIAGRAM_FILTERING", "true").lower() == "true"
         # enable_contextual_length setting is defined but not currently used
         # enable_contextual_length = (
         #     _get_setting_fallback("ENABLE_CONTEXTUAL_LENGTH", "true").lower() == "true"
@@ -225,9 +221,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
             # Skip the outer ```K` and closing ```
             inner_content = content[5:-3] if content.endswith("```") else content[5:]
             # Now extract normally from inner content
-            search_logger.info(
-                f"Attempting to extract from inner content (length: {len(inner_content)})"
-            )
+            search_logger.info(f"Attempting to extract from inner content (length: {len(inner_content)})")
             return extract_code_blocks(inner_content, min_length)
         # For normal language identifiers (e.g., ```python, ```javascript), process normally
         # No need to skip anything - the extraction logic will handle it correctly
@@ -277,9 +271,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
         # Skip if code block is too long (likely corrupted or not actual code)
         if len(code_content) > max_length:
-            search_logger.debug(
-                f"Skipping code block that exceeds max length ({len(code_content)} > {max_length})"
-            )
+            search_logger.debug(f"Skipping code block that exceeds max length ({len(code_content)} > {max_length})")
             i += 2  # Move to next pair
             continue
 
@@ -315,9 +307,10 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
             for indicator in doc_indicators:
                 if isinstance(indicator, tuple):
                     # Check if multiple words from tuple appear
-                    doc_score += sum(1 for word in indicator if word in code_lower)
+                    if isinstance(indicator, list):
+                        doc_score += sum(1 for word in indicator if str(word) in code_lower)
                 else:
-                    if indicator in code_lower:
+                    if str(indicator) in code_lower:
                         doc_score += 2
 
             # Calculate lines and check structure
@@ -411,14 +404,10 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
                         special_char_lines += 1
 
                 # Check for diagram indicators
-                diagram_indicator_count = sum(
-                    1 for indicator in diagram_indicators if indicator in code_content
-                )
+                diagram_indicator_count = sum(1 for indicator in diagram_indicators if indicator in code_content)
 
                 # If looks like a diagram, skip it
-                if (
-                    special_char_lines >= 3 or diagram_indicator_count >= 5
-                ) and code_pattern_count < 5:
+                if (special_char_lines >= 3 or diagram_indicator_count >= 5) and code_pattern_count < 5:
                     search_logger.debug(
                         f"Skipping ASCII art diagram | special_lines={special_char_lines} | diagram_indicators={diagram_indicator_count}"
                     )
@@ -435,13 +424,15 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
         # Add the extracted code block
         stripped_code = code_content.strip()
-        code_blocks.append({
-            "code": stripped_code,
-            "language": language,
-            "context_before": context_before,
-            "context_after": context_after,
-            "full_context": f"{context_before}\n\n{stripped_code}\n\n{context_after}",
-        })
+        code_blocks.append(
+            {
+                "code": stripped_code,
+                "language": language,
+                "context_before": context_before,
+                "context_after": context_after,
+                "full_context": f"{context_before}\n\n{stripped_code}\n\n{context_after}",
+            }
+        )
 
         # Move to next pair (skip the closing backtick we just processed)
         i += 2
@@ -491,7 +482,7 @@ def extract_code_blocks(markdown_content: str, min_length: int = None) -> list[d
 
 
 def generate_code_example_summary(
-    code: str, context_before: str, context_after: str, language: str = "", provider: str = None
+    code: str, context_before: str, context_after: str, language: str = "", provider: str | None = None
 ) -> dict[str, str]:
     """
     Generate a summary and name for a code example using its surrounding context.
@@ -547,10 +538,7 @@ Format your response as JSON:
                 # Try to get from credential service with direct fallback
                 from ..credential_service import credential_service
 
-                if (
-                    credential_service._cache_initialized
-                    and "OPENAI_API_KEY" in credential_service._cache
-                ):
+                if credential_service._cache_initialized and "OPENAI_API_KEY" in credential_service._cache:
                     cached_key = credential_service._cache["OPENAI_API_KEY"]
                     if isinstance(cached_key, dict) and cached_key.get("is_encrypted"):
                         api_key = credential_service._decrypt_value(cached_key["encrypted_value"])
@@ -564,9 +552,7 @@ Format your response as JSON:
 
             client = openai.OpenAI(api_key=api_key)
         except Exception as e:
-            search_logger.error(
-                f"Failed to create LLM client fallback: {e} - returning default values"
-            )
+            search_logger.error(f"Failed to create LLM client fallback: {e} - returning default values")
             return {
                 "example_name": f"Code Example{f' ({language})' if language else ''}",
                 "summary": "Code example for demonstration purposes.",
@@ -598,9 +584,7 @@ Format your response as JSON:
             search_logger.warning(f"Incomplete response from OpenAI: {result}")
 
         final_result = {
-            "example_name": result.get(
-                "example_name", f"Code Example{f' ({language})' if language else ''}"
-            ),
+            "example_name": result.get("example_name", f"Code Example{f' ({language})' if language else ''}"),
             "summary": result.get("summary", "Code example for demonstration purposes."),
         }
 
@@ -626,7 +610,7 @@ Format your response as JSON:
 
 
 async def generate_code_summaries_batch(
-    code_blocks: list[dict[str, Any]], max_workers: int = None, progress_callback=None
+    code_blocks: list[dict[str, Any]], max_workers: int | None = None, progress_callback=None
 ) -> list[dict[str, str]]:
     """
     Generate summaries for multiple code blocks with rate limiting and proper worker management.
@@ -647,19 +631,14 @@ async def generate_code_summaries_batch(
         try:
             from ...services.credential_service import credential_service
 
-            if (
-                credential_service._cache_initialized
-                and "CODE_SUMMARY_MAX_WORKERS" in credential_service._cache
-            ):
+            if credential_service._cache_initialized and "CODE_SUMMARY_MAX_WORKERS" in credential_service._cache:
                 max_workers = int(credential_service._cache["CODE_SUMMARY_MAX_WORKERS"])
             else:
                 max_workers = int(os.getenv("CODE_SUMMARY_MAX_WORKERS", "3"))
         except (ValueError, TypeError):
             max_workers = 3  # Default fallback
 
-    search_logger.info(
-        f"Generating summaries for {len(code_blocks)} code blocks with max_workers={max_workers}"
-    )
+    search_logger.info(f"Generating summaries for {len(code_blocks)} code blocks with max_workers={max_workers}")
 
     # Semaphore to limit concurrent requests
     semaphore = asyncio.Semaphore(max_workers)
@@ -689,13 +668,15 @@ async def generate_code_summaries_batch(
                 if progress_callback:
                     # Simple progress based on summaries completed
                     progress_percentage = int((completed_count / len(code_blocks)) * 100)
-                    await progress_callback({
-                        "status": "code_extraction",
-                        "percentage": progress_percentage,
-                        "log": f"Generated {completed_count}/{len(code_blocks)} code summaries",
-                        "completed_summaries": completed_count,
-                        "total_summaries": len(code_blocks),
-                    })
+                    await progress_callback(
+                        {
+                            "status": "code_extraction",
+                            "percentage": progress_percentage,
+                            "log": f"Generated {completed_count}/{len(code_blocks)} code summaries",
+                            "completed_summaries": completed_count,
+                            "total_summaries": len(code_blocks),
+                        }
+                    )
 
             return result
 
@@ -713,12 +694,12 @@ async def generate_code_summaries_batch(
                 search_logger.error(f"Error generating summary for code block {i}: {summary}")
                 # Use fallback summary
                 language = code_blocks[i].get("language", "")
-                fallback = {
+                fallback: dict[str, str] = {
                     "example_name": f"Code Example{f' ({language})' if language else ''}",
                     "summary": "Code example for demonstration purposes.",
                 }
                 final_summaries.append(fallback)
-            else:
+            elif isinstance(summary, dict):
                 final_summaries.append(summary)
 
         search_logger.info(f"Successfully generated {len(final_summaries)} code summaries")
@@ -782,9 +763,7 @@ async def add_code_examples_to_supabase(
         use_contextual_embeddings = credential_service._cache.get("USE_CONTEXTUAL_EMBEDDINGS")
         if isinstance(use_contextual_embeddings, str):
             use_contextual_embeddings = use_contextual_embeddings.lower() == "true"
-        elif isinstance(use_contextual_embeddings, dict) and use_contextual_embeddings.get(
-            "is_encrypted"
-        ):
+        elif isinstance(use_contextual_embeddings, dict) and use_contextual_embeddings.get("is_encrypted"):
             # Handle encrypted value
             encrypted_value = use_contextual_embeddings.get("encrypted_value")
             if encrypted_value:
@@ -799,13 +778,9 @@ async def add_code_examples_to_supabase(
             use_contextual_embeddings = bool(use_contextual_embeddings)
     except Exception:
         # Fallback to environment variable
-        use_contextual_embeddings = (
-            os.getenv("USE_CONTEXTUAL_EMBEDDINGS", "false").lower() == "true"
-        )
+        use_contextual_embeddings = os.getenv("USE_CONTEXTUAL_EMBEDDINGS", "false").lower() == "true"
 
-    search_logger.info(
-        f"Using contextual embeddings for code examples: {use_contextual_embeddings}"
-    )
+    search_logger.info(f"Using contextual embeddings for code examples: {use_contextual_embeddings}")
 
     # Process in batches
     total_items = len(urls)
@@ -840,9 +815,7 @@ async def add_code_examples_to_supabase(
                 full_documents.append(full_doc)
 
             # Generate contextual embeddings
-            contextual_results = await generate_contextual_embeddings_batch(
-                full_documents, combined_texts
-            )
+            contextual_results = await generate_contextual_embeddings_batch(full_documents, combined_texts)
 
             # Process results
             for j, (contextual_text, success) in enumerate(contextual_results):
@@ -859,8 +832,7 @@ async def add_code_examples_to_supabase(
         # Log any failures
         if result.has_failures:
             search_logger.error(
-                f"Failed to create {result.failure_count} code example embeddings. "
-                f"Successful: {result.success_count}"
+                f"Failed to create {result.failure_count} code example embeddings. Successful: {result.success_count}"
             )
 
         # Use only successful embeddings
@@ -876,7 +848,7 @@ async def add_code_examples_to_supabase(
 
         # Build positions map to handle duplicate texts correctly
         # Each text maps to a queue of indices where it appears
-        positions_by_text = defaultdict(deque)
+        positions_by_text: dict[str, deque[int]] = defaultdict(deque)
         for k, text in enumerate(batch_texts):
             # map text -> original j index (not k)
             positions_by_text[text].append(original_indices[k])
@@ -887,7 +859,9 @@ async def add_code_examples_to_supabase(
             if positions_by_text[text]:
                 orig_idx = positions_by_text[text].popleft()  # Original j index in [i, batch_end)
             else:
-                search_logger.warning(f"Could not map embedding back to original code example (no remaining index for text: {text[:50]}...)")
+                search_logger.warning(
+                    f"Could not map embedding back to original code example (no remaining index for text: {text[:50]}...)"
+                )
                 continue
 
             idx = orig_idx  # Global index into urls/chunk_numbers/etc.
@@ -899,15 +873,17 @@ async def add_code_examples_to_supabase(
                 parsed_url = urlparse(urls[idx])
                 source_id = parsed_url.netloc or parsed_url.path
 
-            batch_data.append({
-                "url": urls[idx],
-                "chunk_number": chunk_numbers[idx],
-                "content": code_examples[idx],
-                "summary": summaries[idx],
-                "metadata": metadatas[idx],  # Store as JSON object, not string
-                "source_id": source_id,
-                "embedding": embedding,
-            })
+            batch_data.append(
+                {
+                    "url": urls[idx],
+                    "chunk_number": chunk_numbers[idx],
+                    "content": code_examples[idx],
+                    "summary": summaries[idx],
+                    "metadata": metadatas[idx],  # Store as JSON object, not string
+                    "source_id": source_id,
+                    "embedding": embedding,
+                }
+            )
 
         if not batch_data:
             search_logger.warning("No records to insert for this batch; skipping insert.")
@@ -961,26 +937,30 @@ async def add_code_examples_to_supabase(
             batch_num = i // batch_size + 1
             total_batches = (total_items + batch_size - 1) // batch_size
             progress_percentage = int((batch_num / total_batches) * 100)
-            await progress_callback({
-                "status": "code_storage",
-                "percentage": progress_percentage,
-                "log": f"Stored batch {batch_num}/{total_batches} of code examples",
-                # Stage-specific batch fields to prevent contamination with document storage
-                "code_current_batch": batch_num,
-                "code_total_batches": total_batches,
-                # Keep generic fields for backward compatibility
-                "batch_number": batch_num,
-                "total_batches": total_batches,
-            })
+            await progress_callback(
+                {
+                    "status": "code_storage",
+                    "percentage": progress_percentage,
+                    "log": f"Stored batch {batch_num}/{total_batches} of code examples",
+                    # Stage-specific batch fields to prevent contamination with document storage
+                    "code_current_batch": batch_num,
+                    "code_total_batches": total_batches,
+                    # Keep generic fields for backward compatibility
+                    "batch_number": batch_num,
+                    "total_batches": total_batches,
+                }
+            )
 
     # Report final completion at 100% after all batches are done
     if progress_callback and total_items > 0:
-        await progress_callback({
-            "status": "code_storage",
-            "percentage": 100,
-            "log": f"Code storage completed. Stored {total_items} code examples.",
-            "total_items": total_items,
-            # Keep final batch info for code storage completion
-            "code_total_batches": (total_items + batch_size - 1) // batch_size,
-            "code_current_batch": (total_items + batch_size - 1) // batch_size,
-        })
+        await progress_callback(
+            {
+                "status": "code_storage",
+                "percentage": 100,
+                "log": f"Code storage completed. Stored {total_items} code examples.",
+                "total_items": total_items,
+                # Keep final batch info for code storage completion
+                "code_total_batches": (total_items + batch_size - 1) // batch_size,
+                "code_current_batch": (total_items + batch_size - 1) // batch_size,
+            }
+        )

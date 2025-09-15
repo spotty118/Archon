@@ -54,6 +54,7 @@ The above content is from the documentation for '{source_id}'. Please provide a 
         async with get_llm_client(provider=provider) as client:
             # Get model choice from credential service
             from .credential_service import credential_service
+
             rag_settings = await credential_service.get_credentials_by_category("rag_strategy")
             model_choice = rag_settings.get("MODEL_CHOICE", "gpt-4.1-nano")
 
@@ -81,7 +82,7 @@ The above content is from the documentation for '{source_id}'. Please provide a 
                 search_logger.error(f"LLM returned None content for {source_id}")
                 return default_summary
 
-            summary = message_content.strip()
+            summary = str(message_content.strip())
 
             # Ensure the summary is not too long
             if len(summary) > max_length:
@@ -90,9 +91,7 @@ The above content is from the documentation for '{source_id}'. Please provide a 
             return summary
 
     except Exception as e:
-        search_logger.error(
-            f"Error generating summary with LLM for {source_id}: {e}. Using default summary."
-        )
+        search_logger.error(f"Error generating summary with LLM for {source_id}: {e}. Using default summary.")
         return default_summary
 
 
@@ -128,6 +127,7 @@ async def generate_source_title_and_metadata(
             async with get_llm_client(provider=provider) as client:
                 # Get model choice from credential service
                 from .credential_service import credential_service
+
                 rag_settings = await credential_service.get_credentials_by_category("rag_strategy")
                 model_choice = rag_settings.get("MODEL_CHOICE", "gpt-4.1-nano")
 
@@ -152,7 +152,7 @@ async def generate_source_title_and_metadata(
                 prompt = f"""You are creating a title for crawled content that identifies the SERVICE NAME and SOURCE TYPE.
 
 Source ID: {source_id}
-Original URL: {original_url or 'Not provided'}
+Original URL: {original_url or "Not provided"}
 Display Name: {source_context}
 {source_type_info}
 
@@ -202,7 +202,7 @@ Generate only the title, nothing else."""
         "knowledge_type": knowledge_type,
         "tags": tags or [],
         "source_type": source_type or "url",  # Use provided source_type or default to "url"
-        "auto_generated": True
+        "auto_generated": True,
     }
 
     return title, metadata
@@ -238,9 +238,7 @@ async def update_source_info(
     search_logger.info(f"Updating source {source_id} with knowledge_type={knowledge_type}")
     try:
         # First, check if source already exists to preserve title
-        existing_source = (
-            client.table("archon_sources").select("title").eq("source_id", source_id).execute()
-        )
+        existing_source = client.table("archon_sources").select("title").eq("source_id", source_id).execute()
 
         if existing_source.data:
             # Source exists - preserve the existing title
@@ -284,16 +282,9 @@ async def update_source_info(
             if source_display_name:
                 update_data["source_display_name"] = source_display_name
 
-            (
-                client.table("archon_sources")
-                .update(update_data)
-                .eq("source_id", source_id)
-                .execute()
-            )
+            (client.table("archon_sources").update(update_data).eq("source_id", source_id).execute())
 
-            search_logger.info(
-                f"Updated source {source_id} while preserving title: {existing_title}"
-            )
+            search_logger.info(f"Updated source {source_id} while preserving title: {existing_title}")
         else:
             # New source - use display name as title if available, otherwise generate
             if source_display_name:
@@ -381,13 +372,15 @@ class SourceManagementService:
 
             sources = []
             for row in response.data:
-                sources.append({
-                    "source_id": row["source_id"],
-                    "title": row.get("title", ""),
-                    "summary": row.get("summary", ""),
-                    "created_at": row.get("created_at", ""),
-                    "updated_at": row.get("updated_at", ""),
-                })
+                sources.append(
+                    {
+                        "source_id": row["source_id"],
+                        "title": row.get("title", ""),
+                        "summary": row.get("summary", ""),
+                        "created_at": row.get("created_at", ""),
+                        "updated_at": row.get("updated_at", ""),
+                    }
+                )
 
             return True, {"sources": sources, "total_count": len(sources)}
 
@@ -412,10 +405,7 @@ class SourceManagementService:
             try:
                 logger.info(f"Deleting from crawled_pages table for source_id: {source_id}")
                 pages_response = (
-                    self.supabase_client.table("archon_crawled_pages")
-                    .delete()
-                    .eq("source_id", source_id)
-                    .execute()
+                    self.supabase_client.table("archon_crawled_pages").delete().eq("source_id", source_id).execute()
                 )
                 pages_deleted = len(pages_response.data) if pages_response.data else 0
                 logger.info(f"Deleted {pages_deleted} pages from crawled_pages")
@@ -427,10 +417,7 @@ class SourceManagementService:
             try:
                 logger.info(f"Deleting from code_examples table for source_id: {source_id}")
                 code_response = (
-                    self.supabase_client.table("archon_code_examples")
-                    .delete()
-                    .eq("source_id", source_id)
-                    .execute()
+                    self.supabase_client.table("archon_code_examples").delete().eq("source_id", source_id).execute()
                 )
                 code_deleted = len(code_response.data) if code_response.data else 0
                 logger.info(f"Deleted {code_deleted} code examples")
@@ -442,10 +429,7 @@ class SourceManagementService:
             try:
                 logger.info(f"Deleting from sources table for source_id: {source_id}")
                 source_response = (
-                    self.supabase_client.table("archon_sources")
-                    .delete()
-                    .eq("source_id", source_id)
-                    .execute()
+                    self.supabase_client.table("archon_sources").delete().eq("source_id", source_id).execute()
                 )
                 source_deleted = len(source_response.data) if source_response.data else 0
                 logger.info(f"Deleted {source_deleted} source records")
@@ -496,16 +480,13 @@ class SourceManagementService:
             if summary is not None:
                 update_data["summary"] = summary
             if word_count is not None:
-                update_data["total_word_count"] = word_count
+                update_data["total_word_count"] = str(word_count)
 
             # Handle metadata fields
             if knowledge_type is not None or tags is not None:
                 # Get existing metadata
                 existing = (
-                    self.supabase_client.table("archon_sources")
-                    .select("metadata")
-                    .eq("source_id", source_id)
-                    .execute()
+                    self.supabase_client.table("archon_sources").select("metadata").eq("source_id", source_id).execute()
                 )
                 metadata = existing.data[0].get("metadata", {}) if existing.data else {}
 
@@ -514,17 +495,16 @@ class SourceManagementService:
                 if tags is not None:
                     metadata["tags"] = tags
 
-                update_data["metadata"] = metadata
+                import json
+
+                update_data["metadata"] = json.dumps(metadata) if isinstance(metadata, dict) else str(metadata)
 
             if not update_data:
                 return False, {"error": "No update data provided"}
 
             # Update the source
             response = (
-                self.supabase_client.table("archon_sources")
-                .update(update_data)
-                .eq("source_id", source_id)
-                .execute()
+                self.supabase_client.table("archon_sources").update(update_data).eq("source_id", source_id).execute()
             )
 
             if response.data:
@@ -603,10 +583,7 @@ class SourceManagementService:
         try:
             # Get source metadata
             source_response = (
-                self.supabase_client.table("archon_sources")
-                .select("*")
-                .eq("source_id", source_id)
-                .execute()
+                self.supabase_client.table("archon_sources").select("*").eq("source_id", source_id).execute()
             )
 
             if not source_response.data:
@@ -616,19 +593,13 @@ class SourceManagementService:
 
             # Get page count
             pages_response = (
-                self.supabase_client.table("archon_crawled_pages")
-                .select("id")
-                .eq("source_id", source_id)
-                .execute()
+                self.supabase_client.table("archon_crawled_pages").select("id").eq("source_id", source_id).execute()
             )
             page_count = len(pages_response.data) if pages_response.data else 0
 
             # Get code example count
             code_response = (
-                self.supabase_client.table("archon_code_examples")
-                .select("id")
-                .eq("source_id", source_id)
-                .execute()
+                self.supabase_client.table("archon_code_examples").select("id").eq("source_id", source_id).execute()
             )
             code_count = len(code_response.data) if code_response.data else 0
 
@@ -664,16 +635,18 @@ class SourceManagementService:
             sources = []
             for row in response.data:
                 metadata = row.get("metadata", {})
-                sources.append({
-                    "source_id": row["source_id"],
-                    "title": row.get("title", ""),
-                    "summary": row.get("summary", ""),
-                    "knowledge_type": metadata.get("knowledge_type", ""),
-                    "tags": metadata.get("tags", []),
-                    "total_word_count": row.get("total_word_count", 0),
-                    "created_at": row.get("created_at", ""),
-                    "updated_at": row.get("updated_at", ""),
-                })
+                sources.append(
+                    {
+                        "source_id": row["source_id"],
+                        "title": row.get("title", ""),
+                        "summary": row.get("summary", ""),
+                        "knowledge_type": metadata.get("knowledge_type", ""),
+                        "tags": metadata.get("tags", []),
+                        "total_word_count": row.get("total_word_count", 0),
+                        "created_at": row.get("created_at", ""),
+                        "updated_at": row.get("updated_at", ""),
+                    }
+                )
 
             return True, {
                 "sources": sources,

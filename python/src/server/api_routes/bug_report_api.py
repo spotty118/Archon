@@ -98,9 +98,7 @@ class GitHubService:
                     ) from None
                 else:
                     logger.error(f"GitHub API error: {response.status_code} - {response.text}")
-                    raise HTTPException(
-                        status_code=500, detail=f"GitHub API error: {response.status_code}"
-                    ) from None
+                    raise HTTPException(status_code=500, detail=f"GitHub API error: {response.status_code}") from None
 
         except httpx.TimeoutException:
             logger.error("GitHub API request timed out")
@@ -208,9 +206,7 @@ async def create_github_issue(bug_report: BugReportRequest):
         try:
             result = await github_service.create_issue(bug_report)
 
-            logger.info(
-                f"Successfully created GitHub issue #{result['issue_number']}: {result['issue_url']}"
-            )
+            logger.info(f"Successfully created GitHub issue #{result['issue_number']}: {result['issue_url']}")
 
             return BugReportResponse(
                 success=True,

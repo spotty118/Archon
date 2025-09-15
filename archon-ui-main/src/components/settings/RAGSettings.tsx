@@ -7,55 +7,11 @@ import { Button } from '../ui/Button';
 import { useToast } from '../../features/ui/hooks/useToast';
 import { credentialsService } from '../../services/credentialsService';
 
+import { RagSettings } from '../../services/credentialsService';
+
 interface RAGSettingsProps {
-  ragSettings: {
-    MODEL_CHOICE: string;
-    USE_CONTEXTUAL_EMBEDDINGS: boolean;
-    CONTEXTUAL_EMBEDDINGS_MAX_WORKERS: number;
-    USE_HYBRID_SEARCH: boolean;
-    USE_AGENTIC_RAG: boolean;
-    USE_RERANKING: boolean;
-    LLM_PROVIDER?: string;
-    LLM_BASE_URL?: string;
-    EMBEDDING_MODEL?: string;
-    // Crawling Performance Settings
-    CRAWL_BATCH_SIZE?: number;
-    CRAWL_MAX_CONCURRENT?: number;
-    CRAWL_WAIT_STRATEGY?: string;
-    CRAWL_PAGE_TIMEOUT?: number;
-    CRAWL_DELAY_BEFORE_HTML?: number;
-    // Storage Performance Settings
-    DOCUMENT_STORAGE_BATCH_SIZE?: number;
-    EMBEDDING_BATCH_SIZE?: number;
-    DELETE_BATCH_SIZE?: number;
-    ENABLE_PARALLEL_BATCHES?: boolean;
-    // Advanced Settings
-    MEMORY_THRESHOLD_PERCENT?: number;
-    DISPATCHER_CHECK_INTERVAL?: number;
-    CODE_EXTRACTION_BATCH_SIZE?: number;
-    CODE_SUMMARY_MAX_WORKERS?: number;
-  };
-  setRagSettings: (settings: {
-    USE_HYBRID_SEARCH: boolean;
-    USE_AGENTIC_RAG: boolean;
-    USE_RERANKING: boolean;
-    LLM_PROVIDER?: string;
-    LLM_BASE_URL?: string;
-    EMBEDDING_MODEL?: string;
-    CRAWL_BATCH_SIZE?: number;
-    CRAWL_MAX_CONCURRENT?: number;
-    CRAWL_WAIT_STRATEGY?: string;
-    CRAWL_PAGE_TIMEOUT?: number;
-    CRAWL_DELAY_BEFORE_HTML?: number;
-    DOCUMENT_STORAGE_BATCH_SIZE?: number;
-    EMBEDDING_BATCH_SIZE?: number;
-    DELETE_BATCH_SIZE?: number;
-    ENABLE_PARALLEL_BATCHES?: boolean;
-    MEMORY_THRESHOLD_PERCENT?: number;
-    DISPATCHER_CHECK_INTERVAL?: number;
-    CODE_EXTRACTION_BATCH_SIZE?: number;
-    CODE_SUMMARY_MAX_WORKERS?: number;
-  }) => void;
+  ragSettings: RagSettings;
+  setRagSettings: (settings: Partial<RagSettings>) => void;
 }
 
 export const RAGSettings = ({

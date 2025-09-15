@@ -93,19 +93,13 @@ async def create_embedding(text: str, provider: str | None = None) -> list[float
                 error_info = result.failed_items[0]
                 error_msg = error_info.get("error", "Unknown error")
                 if "quota" in error_msg.lower():
-                    raise EmbeddingQuotaExhaustedError(
-                        f"OpenAI quota exhausted: {error_msg}", text_preview=text
-                    )
+                    raise EmbeddingQuotaExhaustedError(f"OpenAI quota exhausted: {error_msg}", text_preview=text)
                 elif "rate" in error_msg.lower():
                     raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text)
                 else:
-                    raise EmbeddingAPIError(
-                        f"Failed to create embedding: {error_msg}", text_preview=text
-                    )
+                    raise EmbeddingAPIError(f"Failed to create embedding: {error_msg}", text_preview=text)
             else:
-                raise EmbeddingAPIError(
-                    "No embeddings returned from batch creation", text_preview=text
-                )
+                raise EmbeddingAPIError("No embeddings returned from batch creation", text_preview=text)
         return result.embeddings[0]
     except EmbeddingError:
         # Re-raise our custom exceptions
@@ -117,15 +111,11 @@ async def create_embedding(text: str, provider: str | None = None) -> list[float
         search_logger.error(f"Failed text preview: {text[:100]}...")
 
         if "insufficient_quota" in error_msg:
-            raise EmbeddingQuotaExhaustedError(
-                f"OpenAI quota exhausted: {error_msg}", text_preview=text
-            ) from e
+            raise EmbeddingQuotaExhaustedError(f"OpenAI quota exhausted: {error_msg}", text_preview=text) from e
         elif "rate_limit" in error_msg.lower():
             raise EmbeddingRateLimitError(f"Rate limit hit: {error_msg}", text_preview=text) from e
         else:
-            raise EmbeddingAPIError(
-                f"Embedding error: {error_msg}", text_preview=text, original_error=e
-            ) from e
+            raise EmbeddingAPIError(f"Embedding error: {error_msg}", text_preview=text, original_error=e) from e
 
 
 async def create_embeddings_batch(
@@ -156,16 +146,12 @@ async def create_embeddings_batch(
     validated_texts = []
     for i, text in enumerate(texts):
         if not isinstance(text, str):
-            search_logger.error(
-                f"Invalid text type at index {i}: {type(text)}, value: {text}", exc_info=True
-            )
+            search_logger.error(f"Invalid text type at index {i}: {type(text)}, value: {text}", exc_info=True)
             # Try to convert to string
             try:
                 validated_texts.append(str(text))
             except Exception as e:
-                search_logger.error(
-                    f"Failed to convert text at index {i} to string: {e}", exc_info=True
-                )
+                search_logger.error(f"Failed to convert text at index {i} to string: {e}", exc_info=True)
                 validated_texts.append("")  # Use empty string as fallback
         else:
             validated_texts.append(text)
@@ -175,16 +161,12 @@ async def create_embeddings_batch(
     result = EmbeddingBatchResult()
     threading_service = get_threading_service()
 
-    with safe_span(
-        "create_embeddings_batch", text_count=len(texts), total_chars=sum(len(t) for t in texts)
-    ) as span:
+    with safe_span("create_embeddings_batch", text_count=len(texts), total_chars=sum(len(t) for t in texts)) as span:
         try:
             async with get_llm_client(provider=provider, use_embedding_provider=True) as client:
                 # Load batch size and dimensions from settings
                 try:
-                    rag_settings = await credential_service.get_credentials_by_category(
-                        "rag_strategy"
-                    )
+                    rag_settings = await credential_service.get_credentials_by_category("rag_strategy")
                     batch_size = int(rag_settings.get("EMBEDDING_BATCH_SIZE", "100"))
                     embedding_dimensions = int(rag_settings.get("EMBEDDING_DIMENSIONS", "1536"))
                 except Exception as e:
@@ -200,12 +182,13 @@ async def create_embeddings_batch(
 
                     try:
                         # Estimate tokens for this batch
-                        batch_tokens = sum(len(text.split()) for text in batch) * 1.3
+                        batch_tokens = int(sum(len(text.split()) for text in batch) * 1.3)
                         total_tokens_used += batch_tokens
 
                         # Create rate limit progress callback if we have a progress callback
                         rate_limit_callback = None
                         if progress_callback:
+
                             async def rate_limit_callback(data: dict):
                                 # Send heartbeat during rate limit wait
                                 processed = result.success_count + result.failure_count
@@ -213,7 +196,7 @@ async def create_embeddings_batch(
                                 await progress_callback(message, (processed / len(texts)) * 100)
 
                         # Rate limit each batch
-                        async with threading_service.rate_limited_operation(batch_tokens, rate_limit_callback):
+                        async with threading_service.rate_limited_operation(int(batch_tokens), rate_limit_callback):
                             retry_count = 0
                             max_retries = 3
 
@@ -252,7 +235,7 @@ async def create_embeddings_batch(
                                                 text,
                                                 EmbeddingQuotaExhaustedError(
                                                     "OpenAI quota exhausted",
-                                                    tokens_used=tokens_so_far,
+                                                    tokens_used=int(tokens_so_far),
                                                 ),
                                                 batch_index,
                                             )
@@ -285,9 +268,7 @@ async def create_embeddings_batch(
                             else:
                                 result.add_failure(
                                     text,
-                                    EmbeddingAPIError(
-                                        f"Failed to create embedding: {str(e)}", original_error=e
-                                    ),
+                                    EmbeddingAPIError(f"Failed to create embedding: {str(e)}", original_error=e),
                                     batch_index,
                                 )
 
@@ -320,9 +301,7 @@ async def create_embeddings_batch(
             # Mark remaining texts as failed
             processed_count = result.success_count + result.failure_count
             for text in texts[processed_count:]:
-                result.add_failure(
-                    text, EmbeddingAPIError(f"Catastrophic failure: {str(e)}", original_error=e)
-                )
+                result.add_failure(text, EmbeddingAPIError(f"Catastrophic failure: {str(e)}", original_error=e))
 
             return result
 

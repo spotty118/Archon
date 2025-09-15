@@ -34,6 +34,7 @@ def get_container_status() -> dict[str, Any]:
             # Try to get uptime from container info
             try:
                 from datetime import datetime
+
                 started_at = container.attrs["State"]["StartedAt"]
                 started_time = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
                 uptime = int((datetime.now(started_time.tzinfo) - started_time).total_seconds())
@@ -47,7 +48,7 @@ def get_container_status() -> dict[str, Any]:
             "status": status,
             "uptime": uptime,
             "logs": [],  # No log streaming anymore
-            "container_status": container_status
+            "container_status": container_status,
         }
 
     except NotFound:
@@ -56,17 +57,11 @@ def get_container_status() -> dict[str, Any]:
             "uptime": None,
             "logs": [],
             "container_status": "not_found",
-            "message": "MCP container not found. Run: docker compose up -d archon-mcp"
+            "message": "MCP container not found. Run: docker compose up -d archon-mcp",
         }
     except Exception as e:
         api_logger.error("Failed to get container status", exc_info=True)
-        return {
-            "status": "error",
-            "uptime": None,
-            "logs": [],
-            "container_status": "error",
-            "error": str(e)
-        }
+        return {"status": "error", "uptime": None, "logs": [], "container_status": "error", "error": str(e)}
     finally:
         if docker_client is not None:
             try:
@@ -118,9 +113,7 @@ async def get_mcp_config():
             try:
                 from ..services.credential_service import credential_service
 
-                model_choice = await credential_service.get_credential(
-                    "MODEL_CHOICE", "gpt-4o-mini"
-                )
+                model_choice = await credential_service.get_credential("MODEL_CHOICE", "gpt-4o-mini")
                 config["model_choice"] = model_choice
             except Exception:
                 # Fallback to default model
@@ -151,18 +144,11 @@ async def get_mcp_clients():
             # For now, return empty array as expected by frontend
             api_logger.debug("Getting MCP clients - returning empty array")
 
-            return {
-                "clients": [],
-                "total": 0
-            }
+            return {"clients": [], "total": 0}
         except Exception as e:
             api_logger.error(f"Failed to get MCP clients - error={str(e)}")
             safe_set_attribute(span, "error", str(e))
-            return {
-                "clients": [],
-                "total": 0,
-                "error": str(e)
-            }
+            return {"clients": [], "total": 0, "error": str(e)}
 
 
 @router.get("/sessions")

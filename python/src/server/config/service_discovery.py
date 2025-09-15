@@ -100,9 +100,7 @@ class ServiceDiscovery:
         service_name = self.SERVICE_NAMES.get(service, service)
         port = self.DEFAULT_PORTS.get(service)
         if port is None:
-            raise ValueError(
-                f"Unknown service: {service}. Valid services are: {list(self.DEFAULT_PORTS.keys())}"
-            )
+            raise ValueError(f"Unknown service: {service}. Valid services are: {list(self.DEFAULT_PORTS.keys())}")
 
         if self.environment == Environment.DOCKER_COMPOSE:
             # Docker Compose uses service names directly
@@ -142,13 +140,11 @@ class ServiceDiscovery:
         try:
             async with httpx.AsyncClient(timeout=timeout) as client:
                 response = await client.get(health_endpoint)
-                return response.status_code == 200
+                return bool(response.status_code == 200)
         except Exception:
             return False
 
-    async def wait_for_service(
-        self, service: str, max_attempts: int = 30, delay: float = 2.0
-    ) -> bool:
+    async def wait_for_service(self, service: str, max_attempts: int = 30, delay: float = 2.0) -> bool:
         """
         Wait for a service to become healthy.
 

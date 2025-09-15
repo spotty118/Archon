@@ -30,9 +30,9 @@ class DocumentService:
         project_id: str,
         document_type: str,
         title: str,
-        content: dict[str, Any] = None,
-        tags: list[str] = None,
-        author: str = None,
+        content: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        author: str | None = None,
     ) -> tuple[bool, dict[str, Any]]:
         """
         Add a new document to a project's docs JSONB field.
@@ -43,10 +43,7 @@ class DocumentService:
         try:
             # Get current project
             project_response = (
-                self.supabase_client.table("archon_projects")
-                .select("docs")
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").select("docs").eq("id", project_id).execute()
             )
             if not project_response.data:
                 return False, {"error": f"Project with ID {project_id} not found"}
@@ -109,12 +106,7 @@ class DocumentService:
             Tuple of (success, result_dict)
         """
         try:
-            response = (
-                self.supabase_client.table("archon_projects")
-                .select("docs")
-                .eq("id", project_id)
-                .execute()
-            )
+            response = self.supabase_client.table("archon_projects").select("docs").eq("id", project_id).execute()
 
             if not response.data:
                 return False, {"error": f"Project with ID {project_id} not found"}
@@ -129,20 +121,20 @@ class DocumentService:
                     documents.append(doc)
                 else:
                     # Return metadata only
-                    documents.append({
-                        "id": doc.get("id"),
-                        "document_type": doc.get("document_type"),
-                        "title": doc.get("title"),
-                        "status": doc.get("status"),
-                        "version": doc.get("version"),
-                        "tags": doc.get("tags", []),
-                        "author": doc.get("author"),
-                        "created_at": doc.get("created_at"),
-                        "updated_at": doc.get("updated_at"),
-                        "stats": {
-                            "content_size": len(str(doc.get("content", {})))
+                    documents.append(
+                        {
+                            "id": doc.get("id"),
+                            "document_type": doc.get("document_type"),
+                            "title": doc.get("title"),
+                            "status": doc.get("status"),
+                            "version": doc.get("version"),
+                            "tags": doc.get("tags", []),
+                            "author": doc.get("author"),
+                            "created_at": doc.get("created_at"),
+                            "updated_at": doc.get("updated_at"),
+                            "stats": {"content_size": len(str(doc.get("content", {})))},
                         }
-                    })
+                    )
 
             return True, {
                 "project_id": project_id,
@@ -162,12 +154,7 @@ class DocumentService:
             Tuple of (success, result_dict)
         """
         try:
-            response = (
-                self.supabase_client.table("archon_projects")
-                .select("docs")
-                .eq("id", project_id)
-                .execute()
-            )
+            response = self.supabase_client.table("archon_projects").select("docs").eq("id", project_id).execute()
 
             if not response.data:
                 return False, {"error": f"Project with ID {project_id} not found"}
@@ -184,9 +171,7 @@ class DocumentService:
             if document:
                 return True, {"document": document}
             else:
-                return False, {
-                    "error": f"Document with ID {doc_id} not found in project {project_id}"
-                }
+                return False, {"error": f"Document with ID {doc_id} not found in project {project_id}"}
 
         except Exception as e:
             logger.error(f"Error getting document: {e}")
@@ -208,10 +193,7 @@ class DocumentService:
         try:
             # Get current project docs
             project_response = (
-                self.supabase_client.table("archon_projects")
-                .select("docs")
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").select("docs").eq("id", project_id).execute()
             )
             if not project_response.data:
                 return False, {"error": f"Project with ID {project_id} not found"}
@@ -236,9 +218,7 @@ class DocumentService:
                         created_by=update_fields.get("author", "system"),
                     )
                 except Exception as version_error:
-                    logger.warning(
-                        f"Version creation failed for document {doc_id}: {version_error}"
-                    )
+                    logger.warning(f"Version creation failed for document {doc_id}: {version_error}")
 
             # Make a copy to modify
             docs = current_docs.copy()
@@ -266,9 +246,7 @@ class DocumentService:
                     break
 
             if not updated:
-                return False, {
-                    "error": f"Document with ID {doc_id} not found in project {project_id}"
-                }
+                return False, {"error": f"Document with ID {doc_id} not found in project {project_id}"}
 
             # Update the project
             response = (
@@ -304,10 +282,7 @@ class DocumentService:
         try:
             # Get current project docs
             project_response = (
-                self.supabase_client.table("archon_projects")
-                .select("docs")
-                .eq("id", project_id)
-                .execute()
+                self.supabase_client.table("archon_projects").select("docs").eq("id", project_id).execute()
             )
             if not project_response.data:
                 return False, {"error": f"Project with ID {project_id} not found"}
@@ -319,9 +294,7 @@ class DocumentService:
             docs = [doc for doc in docs if doc.get("id") != doc_id]
 
             if len(docs) == original_length:
-                return False, {
-                    "error": f"Document with ID {doc_id} not found in project {project_id}"
-                }
+                return False, {"error": f"Document with ID {doc_id} not found in project {project_id}"}
 
             # Update the project
             response = (

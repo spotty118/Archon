@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../features/ui/hooks/useToast";
-import { useSettings } from "../contexts/SettingsContext";
+import { useSettings } from '../hooks/useSettings';
 import { useStaggeredEntrance } from "../hooks/useStaggeredEntrance";
 import { FeaturesSection } from "../components/settings/FeaturesSection";
 import { APIKeysSection } from "../components/settings/APIKeysSection";
@@ -28,7 +28,7 @@ import {
   CodeExtractionSettings as CodeExtractionSettingsType,
 } from "../services/credentialsService";
 
-export const SettingsPage = (): void => {
+export const SettingsPage = (): JSX.Element => {
   const [ragSettings, setRagSettings] = useState<RagSettings>({
     USE_CONTEXTUAL_EMBEDDINGS: false,
     CONTEXTUAL_EMBEDDINGS_MAX_WORKERS: 3,
@@ -60,8 +60,22 @@ export const SettingsPage = (): void => {
   const { projectsEnabled } = useSettings();
 
   // Use staggered entrance animation
-  const { isVisible, containerVariants, itemVariants, titleVariants } =
-    useStaggeredEntrance([1, 2, 3, 4], 0.15);
+  const { isVisible } = useStaggeredEntrance([1, 2, 3, 4], 0.15);
+  
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+  
+  const titleVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0 }
+  };
 
   const loadSettings = useCallback(async (_isRetry = false): Promise<void> => {
     try {
@@ -173,7 +187,7 @@ export const SettingsPage = (): void => {
             >
               <RAGSettings
                 ragSettings={ragSettings}
-                setRagSettings={setRagSettings}
+                setRagSettings={(newSettings) => setRagSettings(prev => ({ ...prev, ...newSettings }))}
               />
             </CollapsibleSettingsCard>
           </motion.div>
@@ -187,7 +201,7 @@ export const SettingsPage = (): void => {
             >
               <CodeExtractionSettings
                 codeExtractionSettings={codeExtractionSettings}
-                setCodeExtractionSettings={setCodeExtractionSettings}
+                setCodeExtractionSettings={(newSettings) => setCodeExtractionSettings(prev => ({ ...prev, ...newSettings }))}
               />
             </CollapsibleSettingsCard>
           </motion.div>
