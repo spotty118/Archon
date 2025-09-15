@@ -217,7 +217,7 @@ export function useMultipleOperations(
     notFoundCounts.current.clear();
   }, [progressIds.join(",")]); // Use join to create stable dependency
 
-  const queries = (useQueries as any)({
+  const queries = useQueries({
     queries: progressIds.map((progressId) => ({
       queryKey: progressKeys.detail(progressId) as readonly unknown[],
       queryFn: async (): Promise<ProgressResponse | null> => {
@@ -262,7 +262,7 @@ export function useMultipleOperations(
 
   // Handle callbacks for each operation
   useEffect(() => {
-    queries.forEach((query: any, index: number) => {
+    queries.forEach((query, index: number) => {
       const progressId = progressIds[index];
       if (!query.data || !progressId) return;
 
@@ -297,7 +297,7 @@ export function useMultipleOperations(
 
   // Forward query errors (e.g., 404s after threshold) to onError callback
   useEffect(() => {
-    queries.forEach((query: any, index: number) => {
+    queries.forEach((query, index: number) => {
       const progressId = progressIds[index];
       if (!query.error || !progressId || errorIds.current.has(progressId)) return;
 
@@ -312,7 +312,7 @@ export function useMultipleOperations(
     });
   }, [queries, progressIds, queryClient, options]);
 
-  return queries.map((query: any, index: number) => {
+  return queries.map((query, index: number) => {
     const data = query.data as ProgressResponse | null;
     return {
       progressId: progressIds[index],

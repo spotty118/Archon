@@ -23,10 +23,6 @@ export function getApiUrl(): string {
   // Use configured port or default to 8181
   const port = import.meta.env.VITE_ARCHON_SERVER_PORT || '8181';
   
-  if (!import.meta.env.VITE_ARCHON_SERVER_PORT) {
-    console.info('[Archon] Using default ARCHON_SERVER_PORT: 8181');
-  }
-  
   return `${protocol}//${host}:${port}`;
 }
 

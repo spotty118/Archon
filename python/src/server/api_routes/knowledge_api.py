@@ -489,7 +489,7 @@ async def refresh_knowledge_item(source_id: str):
         if not existing_item:
             raise HTTPException(
                 status_code=404, detail={"error": f"Knowledge item {source_id} not found"}
-            ) from e
+            )
 
         # Extract metadata
         metadata = existing_item.get("metadata", {})
@@ -500,7 +500,7 @@ async def refresh_knowledge_item(source_id: str):
         if not url:
             raise HTTPException(
                 status_code=400, detail={"error": "Knowledge item does not have a URL to refresh"}
-            ) from e
+            )
         knowledge_type = metadata.get("knowledge_type", "technical")
         tags = metadata.get("tags", [])
         max_depth = metadata.get("max_depth", 2)
