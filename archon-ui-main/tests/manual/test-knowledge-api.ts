@@ -64,7 +64,7 @@ async function testKnowledgeAPI() {
     // Test 5: Search
     console.log('🔎 Test 5: Searching knowledge base...');
     try {
-      const searchResults = await knowledgeService.searchKnowledgeBase({
+      const _searchResults = await knowledgeService.searchKnowledgeBase({
         query: 'API',
         limit: 3,
       });

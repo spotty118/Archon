@@ -154,7 +154,7 @@ async def lifespan(server: FastMCP) -> AsyncIterator[ArchonContext]:
         try:
             # Initialize session manager
             logger.info("🔐 Initializing session manager...")
-            session_manager = get_session_manager()
+            _session_manager = get_session_manager()
             logger.info("✓ Session manager initialized")
 
             # Initialize service client for HTTP calls
