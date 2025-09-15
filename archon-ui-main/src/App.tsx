@@ -40,7 +40,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AppRoutes = () => {
+const AppRoutes = (): JSX.Element => {
   const { projectsEnabled } = useSettings();
   
   return (
@@ -61,7 +61,7 @@ const AppRoutes = () => {
   );
 };
 
-const AppContent = () => {
+const AppContent = (): JSX.Element => {
   const [disconnectScreenActive, setDisconnectScreenActive] = useState(false);
   const [disconnectScreenDismissed, setDisconnectScreenDismissed] = useState(false);
   const [disconnectScreenSettings, setDisconnectScreenSettings] = useState({
@@ -99,7 +99,7 @@ const AppContent = () => {
     };
   }, [disconnectScreenDismissed]);
 
-  const handleDismissDisconnectScreen = () => {
+  const handleDismissDisconnectScreen = (): void => {
     setDisconnectScreenActive(false);
     setDisconnectScreenDismissed(true);
   };
@@ -128,7 +128,7 @@ const AppContent = () => {
   );
 };
 
-export function App() {
+export function App(): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

@@ -202,12 +202,6 @@ export const ButtonPlayground: React.FC = () => {
     return css;
   };
 
-  // Helper functions for CSS generation
-  const getSizePadding = () => {
-    const sizes = { sm: '12px 6px', md: '16px 8px', lg: '24px 12px', xl: '32px 16px' };
-    return sizes['md'];
-  };
-
   const getGlowConfig = (intensity: GlowIntensity) => {
     const configs = {
       none: { blur: 0, spread: 0, opacity: 0 },
@@ -260,23 +254,6 @@ export const ButtonPlayground: React.FC = () => {
       }
     };
     return configs[color];
-  };
-
-  const getGradient = (color: ColorOption) => {
-    if (color === 'none') return 'rgba(255,255,255,0.8), rgba(255,255,255,0.6)';
-    return 'rgba(255,255,255,0.7), rgba(255,255,255,0.5)';
-  };
-
-  const getBorderColor = (color: ColorOption) => {
-    const colors = {
-      none: 'rgba(229,231,235,0.5)',
-      purple: 'rgba(196,181,253,0.6)',
-      pink: 'rgba(251,207,232,0.6)',
-      blue: 'rgba(147,197,253,0.6)',
-      green: 'rgba(134,239,172,0.6)',
-      red: 'rgba(252,165,165,0.6)'
-    };
-    return colors[color];
   };
 
   const copyToClipboard = () => {

@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Key, Plus, Trash2, Save, Lock, Unlock, Eye, EyeOff } from 'lucide-react';
-import { Input } from '../ui/Input';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Trash2, Save, Lock, Unlock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { credentialsService, Credential } from '../../services/credentialsService';
+import { credentialsService } from '../../services/credentialsService';
 import { useToast } from '../../features/ui/hooks/useToast';
 
 interface CustomCredential {
@@ -30,7 +29,7 @@ export const APIKeysSection = () => {
   // Load credentials on mount
   useEffect(() => {
     loadCredentials();
-  }, []);
+  }, [loadCredentials]);
 
   // Track unsaved changes
   useEffect(() => {
@@ -38,7 +37,7 @@ export const APIKeysSection = () => {
     setHasUnsavedChanges(hasChanges);
   }, [customCredentials]);
 
-  const loadCredentials = async () => {
+  const loadCredentials = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -53,7 +52,7 @@ export const APIKeysSection = () => {
       
       // Convert to UI format
       const uiCredentials = apiKeys.map(cred => {
-        const isEncryptedFromBackend = cred.is_encrypted && cred.value === '[ENCRYPTED]';
+        const _isEncryptedFromBackend = cred.is_encrypted && cred.value === '[ENCRYPTED]';
         
         return {
           key: cred.key,
@@ -76,7 +75,7 @@ export const APIKeysSection = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   const handleAddNewRow = () => {
     const newCred: CustomCredential = {
