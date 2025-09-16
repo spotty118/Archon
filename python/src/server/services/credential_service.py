@@ -26,12 +26,12 @@ logger = get_logger(__name__)
 
 @dataclass
 class CredentialItem:
-    """Represents a credential/setting item."""
+    """Simple credential item for API responses."""
 
     key: str
     value: str | None = None
     encrypted_value: str | None = None
-    is_encrypted: bool = False
+    encrypted: bool = False
     category: str | None = None
     description: str | None = None
 
@@ -161,8 +161,8 @@ class CredentialService:
         value = self._cache.get(key, default)
 
         # If it's an encrypted value and we want to decrypt it
-        if isinstance(value, dict) and value.get("is_encrypted") and decrypt:
-            encrypted_value = value.get("encrypted_value")
+        if isinstance(value, dict) and value.get("encrypted") and decrypt:
+            encrypted_value = value.get("value")
             if encrypted_value:
                 try:
                     return self._decrypt_value(encrypted_value)
@@ -178,8 +178,8 @@ class CredentialService:
             await self.load_all_credentials()
 
         value = self._cache.get(key)
-        if isinstance(value, dict) and value.get("is_encrypted"):
-            return value.get("encrypted_value")
+        if isinstance(value, dict) and value.get("encrypted"):
+            return value.get("value")
 
         return None
 
@@ -187,7 +187,7 @@ class CredentialService:
         self,
         key: str,
         value: str,
-        is_encrypted: bool = False,
+        encrypted: bool = False,
         category: str | None = None,
         description: str | None = None,
     ) -> bool:
@@ -195,20 +195,19 @@ class CredentialService:
         try:
             supabase = self._get_supabase_client()
 
-            if is_encrypted:
+            if encrypted:
                 encrypted_value = self._encrypt_value(value)
                 data = {
                     "key": key,
-                    "encrypted_value": encrypted_value,
-                    "value": None,
-                    "is_encrypted": True,
+                    "value": encrypted_value,
+                    "encrypted": True,
                     "category": category,
                     "description": description,
                 }
                 # Update cache with encrypted info
                 self._cache[key] = {
-                    "encrypted_value": encrypted_value,
-                    "is_encrypted": True,
+                    "value": encrypted_value,
+                    "encrypted": True,
                     "category": category,
                     "description": description,
                 }
@@ -216,8 +215,7 @@ class CredentialService:
                 data = {
                     "key": key,
                     "value": value,
-                    "encrypted_value": None,
-                    "is_encrypted": False,
+                    "encrypted": False,
                     "category": category,
                     "description": description,
                 }
@@ -252,7 +250,7 @@ class CredentialService:
                     logger.error(f"Error invalidating LLM provider service cache: {e}")
 
             logger.info(
-                f"Successfully {'encrypted and ' if is_encrypted else ''}stored credential: {key}"
+                f"Successfully {'encrypted and ' if encrypted else ''}stored credential: {key}"
             )
             return True
 
@@ -325,11 +323,11 @@ class CredentialService:
             credentials = {}
             for item in result.data:
                 key = item["key"]
-                if item["is_encrypted"]:
+                if item.get("encrypted", False):
                     credentials[key] = {
                         "value": "[ENCRYPTED]",
-                        "is_encrypted": True,
-                        "description": item["description"],
+                        "encrypted": True,
+                        "description": item.get("description"),
                     }
                 else:
                     credentials[key] = item["value"]
@@ -354,23 +352,23 @@ class CredentialService:
 
             credentials = []
             for item in result.data:
-                if item["is_encrypted"] and item["encrypted_value"]:
+                if item.get("encrypted", False) and item.get("value"):
                     cred = CredentialItem(
                         key=item["key"],
                         value="[ENCRYPTED]",
                         encrypted_value=None,
-                        is_encrypted=item["is_encrypted"],
-                        category=item["category"],
-                        description=item["description"],
+                        encrypted=item.get("encrypted", False),
+                        category=item.get("category"),
+                        description=item.get("description"),
                     )
                 else:
                     cred = CredentialItem(
                         key=item["key"],
-                        value=item["value"],
+                        value=item.get("value"),
                         encrypted_value=None,
-                        is_encrypted=item["is_encrypted"],
-                        category=item["category"],
-                        description=item["description"],
+                        encrypted=item.get("encrypted", False),
+                        category=item.get("category"),
+                        description=item.get("description"),
                     )
                 credentials.append(cred)
 
@@ -392,7 +390,7 @@ class CredentialService:
 
         env_dict = {}
         for key, value in self._cache.items():
-            if isinstance(value, dict) and value.get("is_encrypted"):
+            if isinstance(value, dict) and value.get("encrypted"):
                 # Skip encrypted values in env dict - they need to be handled separately
                 continue
             else:
@@ -502,10 +500,10 @@ async def get_credential(key: str, default: Any = None) -> Any:
 
 
 async def set_credential(
-    key: str, value: str, is_encrypted: bool = False, category: str | None = None, description: str | None = None
+    key: str, value: str, encrypted: bool = False, category: str | None = None, description: str | None = None
 ) -> bool:
     """Convenience function to set a credential."""
-    return await credential_service.set_credential(key, value, is_encrypted, category, description)
+    return await credential_service.set_credential(key, value, encrypted, category, description)
 
 
 async def initialize_credentials() -> None:
