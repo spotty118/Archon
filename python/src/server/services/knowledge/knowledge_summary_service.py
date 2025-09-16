@@ -31,6 +31,7 @@ class KnowledgeSummaryService:
         per_page: int = 20,
         knowledge_type: str | None = None,
         search: str | None = None,
+        tags: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Get lightweight summaries of knowledge items.
@@ -65,6 +66,10 @@ class KnowledgeSummaryService:
                 search_pattern = f"%{search}%"
                 query = query.or_(f"title.ilike.{search_pattern},summary.ilike.{search_pattern}")
 
+            if tags:
+                for tag in tags:
+                    query = query.contains("metadata", {"tags": [tag]})
+
             # Get total count
             count_query = self.supabase.from_("archon_sources").select("*", count="exact", head=True)
 
@@ -74,6 +79,10 @@ class KnowledgeSummaryService:
             if search:
                 search_pattern = f"%{search}%"
                 count_query = count_query.or_(f"title.ilike.{search_pattern},summary.ilike.{search_pattern}")
+
+            if tags:
+                for tag in tags:
+                    count_query = count_query.contains("metadata", {"tags": [tag]})
 
             count_result = count_query.execute()
             total = count_result.count if hasattr(count_result, "count") else 0

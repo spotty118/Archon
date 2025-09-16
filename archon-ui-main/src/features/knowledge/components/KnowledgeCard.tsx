@@ -140,11 +140,19 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   };
 
   return (
-    <button
+    <div
       className="relative group cursor-pointer w-full text-left hover:scale-105 transition-transform duration-200"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onViewDocument}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onViewDocument();
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <div
         className={cn(
@@ -302,6 +310,6 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 };

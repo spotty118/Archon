@@ -9,6 +9,7 @@ import os
 from typing import Any
 
 from ...config.logfire_config import safe_span, search_logger
+from ..credential_service import credential_service
 from ..embeddings.contextual_embedding_service import generate_contextual_embeddings_batch
 from ..embeddings.embedding_service import create_embeddings_batch
 
@@ -44,21 +45,32 @@ async def add_documents_to_supabase(
     """
     with safe_span("add_documents_to_supabase", total_documents=len(contents), batch_size=batch_size) as span:
         # Simple progress reporting helper with batch info support
-        async def report_progress(message: str, progress: int, batch_info: dict[Any, Any] | None = None):
-            if progress_callback and asyncio.iscoroutinefunction(progress_callback):
-                try:
-                    if batch_info:
-                        await progress_callback("document_storage", progress, message, **batch_info)
-                    else:
-                        await progress_callback("document_storage", progress, message)
-                except Exception as e:
-                    search_logger.warning(f"Progress callback failed: {e}. Storage continuing...")
+        async def report_progress(
+            message: str,
+            progress: int,
+            batch_info: dict[Any, Any] | None = None,
+            *,
+            status: str = "document_storage",
+        ):
+            if not progress_callback:
+                return
+
+            payload = dict(batch_info or {})
+            if status:
+                payload.setdefault("status", status)
+
+            try:
+                if asyncio.iscoroutinefunction(progress_callback):
+                    await progress_callback(message, progress, payload or None)
+                else:
+                    progress_callback(message, progress, payload or None)
+            except Exception as e:
+                search_logger.warning(f"Progress callback failed: {e}. Storage continuing...")
 
         # Load settings from database
         try:
-            # Defensive import to handle any initialization issues
-            from ..credential_service import credential_service as cred_service
-            rag_settings = await cred_service.get_credentials_by_category("rag_strategy")
+            # Defensive call to handle any initialization issues
+            rag_settings = await credential_service.get_credentials_by_category("rag_strategy")
             if batch_size is None:
                 batch_size = int(rag_settings.get("DOCUMENT_STORAGE_BATCH_SIZE", "50"))
             # Clamp batch sizes to sane minimums to prevent crashes
@@ -87,14 +99,15 @@ async def add_documents_to_supabase(
                         try:
                             cancellation_check()
                         except asyncio.CancelledError:
-                            if progress_callback:
-                                await progress_callback(
-                                    "cancelled",
-                                    99,
-                                    "Storage cancelled during deletion",
-                                    current_batch=i // delete_batch_size + 1,
-                                    total_batches=(len(unique_urls) + delete_batch_size - 1) // delete_batch_size,
-                                )
+                            await report_progress(
+                                "Storage cancelled during deletion",
+                                99,
+                                {
+                                    "current_batch": i // delete_batch_size + 1,
+                                    "total_batches": (len(unique_urls) + delete_batch_size - 1) // delete_batch_size,
+                                },
+                                status="cancelled",
+                            )
                             raise
 
                     batch_urls = unique_urls[i : i + delete_batch_size]
@@ -114,14 +127,15 @@ async def add_documents_to_supabase(
                     try:
                         cancellation_check()
                     except asyncio.CancelledError:
-                        if progress_callback:
-                            await progress_callback(
-                                "cancelled",
-                                99,
-                                "Storage cancelled during fallback deletion",
-                                current_batch=i // fallback_batch_size + 1,
-                                total_batches=(len(unique_urls) + fallback_batch_size - 1) // fallback_batch_size,
-                            )
+                        await report_progress(
+                            "Storage cancelled during fallback deletion",
+                            99,
+                            {
+                                "current_batch": i // fallback_batch_size + 1,
+                                "total_batches": (len(unique_urls) + fallback_batch_size - 1) // fallback_batch_size,
+                            },
+                            status="cancelled",
+                        )
                         raise
 
                 batch_urls = unique_urls[i : i + fallback_batch_size]
@@ -159,14 +173,12 @@ async def add_documents_to_supabase(
                 try:
                     cancellation_check()
                 except asyncio.CancelledError:
-                    if progress_callback:
-                        await progress_callback(
-                            "cancelled",
-                            99,
-                            "Storage cancelled during batch processing",
-                            current_batch=batch_num,
-                            total_batches=total_batches,
-                        )
+                    await report_progress(
+                        "Storage cancelled during batch processing",
+                        99,
+                        {"current_batch": batch_num, "total_batches": total_batches},
+                        status="cancelled",
+                    )
                     raise
 
             batch_end = min(i + batch_size, len(contents))
@@ -193,22 +205,17 @@ async def add_documents_to_supabase(
                 max_workers = 1
 
             # Report batch start with simplified progress
-            if progress_callback and asyncio.iscoroutinefunction(progress_callback):
-                try:
-                    await progress_callback(
-                        "document_storage",  # status (will be overridden by base_status anyway)
-                        current_progress,  # progress
-                        f"Processing batch {batch_num}/{total_batches} ({len(batch_contents)} chunks)",  # message
-                        **{  # **kwargs - these will be stored at top level
-                            "current_batch": batch_num,
-                            "total_batches": total_batches,
-                            "completed_batches": completed_batches,
-                            "chunks_in_batch": len(batch_contents),
-                            "active_workers": max_workers if use_contextual_embeddings else 1,
-                        },
-                    )
-                except Exception as e:
-                    search_logger.warning(f"Progress callback failed: {e}. Storage continuing...")
+            await report_progress(
+                f"Processing batch {batch_num}/{total_batches} ({len(batch_contents)} chunks)",
+                current_progress,
+                {
+                    "current_batch": batch_num,
+                    "total_batches": total_batches,
+                    "completed_batches": completed_batches,
+                    "chunks_in_batch": len(batch_contents),
+                    "active_workers": max_workers if use_contextual_embeddings else 1,
+                },
+            )
 
             # Skip batch start progress to reduce traffic
             # Only report on completion
@@ -239,14 +246,12 @@ async def add_documents_to_supabase(
                             try:
                                 cancellation_check()
                             except asyncio.CancelledError:
-                                if progress_callback:
-                                    await progress_callback(
-                                        "cancelled",
-                                        99,
-                                        "Storage cancelled during contextual embedding",
-                                        current_batch=batch_num,
-                                        total_batches=total_batches,
-                                    )
+                                await report_progress(
+                                    "Storage cancelled during contextual embedding",
+                                    99,
+                                    {"current_batch": batch_num, "total_batches": total_batches},
+                                    status="cancelled",
+                                )
                                 raise
 
                         ctx_end = min(ctx_i + contextual_batch_size, len(batch_contents))
@@ -285,12 +290,10 @@ async def add_documents_to_supabase(
                     # Forward rate limiting messages to the main progress callback
                     if progress_callback and "rate limit" in message.lower():
                         try:
-                            await progress_callback(
-                                "document_storage",
-                                progress,  # Use captured batch progress
+                            await report_progress(
                                 message,
-                                current_batch=batch,
-                                event="rate_limit_wait",
+                                progress,  # Use captured batch progress
+                                {"current_batch": batch, "event": "rate_limit_wait"},
                             )
                         except Exception as e:
                             search_logger.warning(f"Progress callback failed during rate limiting: {e}")
@@ -317,7 +320,6 @@ async def add_documents_to_supabase(
             
             # Get model information for tracking
             from ..llm_provider_service import get_embedding_model
-            from ..credential_service import credential_service
             
             # Get embedding model name
             embedding_model_name = await get_embedding_model(provider=provider)
@@ -411,14 +413,12 @@ async def add_documents_to_supabase(
                     try:
                         cancellation_check()
                     except asyncio.CancelledError:
-                        if progress_callback:
-                            await progress_callback(
-                                "cancelled",
-                                99,
-                                "Storage cancelled during batch insert",
-                                current_batch=batch_num,
-                                total_batches=total_batches,
-                            )
+                        await report_progress(
+                            "Storage cancelled during batch insert",
+                            99,
+                            {"current_batch": batch_num, "total_batches": total_batches},
+                            status="cancelled",
+                        )
                         raise
 
                 try:
@@ -463,14 +463,12 @@ async def add_documents_to_supabase(
                                 try:
                                     cancellation_check()
                                 except asyncio.CancelledError:
-                                    if progress_callback:
-                                        await progress_callback(
-                                            "cancelled",
-                                            99,
-                                            "Storage cancelled during individual insert",
-                                            current_batch=batch_num,
-                                            total_batches=total_batches,
-                                        )
+                                    await report_progress(
+                                        "Storage cancelled during individual insert",
+                                        99,
+                                        {"current_batch": batch_num, "total_batches": total_batches},
+                                        status="cancelled",
+                                    )
                                     raise
 
                             try:
@@ -488,25 +486,24 @@ async def add_documents_to_supabase(
                 await asyncio.sleep(0.1)  # Reduced from 1.5s/0.5s to 0.1s
 
         # Send final progress report for this stage (100% of document_storage stage, not overall)
-        if progress_callback and asyncio.iscoroutinefunction(progress_callback):
-            try:
-                search_logger.info(
-                    f"DEBUG document_storage sending final 100% | total_batches={total_batches} | "
-                    f"chunks_stored={total_chunks_stored} | contents_len={len(contents)}"
-                )
-                await progress_callback(
-                    "document_storage",
-                    100,  # 100% of document_storage stage (will be mapped to 40% overall)
-                    f"Document storage completed: {len(contents)} chunks stored in {total_batches} batches",
-                    completed_batches=total_batches,
-                    total_batches=total_batches,
-                    current_batch=total_batches,
-                    chunks_processed=len(contents),
-                    # DON'T send 'status': 'completed' - that's for the orchestration service only!
-                )
-                search_logger.info("DEBUG document_storage final 100% sent successfully")
-            except Exception as e:
-                search_logger.warning(f"Progress callback failed during completion: {e}. Storage still successful.")
+        try:
+            search_logger.info(
+                f"DEBUG document_storage sending final 100% | total_batches={total_batches} | "
+                f"chunks_stored={total_chunks_stored} | contents_len={len(contents)}"
+            )
+            await report_progress(
+                f"Document storage completed: {len(contents)} chunks stored in {total_batches} batches",
+                100,
+                {
+                    "completed_batches": total_batches,
+                    "total_batches": total_batches,
+                    "current_batch": total_batches,
+                    "chunks_processed": len(contents),
+                },
+            )
+            search_logger.info("DEBUG document_storage final 100% sent successfully")
+        except Exception as e:
+            search_logger.warning(f"Progress callback failed during completion: {e}. Storage still successful.")
 
         span.set_attribute("success", True)
         span.set_attribute("total_processed", len(contents))
