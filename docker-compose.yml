@@ -172,8 +172,8 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - ./archon-ui-main/src:/app/src
-      - ./archon-ui-main/public:/app/public
+      - ./archon-ui-main:/app
+      - /app/node_modules
     depends_on:
       archon-server:
         condition: service_healthy

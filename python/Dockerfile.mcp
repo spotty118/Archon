@@ -38,21 +38,5 @@ ARG ARCHON_MCP_PORT=8051
 ENV ARCHON_MCP_PORT=${ARCHON_MCP_PORT}
 EXPOSE ${ARCHON_MCP_PORT}
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-# Start the MCP server in background\n\
-python -m src.mcp_server.mcp_server &\n\
-MCP_PID=$!\n\
-\n\
-# Wait a moment for MCP to start\n\
-sleep 2\n\
-\n\
-# Start simple health server\n\
-python -m src.mcp_server.health_server &\n\
-HEALTH_PID=$!\n\
-\n\
-# Wait for either process to exit\n\
-wait $MCP_PID $HEALTH_PID' > /app/start.sh && chmod +x /app/start.sh
-
-# Run both servers
-CMD ["/bin/bash", "/app/start.sh"]
+# Run the MCP server
+CMD ["python", "-m", "src.mcp_server.mcp_server"]
