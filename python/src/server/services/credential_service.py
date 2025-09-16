@@ -130,18 +130,18 @@ class CredentialService:
             credentials = {}
             for item in result.data:
                 key = item["key"]
-                if item["is_encrypted"] and item["encrypted_value"]:
+                if item.get("encrypted", False):
                     # For encrypted values, we store the encrypted version
                     # Decryption happens when the value is actually needed
                     credentials[key] = {
-                        "encrypted_value": item["encrypted_value"],
+                        "encrypted_value": item.get("value", ""),
                         "is_encrypted": True,
-                        "category": item["category"],
-                        "description": item["description"],
+                        "category": item.get("category"),
+                        "description": item.get("description"),
                     }
                 else:
                     # Plain text values
-                    credentials[key] = item["value"]
+                    credentials[key] = item.get("value", "")
 
             self._cache = credentials
             self._cache_initialized = True
