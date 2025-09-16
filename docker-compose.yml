@@ -87,6 +87,7 @@ services:
       - ARCHON_MCP_PORT=${ARCHON_MCP_PORT:-8051}
       - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+      - FASTMCP_STREAMABLE_HTTP_PATH=/
     networks:
       - app-network
       - supabase_network_Archon
