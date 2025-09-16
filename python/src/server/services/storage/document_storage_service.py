@@ -56,14 +56,12 @@ async def add_documents_to_supabase(
                 return
 
             payload = dict(batch_info or {})
-            if status:
-                payload.setdefault("status", status)
 
             try:
                 if asyncio.iscoroutinefunction(progress_callback):
-                    await progress_callback(message, progress, payload or None)
+                    await progress_callback(status, progress, message, **payload)
                 else:
-                    progress_callback(message, progress, payload or None)
+                    progress_callback(status, progress, message, **payload)
             except Exception as e:
                 search_logger.warning(f"Progress callback failed: {e}. Storage continuing...")
 

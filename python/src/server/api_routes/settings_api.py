@@ -67,6 +67,7 @@ async def list_credentials(category: str | None = None):
                     "value": cred.value,
                     "encrypted_value": cred.encrypted_value,
                     "encrypted": cred.encrypted,
+                    "is_encrypted": cred.encrypted,
                     "category": cred.category,
                     "description": cred.description,
                 }
@@ -160,18 +161,19 @@ async def get_credential(key: str):
 
         safe_logfire_info(f"Credential retrieved successfully | key={key}")
 
-        if isinstance(value, dict) and value.get("encrypted"):
+        if isinstance(value, dict) and (value.get("encrypted") or value.get("is_encrypted")):
             return {
                 "key": key,
                 "value": "[ENCRYPTED]",
                 "encrypted": True,
+                "is_encrypted": True,
                 "category": value.get("category"),
                 "description": value.get("description"),
-                "has_value": bool(value.get("value")),
+                "has_value": bool(value.get("value")) or bool(value.get("encrypted_value")),
             }
 
         # For non-encrypted credentials, return the actual value
-        return {"key": key, "value": value, "encrypted": False}
+        return {"key": key, "value": value, "encrypted": False, "is_encrypted": False}
 
     except HTTPException:
         raise

@@ -130,17 +130,17 @@ class CredentialService:
             credentials = {}
             for item in result.data:
                 key = item["key"]
-                if item.get("encrypted", False):
-                    # For encrypted values, we store the encrypted version
-                    # Decryption happens when the value is actually needed
+                is_encrypted = bool(item.get("encrypted") or item.get("is_encrypted"))
+                if is_encrypted:
+                    encrypted_value = item.get("encrypted_value") or item.get("value", "")
                     credentials[key] = {
-                        "encrypted_value": item.get("value", ""),
+                        "encrypted_value": encrypted_value,
                         "is_encrypted": True,
+                        "encrypted": True,
                         "category": item.get("category"),
                         "description": item.get("description"),
                     }
                 else:
-                    # Plain text values
                     credentials[key] = item.get("value", "")
 
             self._cache = credentials
@@ -161,8 +161,8 @@ class CredentialService:
         value = self._cache.get(key, default)
 
         # If it's an encrypted value and we want to decrypt it
-        if isinstance(value, dict) and value.get("encrypted") and decrypt:
-            encrypted_value = value.get("value")
+        if isinstance(value, dict) and value.get("is_encrypted") and decrypt:
+            encrypted_value = value.get("encrypted_value") or value.get("value")
             if encrypted_value:
                 try:
                     return self._decrypt_value(encrypted_value)
@@ -178,8 +178,8 @@ class CredentialService:
             await self.load_all_credentials()
 
         value = self._cache.get(key)
-        if isinstance(value, dict) and value.get("encrypted"):
-            return value.get("value")
+        if isinstance(value, dict) and value.get("is_encrypted"):
+            return value.get("encrypted_value") or value.get("value")
 
         return None
 
@@ -187,7 +187,9 @@ class CredentialService:
         self,
         key: str,
         value: str,
-        encrypted: bool = False,
+        *,
+        encrypted: bool | None = None,
+        is_encrypted: bool | None = None,
         category: str | None = None,
         description: str | None = None,
     ) -> bool:
@@ -195,7 +197,9 @@ class CredentialService:
         try:
             supabase = self._get_supabase_client()
 
-            if encrypted:
+            should_encrypt = encrypted if encrypted is not None else bool(is_encrypted)
+
+            if should_encrypt:
                 encrypted_value = self._encrypt_value(value)
                 data = {
                     "key": key,
@@ -206,7 +210,8 @@ class CredentialService:
                 }
                 # Update cache with encrypted info
                 self._cache[key] = {
-                    "value": encrypted_value,
+                    "encrypted_value": encrypted_value,
+                    "is_encrypted": True,
                     "encrypted": True,
                     "category": category,
                     "description": description,
@@ -323,10 +328,12 @@ class CredentialService:
             credentials = {}
             for item in result.data:
                 key = item["key"]
-                if item.get("encrypted", False):
+                is_encrypted = bool(item.get("encrypted") or item.get("is_encrypted"))
+                if is_encrypted:
                     credentials[key] = {
                         "value": "[ENCRYPTED]",
                         "encrypted": True,
+                        "is_encrypted": True,
                         "description": item.get("description"),
                     }
                 else:
@@ -352,12 +359,13 @@ class CredentialService:
 
             credentials = []
             for item in result.data:
-                if item.get("encrypted", False) and item.get("value"):
+                is_encrypted = bool(item.get("encrypted") or item.get("is_encrypted"))
+                if is_encrypted:
                     cred = CredentialItem(
                         key=item["key"],
                         value="[ENCRYPTED]",
-                        encrypted_value=None,
-                        encrypted=item.get("encrypted", False),
+                        encrypted_value=item.get("value") or item.get("encrypted_value"),
+                        encrypted=True,
                         category=item.get("category"),
                         description=item.get("description"),
                     )
@@ -366,7 +374,7 @@ class CredentialService:
                         key=item["key"],
                         value=item.get("value"),
                         encrypted_value=None,
-                        encrypted=item.get("encrypted", False),
+                        encrypted=False,
                         category=item.get("category"),
                         description=item.get("description"),
                     )
@@ -390,7 +398,7 @@ class CredentialService:
 
         env_dict = {}
         for key, value in self._cache.items():
-            if isinstance(value, dict) and value.get("encrypted"):
+            if isinstance(value, dict) and (value.get("encrypted") or value.get("is_encrypted")):
                 # Skip encrypted values in env dict - they need to be handled separately
                 continue
             else:
@@ -500,10 +508,23 @@ async def get_credential(key: str, default: Any = None) -> Any:
 
 
 async def set_credential(
-    key: str, value: str, encrypted: bool = False, category: str | None = None, description: str | None = None
+    key: str,
+    value: str,
+    *,
+    encrypted: bool | None = None,
+    is_encrypted: bool | None = None,
+    category: str | None = None,
+    description: str | None = None,
 ) -> bool:
     """Convenience function to set a credential."""
-    return await credential_service.set_credential(key, value, encrypted, category, description)
+    return await credential_service.set_credential(
+        key,
+        value,
+        encrypted=encrypted,
+        is_encrypted=is_encrypted,
+        category=category,
+        description=description,
+    )
 
 
 async def initialize_credentials() -> None:
