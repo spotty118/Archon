@@ -27,14 +27,14 @@ router = APIRouter(prefix="/api", tags=["settings"])
 class CredentialRequest(BaseModel):
     key: str
     value: str
-    is_encrypted: bool = False
+    encrypted: bool = False
     category: str | None = None
     description: str | None = None
 
 
 class CredentialUpdateRequest(BaseModel):
     value: str
-    is_encrypted: bool | None = None
+    encrypted: bool | None = None
     category: str | None = None
     description: str | None = None
 
@@ -59,17 +59,19 @@ async def list_credentials(category: str | None = None):
         result_count = len(credentials)
         safe_logfire_info(f"Credentials listed successfully | count={result_count} | category={category}")
 
-        return [
-            {
-                "key": cred.key,
-                "value": cred.value,
-                "encrypted_value": cred.encrypted_value,
-                "is_encrypted": cred.is_encrypted,
-                "category": cred.category,
-                "description": cred.description,
-            }
-            for cred in credentials
-        ]
+        items = []
+        for cred in credentials:
+            items.append(
+                {
+                    "key": cred.key,
+                    "value": cred.value,
+                    "encrypted_value": cred.encrypted_value,
+                    "encrypted": cred.encrypted,
+                    "category": cred.category,
+                    "description": cred.description,
+                }
+            )
+        return items
     except Exception as e:
         safe_logfire_error(f"Error listing credentials | category={category} | error={str(e)}")
         raise HTTPException(status_code=500, detail={"error": str(e)}) from e
@@ -95,25 +97,25 @@ async def create_credential(request: CredentialRequest):
     """Create or update a credential."""
     try:
         safe_logfire_info(
-            f"Creating/updating credential | key={request.key} | is_encrypted={request.is_encrypted} | category={request.category}"
+            f"Creating/updating credential | key={request.key} | encrypted={request.encrypted} | category={request.category}"
         )
 
         success = await credential_service.set_credential(
             key=request.key,
             value=request.value,
-            is_encrypted=request.is_encrypted,
+            encrypted=request.encrypted,
             category=request.category,
             description=request.description,
         )
 
         if success:
             safe_logfire_info(
-                f"Credential saved successfully | key={request.key} | is_encrypted={request.is_encrypted}"
+                f"Credential saved successfully | key={request.key} | encrypted={request.encrypted}"
             )
 
             return {
                 "success": True,
-                "message": f"Credential {request.key} {'encrypted and ' if request.is_encrypted else ''}saved successfully",
+                "message": f"Credential {request.key} {'encrypted and ' if request.encrypted else ''}saved successfully",
             }
         else:
             safe_logfire_error(f"Failed to save credential | key={request.key}")
@@ -160,18 +162,18 @@ async def get_credential(key: str):
 
         safe_logfire_info(f"Credential retrieved successfully | key={key}")
 
-        if isinstance(value, dict) and value.get("is_encrypted"):
+        if isinstance(value, dict) and value.get("encrypted"):
             return {
                 "key": key,
                 "value": "[ENCRYPTED]",
-                "is_encrypted": True,
+                "encrypted": True,
                 "category": value.get("category"),
                 "description": value.get("description"),
-                "has_value": bool(value.get("encrypted_value")),
+                "has_value": bool(value.get("value")),
             }
 
         # For non-encrypted credentials, return the actual value
-        return {"key": key, "value": value, "is_encrypted": False}
+        return {"key": key, "value": value, "encrypted": False}
 
     except HTTPException:
         raise
@@ -190,12 +192,12 @@ async def update_credential(key: str, request: dict[str, Any]):
         if isinstance(request, dict):
             # If the request contains a 'value' field directly, use it
             value = request.get("value", "")
-            is_encrypted = request.get("is_encrypted")
+            encrypted = request.get("encrypted")
             category = request.get("category")
             description = request.get("description")
         else:
             value = request.value
-            is_encrypted = request.is_encrypted
+            encrypted = request.encrypted
             category = request.category
             description = request.description
 
@@ -205,12 +207,12 @@ async def update_credential(key: str, request: dict[str, Any]):
 
         if existing is None:
             # If credential doesn't exist, create it
-            is_encrypted = is_encrypted if is_encrypted is not None else False
+            encrypted = encrypted if encrypted is not None else False
             safe_logfire_info(f"Creating new credential via PUT | key={key}")
         else:
             # Preserve existing values if not provided
-            if is_encrypted is None:
-                is_encrypted = existing.is_encrypted
+            if encrypted is None:
+                encrypted = existing.encrypted
             if category is None:
                 category = existing.category
             if description is None:
@@ -220,13 +222,13 @@ async def update_credential(key: str, request: dict[str, Any]):
         success = await credential_service.set_credential(
             key=key,
             value=value,
-            is_encrypted=is_encrypted,
+            encrypted=encrypted,
             category=category,
             description=description,
         )
 
         if success:
-            safe_logfire_info(f"Credential updated successfully | key={key} | is_encrypted={is_encrypted}")
+            safe_logfire_info(f"Credential updated successfully | key={key} | encrypted={encrypted}")
 
             return {"success": True, "message": f"Credential {key} updated successfully"}
         else:
