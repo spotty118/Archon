@@ -7,8 +7,6 @@ various embedding models from OpenAI, Google, Ollama, and other providers.
 This service works with the tested database schema that has been validated.
 """
 
-from typing import Any
-
 from ...config.logfire_config import get_logger
 
 logger = get_logger(__name__)
