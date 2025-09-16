@@ -52,6 +52,15 @@ archon-ui-main/
     └── test-results.json     # Test execution results
 ```
 
+## 🚀 Running the Suite
+
+Most component and service tests run in isolation, but the Vitest integration specs in `test/integration/knowledge/` call the live FastAPI backend. Start the API before running `npm run test -- --run`; otherwise those cases receive empty `{}` payloads from `http://localhost:8181` and assertions fail. Two easy ways to boot the backend:
+
+- `make dev` – Docker backend plus local frontend
+- `docker compose --profile backend up -d` – backend services only
+
+Once the backend is up, the integration tests exercise the real endpoints (`/api/knowledge-items`, `/api/progress`, etc.) and succeed.
+
 ## 🔧 Configuration
 
 ### vitest.config.ts
