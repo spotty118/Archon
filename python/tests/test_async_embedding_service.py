@@ -65,20 +65,14 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
                         # Mock credential service properly
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         # Setup proper async context manager
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
@@ -101,19 +95,13 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
 
@@ -130,25 +118,17 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         # Setup client to raise an error
                         mock_client = MagicMock()
-                        mock_client.embeddings.create = AsyncMock(
-                            side_effect=Exception("API Error")
-                        )
+                        mock_client.embeddings.create = AsyncMock(side_effect=Exception("API Error"))
                         mock_get_client.return_value = AsyncContextManager(mock_client)
 
                         # Should raise exception now instead of returning zero embeddings
@@ -170,19 +150,13 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
 
@@ -216,19 +190,13 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         # Setup client to raise rate limit error (not quota)
                         mock_client = MagicMock()
@@ -257,19 +225,13 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
 
                         # Setup client to raise quota exhausted error
                         mock_client = MagicMock()
@@ -284,9 +246,7 @@ class TestAsyncEmbeddingService:
                         # Mock progress callback
                         progress_callback = AsyncMock()
 
-                        result = await create_embeddings_batch(
-                            ["text1", "text2"], progress_callback=progress_callback
-                        )
+                        result = await create_embeddings_batch(["text1", "text2"], progress_callback=progress_callback)
 
                         # Should return result with failures, not zero embeddings
                         assert isinstance(result, EmbeddingBatchResult)
@@ -297,11 +257,8 @@ class TestAsyncEmbeddingService:
                         # Verify quota exhausted is in error messages
                         assert any("quota" in item["error"].lower() for item in result.failed_items)
 
-
     @pytest.mark.asyncio
-    async def test_create_embeddings_batch_with_progress_callback(
-        self, mock_llm_client, mock_threading_service
-    ):
+    async def test_create_embeddings_batch_with_progress_callback(self, mock_llm_client, mock_threading_service):
         """Test batch embedding with progress callback"""
         mock_response = MagicMock()
         mock_response.data = [MagicMock(embedding=[0.1] * 1536)]
@@ -311,28 +268,20 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "1"}
-                        )
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "1"})
 
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
 
                         # Mock progress callback
                         progress_callback = AsyncMock()
 
-                        result = await create_embeddings_batch(
-                            ["text1"], progress_callback=progress_callback
-                        )
+                        result = await create_embeddings_batch(["text1"], progress_callback=progress_callback)
 
                         # Verify result
                         assert isinstance(result, EmbeddingBatchResult)
@@ -352,18 +301,10 @@ class TestAsyncEmbeddingService:
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
-                with patch(
-                    "src.server.services.embeddings.embedding_service.get_embedding_model"
-                ) as mock_get_model:
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "10"}
-                        )
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
+                with patch("src.server.services.embeddings.embedding_service.get_embedding_model") as mock_get_model:
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "10"})
                         mock_get_model.return_value = "custom-model"
 
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
@@ -371,40 +312,28 @@ class TestAsyncEmbeddingService:
                         await create_embedding("test text", provider="custom-provider")
 
                         # Verify provider was passed to get_llm_client
-                        mock_get_client.assert_called_with(
-                            provider="custom-provider", use_embedding_provider=True
-                        )
+                        mock_get_client.assert_called_with(provider="custom-provider", use_embedding_provider=True)
                         mock_get_model.assert_called_with(provider="custom-provider")
 
     @pytest.mark.asyncio
-    async def test_create_embeddings_batch_large_batch_splitting(
-        self, mock_llm_client, mock_threading_service
-    ):
+    async def test_create_embeddings_batch_large_batch_splitting(self, mock_llm_client, mock_threading_service):
         """Test that large batches are properly split according to batch size settings"""
         mock_response = MagicMock()
-        mock_response.data = [
-            MagicMock(embedding=[0.1] * 1536) for _ in range(2)
-        ]  # 2 embeddings per call
+        mock_response.data = [MagicMock(embedding=[0.1] * 1536) for _ in range(2)]  # 2 embeddings per call
         mock_llm_client.embeddings.create = AsyncMock(return_value=mock_response)
 
         with patch(
             "src.server.services.embeddings.embedding_service.get_threading_service",
             return_value=mock_threading_service,
         ):
-            with patch(
-                "src.server.services.embeddings.embedding_service.get_llm_client"
-            ) as mock_get_client:
+            with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_get_client:
                 with patch(
                     "src.server.services.embeddings.embedding_service.get_embedding_model",
                     return_value="text-embedding-3-small",
                 ):
-                    with patch(
-                        "src.server.services.embeddings.embedding_service.credential_service"
-                    ) as mock_cred:
+                    with patch("src.server.services.embeddings.embedding_service.credential_service") as mock_cred:
                         # Set batch size to 2
-                        mock_cred.get_credentials_by_category = AsyncMock(
-                            return_value={"EMBEDDING_BATCH_SIZE": "2"}
-                        )
+                        mock_cred.get_credentials_by_category = AsyncMock(return_value={"EMBEDDING_BATCH_SIZE": "2"})
 
                         mock_get_client.return_value = AsyncContextManager(mock_llm_client)
 

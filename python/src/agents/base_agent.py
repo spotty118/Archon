@@ -17,7 +17,6 @@ from pydantic_ai import Agent
 logger = logging.getLogger(__name__)
 
 
-
 @dataclass
 class ArchonDependencies:
     """Base dependencies for all Archon agents."""

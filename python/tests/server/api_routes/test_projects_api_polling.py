@@ -32,9 +32,10 @@ class TestProjectsListPolling:
             {"id": "proj-2", "name": "Project 2", "description": "Another project"},
         ]
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.list_projects.return_value = (True, {"projects": mock_projects})
@@ -67,9 +68,10 @@ class TestProjectsListPolling:
             {"id": "proj-1", "name": "Project 1", "description": "Test"},
         ]
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.list_projects.return_value = (True, {"projects": mock_projects})
@@ -97,9 +99,10 @@ class TestProjectsListPolling:
         """Test that ETag changes when project data changes."""
         from src.server.api_routes.projects_api import list_projects
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_source_service = MagicMock()
@@ -128,9 +131,10 @@ class TestProjectsListPolling:
 
     def test_list_projects_http_with_etag(self, test_client):
         """Test projects endpoint via HTTP with ETag support."""
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             projects = [{"id": "proj-1", "name": "Test Project"}]
@@ -147,10 +151,7 @@ class TestProjectsListPolling:
             etag = response1.headers["ETag"]
 
             # Second request with If-None-Match
-            response2 = test_client.get(
-                "/api/projects",
-                headers={"If-None-Match": etag}
-            )
+            response2 = test_client.get("/api/projects", headers={"If-None-Match": etag})
             assert response2.status_code == 304
             assert response2.content == b""
 
@@ -170,9 +171,10 @@ class TestProjectTasksPolling:
             {"id": "task-2", "title": "Task 2", "status": "doing", "task_order": 2},
         ]
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.TaskService") as mock_task_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.TaskService") as mock_task_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.get_project.return_value = (True, {"id": "proj-1", "name": "Test"})
@@ -206,9 +208,10 @@ class TestProjectTasksPolling:
             {"id": "task-1", "title": "Task 1", "status": "todo"},
         ]
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.TaskService") as mock_task_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.TaskService") as mock_task_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.get_project.return_value = (True, {"id": "proj-1"})
@@ -238,18 +241,24 @@ class TestProjectTasksPolling:
 
     def test_list_project_tasks_http_polling(self, test_client):
         """Test project tasks endpoint polling via HTTP."""
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.TaskService") as mock_task_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.TaskService") as mock_task_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.get_project.return_value = (True, {"id": "proj-1"})
 
             mock_task_service = MagicMock()
             mock_task_class.return_value = mock_task_service
-            mock_task_service.list_tasks.return_value = (True, {"tasks": [
-                {"id": "task-1", "title": "Test Task", "status": "todo"},
-            ]})
+            mock_task_service.list_tasks.return_value = (
+                True,
+                {
+                    "tasks": [
+                        {"id": "task-1", "title": "Test Task", "status": "todo"},
+                    ]
+                },
+            )
 
             # Simulate multiple polling requests
             etag = None
@@ -276,9 +285,10 @@ class TestPollingEdgeCases:
         """Test ETag generation for empty projects list."""
         from src.server.api_routes.projects_api import list_projects
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.SourceLinkingService") as mock_source_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.list_projects.return_value = (True, {"projects": []})
@@ -306,9 +316,10 @@ class TestPollingEdgeCases:
 
         from src.server.api_routes.projects_api import list_project_tasks
 
-        with patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class, \
-             patch("src.server.api_routes.projects_api.TaskService") as mock_task_class:
-
+        with (
+            patch("src.server.api_routes.projects_api.ProjectService") as mock_proj_class,
+            patch("src.server.api_routes.projects_api.TaskService") as mock_task_class,
+        ):
             mock_proj_service = MagicMock()
             mock_proj_class.return_value = mock_proj_service
             mock_proj_service.get_project.return_value = (False, "Project not found")

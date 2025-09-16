@@ -219,7 +219,6 @@ class TestAsyncCredentialService:
             # Plain text values should be stored directly
             assert credential_service._cache["MODEL_CHOICE"] == "gpt-4.1-nano"
 
-
     @pytest.mark.asyncio
     async def test_get_active_provider_basic(self, mock_supabase_client):
         """Test basic provider configuration retrieval"""
@@ -277,9 +276,7 @@ class TestAsyncCredentialService:
         credential_service._cache = {"CORRUPTED_KEY": encrypted_data}
         credential_service._cache_initialized = True
 
-        with patch.object(
-            credential_service, "_decrypt_value", side_effect=Exception("Decryption failed")
-        ):
+        with patch.object(credential_service, "_decrypt_value", side_effect=Exception("Decryption failed")):
             # Should fall back to default when decryption fails
             result = await credential_service.get_credential("CORRUPTED_KEY", "fallback_value")
             assert result == "fallback_value"

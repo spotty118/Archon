@@ -498,7 +498,7 @@ def generate_code_example_summary(
         A dictionary with 'summary' and 'example_name'
     """
     import asyncio
-    
+
     # Run the async version in the current thread
     return asyncio.run(_generate_code_example_summary_async(code, context_before, context_after, language, provider))
 
@@ -510,7 +510,7 @@ async def _generate_code_example_summary_async(
     Async version of generate_code_example_summary using unified LLM provider service.
     """
     from ..llm_provider_service import get_llm_client
-    
+
     # Get model choice from credential service (RAG setting)
     model_choice = _get_model_choice()
 
@@ -543,10 +543,8 @@ Format your response as JSON:
     try:
         # Use unified LLM provider service
         async with get_llm_client(provider=provider) as client:
-            search_logger.info(
-                f"Generating summary for {hash(code) & 0xffffff:06x} using model: {model_choice}"
-            )
-            
+            search_logger.info(f"Generating summary for {hash(code) & 0xFFFFFF:06x} using model: {model_choice}")
+
             response = await client.chat.completions.create(
                 model=model_choice,
                 messages=[
@@ -571,9 +569,7 @@ Format your response as JSON:
                 search_logger.warning(f"Incomplete response from LLM: {result}")
 
             final_result = {
-                "example_name": result.get(
-                    "example_name", f"Code Example{f' ({language})' if language else ''}"
-                ),
+                "example_name": result.get("example_name", f"Code Example{f' ({language})' if language else ''}"),
                 "summary": result.get("summary", "Code example for demonstration purposes."),
             }
 
@@ -827,14 +823,14 @@ async def add_code_examples_to_supabase(
         # Use only successful embeddings
         valid_embeddings = result.embeddings
         successful_texts = result.texts_processed
-        
+
         # Get model information for tracking
-        from ..llm_provider_service import get_embedding_model
         from ..credential_service import credential_service
-        
+        from ..llm_provider_service import get_embedding_model
+
         # Get embedding model name
         embedding_model_name = await get_embedding_model(provider=provider)
-        
+
         # Get LLM chat model (used for code summaries and contextual embeddings if enabled)
         llm_chat_model = None
         try:
@@ -889,7 +885,7 @@ async def add_code_examples_to_supabase(
             # Determine the correct embedding column based on dimension
             embedding_dim = len(embedding) if isinstance(embedding, list) else len(embedding.tolist())
             embedding_column = None
-            
+
             if embedding_dim == 768:
                 embedding_column = "embedding_768"
             elif embedding_dim == 1024:
@@ -902,19 +898,21 @@ async def add_code_examples_to_supabase(
                 # Default to closest supported dimension
                 search_logger.warning(f"Unsupported embedding dimension {embedding_dim}, using embedding_1536")
                 embedding_column = "embedding_1536"
-            
-            batch_data.append({
-                "url": urls[idx],
-                "chunk_number": chunk_numbers[idx],
-                "content": code_examples[idx],
-                "summary": summaries[idx],
-                "metadata": metadatas[idx],  # Store as JSON object, not string
-                "source_id": source_id,
-                embedding_column: embedding,
-                "llm_chat_model": llm_chat_model,  # Add LLM model tracking
-                "embedding_model": embedding_model_name,  # Add embedding model tracking
-                "embedding_dimension": embedding_dim,  # Add dimension tracking
-            })
+
+            batch_data.append(
+                {
+                    "url": urls[idx],
+                    "chunk_number": chunk_numbers[idx],
+                    "content": code_examples[idx],
+                    "summary": summaries[idx],
+                    "metadata": metadatas[idx],  # Store as JSON object, not string
+                    "source_id": source_id,
+                    embedding_column: embedding,
+                    "llm_chat_model": llm_chat_model,  # Add LLM model tracking
+                    "embedding_model": embedding_model_name,  # Add embedding model tracking
+                    "embedding_dimension": embedding_dim,  # Add dimension tracking
+                }
+            )
 
         if not batch_data:
             search_logger.warning("No records to insert for this batch; skipping insert.")

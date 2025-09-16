@@ -238,6 +238,7 @@ class CredentialService:
                 # Also invalidate LLM provider service cache for provider config
                 try:
                     from . import llm_provider_service
+
                     # Clear the provider config caches that depend on RAG settings
                     cache_keys_to_clear = ["provider_config_llm", "provider_config_embedding", "rag_strategy_settings"]
                     for cache_key in cache_keys_to_clear:
@@ -249,9 +250,7 @@ class CredentialService:
                 except Exception as e:
                     logger.error(f"Error invalidating LLM provider service cache: {e}")
 
-            logger.info(
-                f"Successfully {'encrypted and ' if encrypted else ''}stored credential: {key}"
-            )
+            logger.info(f"Successfully {'encrypted and ' if encrypted else ''}stored credential: {key}")
             return True
 
         except Exception as e:
@@ -280,6 +279,7 @@ class CredentialService:
                 # Also invalidate LLM provider service cache for provider config
                 try:
                     from . import llm_provider_service
+
                     # Clear the provider config caches that depend on RAG settings
                     cache_keys_to_clear = ["provider_config_llm", "provider_config_embedding", "rag_strategy_settings"]
                     for cache_key in cache_keys_to_clear:

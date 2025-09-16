@@ -21,21 +21,15 @@ class TestKnowledgeAPIIntegration:
                 "source_id": f"source-{i}",
                 "title": f"Source {i}",
                 "summary": f"Summary {i}",
-                "metadata": {
-                    "knowledge_type": "technical" if i % 2 == 0 else "business",
-                    "tags": ["test", f"tag{i}"]
-                },
+                "metadata": {"knowledge_type": "technical" if i % 2 == 0 else "business", "tags": ["test", f"tag{i}"]},
                 "created_at": "2024-01-01T00:00:00",
-                "updated_at": "2024-01-01T00:00:00"
+                "updated_at": "2024-01-01T00:00:00",
             }
             for i in range(20)
         ]
 
         # Mock URLs batch query
-        mock_urls = [
-            {"source_id": f"source-{i}", "url": f"https://example.com/doc{i}"}
-            for i in range(20)
-        ]
+        mock_urls = [{"source_id": f"source-{i}", "url": f"https://example.com/doc{i}"} for i in range(20)]
 
         # Set up mock table/from chain
         MagicMock()
@@ -135,14 +129,16 @@ class TestKnowledgeAPIIntegration:
                 elif query_state["count"] <= 3:
                     # Sources data for summary (with URL batch query)
                     if query_state["count"] == 2:
-                        result.data = [{
-                            "source_id": "test-source",
-                            "title": "Test Source",
-                            "summary": "Test",
-                            "metadata": {"knowledge_type": "technical"},
-                            "created_at": "2024-01-01T00:00:00",
-                            "updated_at": "2024-01-01T00:00:00"
-                        }]
+                        result.data = [
+                            {
+                                "source_id": "test-source",
+                                "title": "Test Source",
+                                "summary": "Test",
+                                "metadata": {"knowledge_type": "technical"},
+                                "created_at": "2024-01-01T00:00:00",
+                                "updated_at": "2024-01-01T00:00:00",
+                            }
+                        ]
                     else:
                         result.data = [{"source_id": "test-source", "url": "https://example.com/test"}]
                     result.count = None
@@ -166,7 +162,7 @@ class TestKnowledgeAPIIntegration:
                             "id": f"chunk-{i + offset}",
                             "source_id": "test-source",
                             "content": f"Content {i + offset}",
-                            "url": f"https://example.com/page{i + offset}"
+                            "url": f"https://example.com/page{i + offset}",
                         }
                         for i in range(20)
                     ]
@@ -298,7 +294,7 @@ class TestKnowledgeAPIIntegration:
                 "id": f"chunk-{i}",
                 "source_id": "test-source",
                 "content": f"Docs content {i}",
-                "url": f"https://docs.example.com/api/page{i}"
+                "url": f"https://docs.example.com/api/page{i}",
             }
             for i in range(5)
         ]
@@ -340,10 +336,7 @@ class TestKnowledgeAPIIntegration:
         mock_supabase_client.from_.return_value = mock_from
 
         # Request with domain filter
-        response = client.get(
-            "/api/knowledge-items/test-source/chunks?"
-            "domain_filter=docs.example.com&limit=5&offset=0"
-        )
+        response = client.get("/api/knowledge-items/test-source/chunks?domain_filter=docs.example.com&limit=5&offset=0")
 
         assert response.status_code == 200
         data = response.json()
@@ -384,10 +377,7 @@ class TestKnowledgeAPIIntegration:
         # Reset mock to ensure clean state
         mock_supabase_client.reset_mock()
         # Mock data without pagination
-        mock_chunks = [
-            {"id": f"chunk-{i}", "content": f"Content {i}"}
-            for i in range(20)
-        ]
+        mock_chunks = [{"id": f"chunk-{i}", "content": f"Content {i}"} for i in range(20)]
 
         # Track query count
         query_counter = {"count": 0}

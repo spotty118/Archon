@@ -29,13 +29,7 @@ def test_create_project(client, test_project, mock_supabase_client):
     if response.status_code in [200, 201]:
         data = response.json()
         # Check response format - at least one of these should be present
-        assert (
-            "title" in data
-            or "id" in data
-            or "progress_id" in data
-            or "status" in data
-            or "message" in data
-        )
+        assert "title" in data or "id" in data or "progress_id" in data or "status" in data or "message" in data
 
 
 def test_list_projects(client, mock_supabase_client):

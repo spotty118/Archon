@@ -2,7 +2,6 @@
 Tests for ProgressTracker
 """
 
-
 import pytest
 
 from src.server.utils.progress import ProgressTracker
@@ -52,10 +51,7 @@ class TestProgressTracker:
         """Test starting progress tracking"""
         tracker = ProgressTracker("test-start", operation_type="crawl")
 
-        initial_data = {
-            "url": "https://example.com",
-            "crawl_type": "normal"
-        }
+        initial_data = {"url": "https://example.com", "crawl_type": "normal"}
 
         await tracker.start(initial_data)
 
@@ -69,10 +65,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("test-update", operation_type="crawl")
 
         await tracker.update(
-            status="crawling",
-            progress=50,
-            log="Processing page 5/10",
-            current_url="https://example.com/page5"
+            status="crawling", progress=50, log="Processing page 5/10", current_url="https://example.com/page5"
         )
 
         assert tracker.state["status"] == "crawling"
@@ -103,11 +96,7 @@ class TestProgressTracker:
         """Test marking progress as completed"""
         tracker = ProgressTracker("test-complete", operation_type="crawl")
 
-        await tracker.complete({
-            "chunks_stored": 100,
-            "source_id": "source-123",
-            "log": "Crawl completed successfully"
-        })
+        await tracker.complete({"chunks_stored": 100, "source_id": "source-123", "log": "Crawl completed successfully"})
 
         assert tracker.state["status"] == "completed"
         assert tracker.state["progress"] == 100
@@ -121,10 +110,7 @@ class TestProgressTracker:
         """Test marking progress as error"""
         tracker = ProgressTracker("test-error", operation_type="crawl")
 
-        await tracker.error(
-            "Failed to connect to URL",
-            error_details={"code": 404, "url": "https://example.com"}
-        )
+        await tracker.error("Failed to connect to URL", error_details={"code": 404, "url": "https://example.com"})
 
         assert tracker.state["status"] == "error"
         assert tracker.state["error"] == "Failed to connect to URL"
@@ -137,10 +123,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("test-crawl-stats", operation_type="crawl")
 
         await tracker.update_crawl_stats(
-            processed_pages=5,
-            total_pages=10,
-            current_url="https://example.com/page5",
-            pages_found=15
+            processed_pages=5, total_pages=10, current_url="https://example.com/page5", pages_found=15
         )
 
         assert tracker.state["status"] == "crawling"
@@ -156,11 +139,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("test-storage", operation_type="crawl")
 
         await tracker.update_storage_progress(
-            chunks_stored=25,
-            total_chunks=100,
-            operation="Storing embeddings",
-            word_count=5000,
-            embeddings_created=25
+            chunks_stored=25, total_chunks=100, operation="Storing embeddings", word_count=5000, embeddings_created=25
         )
 
         assert tracker.state["status"] == "document_storage"
@@ -176,10 +155,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("test-code", operation_type="crawl")
 
         await tracker.update_code_extraction_progress(
-            completed_summaries=3,
-            total_summaries=10,
-            code_blocks_found=15,
-            current_file="main.py"
+            completed_summaries=3, total_summaries=10, code_blocks_found=15, current_file="main.py"
         )
 
         assert tracker.state["status"] == "code_extraction"
@@ -195,10 +171,7 @@ class TestProgressTracker:
         tracker = ProgressTracker("test-batch", operation_type="upload")
 
         await tracker.update_batch_progress(
-            current_batch=3,
-            total_batches=5,
-            batch_size=100,
-            message="Processing batch 3 of 5"
+            current_batch=3, total_batches=5, batch_size=100, message="Processing batch 3 of 5"
         )
 
         assert tracker.state["status"] == "processing_batch"

@@ -31,9 +31,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_async_quota_exhausted_returns_failure(self) -> None:
         """Test that quota exhaustion returns failure result instead of zeros."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock the client to raise quota error
             mock_ctx = AsyncMock()
             mock_ctx.__aenter__.return_value.embeddings.create.side_effect = openai.RateLimitError(
@@ -50,9 +48,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_async_rate_limit_raises_exception(self) -> None:
         """Test that rate limit errors raise exception after retries."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock the client to raise rate limit error
             mock_ctx = AsyncMock()
             mock_ctx.__aenter__.return_value.embeddings.create.side_effect = openai.RateLimitError(
@@ -68,14 +64,10 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_async_api_error_raises_exception(self) -> None:
         """Test that API errors raise exception instead of returning zeros."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock the client to raise generic error
             mock_ctx = AsyncMock()
-            mock_ctx.__aenter__.return_value.embeddings.create.side_effect = Exception(
-                "Network error"
-            )
+            mock_ctx.__aenter__.return_value.embeddings.create.side_effect = Exception("Network error")
             mock_client.return_value = mock_ctx
 
             with pytest.raises(EmbeddingAPIError) as exc_info:
@@ -86,9 +78,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_batch_handles_partial_failures(self) -> None:
         """Test that batch processing can handle partial failures gracefully."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock successful response for first batch, failure for second
             mock_ctx = AsyncMock()
             mock_response = Mock()
@@ -130,9 +120,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_configurable_embedding_dimensions(self) -> None:
         """Test that embedding dimensions can be configured via settings."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock successful response
             mock_ctx = AsyncMock()
             mock_create = AsyncMock()
@@ -169,9 +157,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_default_embedding_dimensions(self) -> None:
         """Test that default dimensions (1536) are used when not configured."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock successful response
             mock_ctx = AsyncMock()
             mock_create = AsyncMock()
@@ -208,9 +194,7 @@ class TestNoZeroEmbeddings:
     @pytest.mark.asyncio
     async def test_batch_quota_exhausted_stops_process(self) -> None:
         """Test that quota exhaustion stops processing remaining batches."""
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock quota exhaustion
             mock_ctx = AsyncMock()
             mock_ctx.__aenter__.return_value.embeddings.create.side_effect = openai.RateLimitError(
@@ -249,9 +233,7 @@ class TestNoZeroEmbeddings:
         test_text = "This is a test"
 
         # Test: Batch function with error should return failure result, not zeros
-        with patch(
-            "src.server.services.embeddings.embedding_service.get_llm_client"
-        ) as mock_client:
+        with patch("src.server.services.embeddings.embedding_service.get_llm_client") as mock_client:
             # Mock the client to raise an error
             mock_ctx = AsyncMock()
             mock_ctx.__aenter__.return_value.embeddings.create.side_effect = Exception("Test error")

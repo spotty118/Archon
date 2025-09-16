@@ -129,9 +129,7 @@ async def test_find_tasks_with_status_filter(mock_mcp, mock_context):
         mock_async_client.get.return_value = mock_response
         mock_client.return_value.__aenter__.return_value = mock_async_client
 
-        result = await find_tasks(
-            mock_context, filter_by="status", filter_value="todo", project_id="project-123"
-        )
+        result = await find_tasks(mock_context, filter_by="status", filter_value="todo", project_id="project-123")
 
         result_data = json.loads(result)
         assert result_data["success"] is True
@@ -166,9 +164,7 @@ async def test_update_task_status(mock_mcp, mock_context):
         mock_async_client.put.return_value = mock_response
         mock_client.return_value.__aenter__.return_value = mock_async_client
 
-        result = await manage_task(
-            mock_context, action="update", task_id="task-123", status="doing", assignee="User"
-        )
+        result = await manage_task(mock_context, action="update", task_id="task-123", status="doing", assignee="User")
 
         result_data = json.loads(result)
         assert result_data["success"] is True
@@ -228,8 +224,6 @@ async def test_delete_task_already_archived(mock_mcp, mock_context):
         assert result_data["success"] is False
         # Error must be structured format (dict), not string
         assert "error" in result_data
-        assert isinstance(result_data["error"], dict), (
-            "Error should be structured format, not string"
-        )
+        assert isinstance(result_data["error"], dict), "Error should be structured format, not string"
         assert result_data["error"]["type"] == "http_error"
         assert "http 400" in result_data["error"]["message"].lower()

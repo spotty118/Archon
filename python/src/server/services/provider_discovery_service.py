@@ -47,9 +47,11 @@ EMBEDDING_DIMENSIONS = {
     "all-minilm": 384,
 }
 
+
 @dataclass
 class ModelSpec:
     """Model specification with capabilities and constraints."""
+
     name: str
     provider: str
     context_window: int
@@ -66,9 +68,11 @@ class ModelSpec:
         if self.aliases is None:
             self.aliases = []
 
+
 @dataclass
 class ProviderStatus:
     """Provider health and connectivity status."""
+
     provider: str
     is_available: bool
     response_time_ms: float | None = None
@@ -76,6 +80,7 @@ class ProviderStatus:
     models_available: int = 0
     base_url: str | None = None
     last_checked: float | None = None
+
 
 class ProviderDiscoveryService:
     """Service for discovering models and checking provider health."""
@@ -113,65 +118,59 @@ class ProviderDiscoveryService:
     async def _test_tool_support(self, model_name: str, api_url: str) -> bool:
         """
         Test if a model supports function/tool calling by making an actual API call.
-        
+
         Args:
             model_name: Name of the model to test
             api_url: Base URL of the Ollama instance
-            
+
         Returns:
             True if tool calling is supported, False otherwise
         """
         try:
             import openai
-            
+
             # Use OpenAI-compatible client for function calling test
             client = openai.AsyncOpenAI(
                 base_url=f"{api_url}/v1",
-                api_key="ollama"  # Dummy API key for Ollama
+                api_key="ollama",  # Dummy API key for Ollama
             )
-            
+
             # Define a simple test function
             test_function = {
                 "name": "test_function",
                 "description": "A test function",
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "test_param": {
-                            "type": "string",
-                            "description": "A test parameter"
-                        }
-                    },
-                    "required": ["test_param"]
-                }
+                    "properties": {"test_param": {"type": "string", "description": "A test parameter"}},
+                    "required": ["test_param"],
+                },
             }
-            
+
             # Try to make a function calling request
             response = await client.chat.completions.create(
                 model=model_name,
                 messages=[{"role": "user", "content": "Call the test function with parameter 'hello'"}],
                 tools=[{"type": "function", "function": test_function}],
                 max_tokens=50,
-                timeout=5  # Short timeout for quick testing
+                timeout=5,  # Short timeout for quick testing
             )
-            
+
             # Check if the model attempted to use the function
             if response.choices and len(response.choices) > 0:
                 choice = response.choices[0]
-                if hasattr(choice.message, 'tool_calls') and choice.message.tool_calls:
+                if hasattr(choice.message, "tool_calls") and choice.message.tool_calls:
                     logger.info(f"Model {model_name} supports tool calling")
                     return True
-            
+
             return False
-            
+
         except Exception as e:
             logger.debug(f"Tool support test failed for {model_name}: {e}")
             # Fall back to name-based heuristics for known models
-            return any(pattern in model_name.lower() 
-                      for pattern in CHAT_MODEL_PATTERNS)
-        
+            return any(pattern in model_name.lower() for pattern in CHAT_MODEL_PATTERNS)
+
         finally:
-            if 'client' in locals():
+            if "client" in locals():
                 await client.close()
 
     async def discover_openai_models(self, api_key: str) -> list[ModelSpec]:
@@ -188,13 +187,63 @@ class ProviderDiscoveryService:
 
             # OpenAI model specifications
             model_specs = {
-                "gpt-4o": ModelSpec("gpt-4o", "openai", 128000, True, True, False, None, 2.50, 10.00, "Most capable GPT-4 model with vision"),
-                "gpt-4o-mini": ModelSpec("gpt-4o-mini", "openai", 128000, True, True, False, None, 0.15, 0.60, "Affordable GPT-4 model"),
-                "gpt-4-turbo": ModelSpec("gpt-4-turbo", "openai", 128000, True, True, False, None, 10.00, 30.00, "GPT-4 Turbo with vision"),
-                "gpt-3.5-turbo": ModelSpec("gpt-3.5-turbo", "openai", 16385, True, False, False, None, 0.50, 1.50, "Fast and efficient model"),
-                "text-embedding-3-large": ModelSpec("text-embedding-3-large", "openai", 8191, False, False, True, 3072, 0.13, 0, "High-quality embedding model"),
-                "text-embedding-3-small": ModelSpec("text-embedding-3-small", "openai", 8191, False, False, True, 1536, 0.02, 0, "Efficient embedding model"),
-                "text-embedding-ada-002": ModelSpec("text-embedding-ada-002", "openai", 8191, False, False, True, 1536, 0.10, 0, "Legacy embedding model"),
+                "gpt-4o": ModelSpec(
+                    "gpt-4o",
+                    "openai",
+                    128000,
+                    True,
+                    True,
+                    False,
+                    None,
+                    2.50,
+                    10.00,
+                    "Most capable GPT-4 model with vision",
+                ),
+                "gpt-4o-mini": ModelSpec(
+                    "gpt-4o-mini", "openai", 128000, True, True, False, None, 0.15, 0.60, "Affordable GPT-4 model"
+                ),
+                "gpt-4-turbo": ModelSpec(
+                    "gpt-4-turbo", "openai", 128000, True, True, False, None, 10.00, 30.00, "GPT-4 Turbo with vision"
+                ),
+                "gpt-3.5-turbo": ModelSpec(
+                    "gpt-3.5-turbo", "openai", 16385, True, False, False, None, 0.50, 1.50, "Fast and efficient model"
+                ),
+                "text-embedding-3-large": ModelSpec(
+                    "text-embedding-3-large",
+                    "openai",
+                    8191,
+                    False,
+                    False,
+                    True,
+                    3072,
+                    0.13,
+                    0,
+                    "High-quality embedding model",
+                ),
+                "text-embedding-3-small": ModelSpec(
+                    "text-embedding-3-small",
+                    "openai",
+                    8191,
+                    False,
+                    False,
+                    True,
+                    1536,
+                    0.02,
+                    0,
+                    "Efficient embedding model",
+                ),
+                "text-embedding-ada-002": ModelSpec(
+                    "text-embedding-ada-002",
+                    "openai",
+                    8191,
+                    False,
+                    False,
+                    True,
+                    1536,
+                    0.10,
+                    0,
+                    "Legacy embedding model",
+                ),
             }
 
             for model in response.data:
@@ -202,12 +251,14 @@ class ProviderDiscoveryService:
                     models.append(model_specs[model.id])
                 else:
                     # Create basic spec for unknown models
-                    models.append(ModelSpec(
-                        name=model.id,
-                        provider="openai",
-                        context_window=4096,  # Default assumption
-                        description=f"OpenAI model {model.id}"
-                    ))
+                    models.append(
+                        ModelSpec(
+                            name=model.id,
+                            provider="openai",
+                            context_window=4096,  # Default assumption
+                            description=f"OpenAI model {model.id}",
+                        )
+                    )
 
             self._cache_result(cache_key, models)
             logger.info(f"Discovered {len(models)} OpenAI models")
@@ -228,10 +279,54 @@ class ProviderDiscoveryService:
         try:
             # Google Gemini model specifications
             model_specs = [
-                ModelSpec("gemini-1.5-pro", "google", 2097152, True, True, False, None, 1.25, 5.00, "Advanced reasoning and multimodal capabilities"),
-                ModelSpec("gemini-1.5-flash", "google", 1048576, True, True, False, None, 0.075, 0.30, "Fast and versatile performance"),
-                ModelSpec("gemini-1.0-pro", "google", 30720, True, False, False, None, 0.50, 1.50, "Efficient model for text tasks"),
-                ModelSpec("text-embedding-004", "google", 2048, False, False, True, 768, 0.00, 0, "Google's latest embedding model"),
+                ModelSpec(
+                    "gemini-1.5-pro",
+                    "google",
+                    2097152,
+                    True,
+                    True,
+                    False,
+                    None,
+                    1.25,
+                    5.00,
+                    "Advanced reasoning and multimodal capabilities",
+                ),
+                ModelSpec(
+                    "gemini-1.5-flash",
+                    "google",
+                    1048576,
+                    True,
+                    True,
+                    False,
+                    None,
+                    0.075,
+                    0.30,
+                    "Fast and versatile performance",
+                ),
+                ModelSpec(
+                    "gemini-1.0-pro",
+                    "google",
+                    30720,
+                    True,
+                    False,
+                    False,
+                    None,
+                    0.50,
+                    1.50,
+                    "Efficient model for text tasks",
+                ),
+                ModelSpec(
+                    "text-embedding-004",
+                    "google",
+                    2048,
+                    False,
+                    False,
+                    True,
+                    768,
+                    0.00,
+                    0,
+                    "Google's latest embedding model",
+                ),
             ]
 
             # Test connectivity with a simple request
@@ -266,8 +361,8 @@ class ProviderDiscoveryService:
             try:
                 # Clean up URL - remove /v1 suffix if present for raw Ollama API
                 parsed = urlparse(base_url)
-                if parsed.path.endswith('/v1'):
-                    api_url = base_url.replace('/v1', '')
+                if parsed.path.endswith("/v1"):
+                    api_url = base_url.replace("/v1", "")
                 else:
                     api_url = base_url
 
@@ -280,15 +375,17 @@ class ProviderDiscoveryService:
                         models = []
 
                         for model_info in data.get("models", []):
-                            model_name = model_info.get("name", "").split(':')[0]  # Remove tag
+                            model_name = model_info.get("name", "").split(":")[0]  # Remove tag
 
                             # Determine model capabilities based on testing and name patterns
                             # Test for function calling capabilities via actual API calls
                             supports_tools = await self._test_tool_support(model_name, api_url)
                             # Vision support is typically indicated by name patterns (reliable indicator)
                             supports_vision = any(pattern in model_name.lower() for pattern in VISION_MODEL_PATTERNS)
-                            # Embedding support is typically indicated by name patterns (reliable indicator)  
-                            supports_embeddings = any(pattern in model_name.lower() for pattern in EMBEDDING_MODEL_PATTERNS)
+                            # Embedding support is typically indicated by name patterns (reliable indicator)
+                            supports_embeddings = any(
+                                pattern in model_name.lower() for pattern in EMBEDDING_MODEL_PATTERNS
+                            )
 
                             # Estimate context window based on model family
                             context_window = 4096  # Default
@@ -313,7 +410,7 @@ class ProviderDiscoveryService:
                                 supports_embeddings=supports_embeddings,
                                 embedding_dimensions=embedding_dims,
                                 description=f"Ollama model on {base_url}",
-                                aliases=[model_name] if ':' in model_info.get("name", "") else []
+                                aliases=[model_name] if ":" in model_info.get("name", "") else [],
                             )
                             models.append(spec)
 
@@ -340,11 +437,66 @@ class ProviderDiscoveryService:
         try:
             # Anthropic Claude model specifications
             model_specs = [
-                ModelSpec("claude-3-5-sonnet-20241022", "anthropic", 200000, True, True, False, None, 3.00, 15.00, "Most intelligent Claude model"),
-                ModelSpec("claude-3-5-haiku-20241022", "anthropic", 200000, True, False, False, None, 0.25, 1.25, "Fast and cost-effective Claude model"),
-                ModelSpec("claude-3-opus-20240229", "anthropic", 200000, True, True, False, None, 15.00, 75.00, "Powerful model for complex tasks"),
-                ModelSpec("claude-3-sonnet-20240229", "anthropic", 200000, True, True, False, None, 3.00, 15.00, "Balanced performance and cost"),
-                ModelSpec("claude-3-haiku-20240307", "anthropic", 200000, True, False, False, None, 0.25, 1.25, "Fast responses and cost-effective"),
+                ModelSpec(
+                    "claude-3-5-sonnet-20241022",
+                    "anthropic",
+                    200000,
+                    True,
+                    True,
+                    False,
+                    None,
+                    3.00,
+                    15.00,
+                    "Most intelligent Claude model",
+                ),
+                ModelSpec(
+                    "claude-3-5-haiku-20241022",
+                    "anthropic",
+                    200000,
+                    True,
+                    False,
+                    False,
+                    None,
+                    0.25,
+                    1.25,
+                    "Fast and cost-effective Claude model",
+                ),
+                ModelSpec(
+                    "claude-3-opus-20240229",
+                    "anthropic",
+                    200000,
+                    True,
+                    True,
+                    False,
+                    None,
+                    15.00,
+                    75.00,
+                    "Powerful model for complex tasks",
+                ),
+                ModelSpec(
+                    "claude-3-sonnet-20240229",
+                    "anthropic",
+                    200000,
+                    True,
+                    True,
+                    False,
+                    None,
+                    3.00,
+                    15.00,
+                    "Balanced performance and cost",
+                ),
+                ModelSpec(
+                    "claude-3-haiku-20240307",
+                    "anthropic",
+                    200000,
+                    True,
+                    False,
+                    False,
+                    None,
+                    0.25,
+                    1.25,
+                    "Fast responses and cost-effective",
+                ),
             ]
 
             # Test connectivity - Anthropic doesn't have a models list endpoint,
@@ -378,7 +530,7 @@ class ProviderDiscoveryService:
                     is_available=True,
                     response_time_ms=response_time,
                     models_available=len(models.data),
-                    last_checked=time.time()
+                    last_checked=time.time(),
                 )
 
             elif provider == "google":
@@ -400,7 +552,7 @@ class ProviderDiscoveryService:
                             response_time_ms=response_time,
                             models_available=len(data.get("models", [])),
                             base_url=base_url,
-                            last_checked=time.time()
+                            last_checked=time.time(),
                         )
                     else:
                         return ProviderStatus(provider, False, response_time, f"HTTP {response.status}")
@@ -415,8 +567,8 @@ class ProviderDiscoveryService:
                     try:
                         # Clean up URL for raw Ollama API
                         parsed = urlparse(base_url)
-                        if parsed.path.endswith('/v1'):
-                            api_url = base_url.replace('/v1', '')
+                        if parsed.path.endswith("/v1"):
+                            api_url = base_url.replace("/v1", "")
                         else:
                             api_url = base_url
 
@@ -432,7 +584,7 @@ class ProviderDiscoveryService:
                                     response_time_ms=response_time,
                                     models_available=len(data.get("models", [])),
                                     base_url=api_url,
-                                    last_checked=time.time()
+                                    last_checked=time.time(),
                                 )
                     except Exception:
                         continue  # Try next URL
@@ -453,7 +605,7 @@ class ProviderDiscoveryService:
                     is_available=True,
                     response_time_ms=response_time,
                     models_available=5,  # Known model count
-                    last_checked=time.time()
+                    last_checked=time.time(),
                 )
 
             else:
@@ -466,7 +618,7 @@ class ProviderDiscoveryService:
                 is_available=False,
                 response_time_ms=response_time,
                 error_message=str(e),
-                last_checked=time.time()
+                last_checked=time.time(),
             )
 
     async def get_all_available_models(self) -> dict[str, list[ModelSpec]]:
@@ -500,6 +652,7 @@ class ProviderDiscoveryService:
             logger.error(f"Error getting all available models: {e}")
 
         return providers
+
 
 # Global instance
 provider_discovery_service = ProviderDiscoveryService()

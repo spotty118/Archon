@@ -2,7 +2,6 @@
 Tests for ProgressMapper
 """
 
-
 from src.server.services.crawling.progress_mapper import ProgressMapper
 
 

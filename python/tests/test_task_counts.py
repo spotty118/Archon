@@ -110,4 +110,4 @@ def test_batch_task_counts_etag_caching(client, mock_supabase_client):
             assert response2.headers.get("ETag") == etag
 
             # Verify no body is returned on 304
-            assert response2.content == b''
+            assert response2.content == b""

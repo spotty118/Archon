@@ -22,7 +22,7 @@ def test_knowledge_summary_endpoint(client, mock_supabase_client):
             "summary": "Test summary 1",
             "metadata": {"knowledge_type": "technical", "tags": ["test"]},
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
+            "updated_at": "2024-01-01T00:00:00",
         },
         {
             "source_id": "test-source-2",
@@ -30,8 +30,8 @@ def test_knowledge_summary_endpoint(client, mock_supabase_client):
             "summary": "Test summary 2",
             "metadata": {"knowledge_type": "business", "tags": ["docs"]},
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
-        }
+            "updated_at": "2024-01-01T00:00:00",
+        },
     ]
 
     # Setup mock responses
@@ -91,7 +91,7 @@ def test_chunks_pagination(client, mock_supabase_client):
             "source_id": "test-source",
             "content": f"Chunk content {i}",
             "metadata": {},
-            "url": f"https://example.com/page{i}"
+            "url": f"https://example.com/page{i}",
         }
         for i in range(5)
     ]
@@ -162,7 +162,7 @@ def test_chunks_pagination_with_domain_filter(client, mock_supabase_client):
             "id": "chunk-1",
             "source_id": "test-source",
             "content": "Filtered content",
-            "url": "https://docs.example.com/page1"
+            "url": "https://docs.example.com/page1",
         }
     ]
 
@@ -198,9 +198,7 @@ def test_chunks_pagination_with_domain_filter(client, mock_supabase_client):
     mock_supabase_client.from_.return_value = mock_from
 
     # Test with domain filter
-    response = client.get(
-        "/api/knowledge-items/test-source/chunks?domain_filter=docs.example.com&limit=10"
-    )
+    response = client.get("/api/knowledge-items/test-source/chunks?domain_filter=docs.example.com&limit=10")
 
     assert response.status_code == 200
     data = response.json()
@@ -219,7 +217,7 @@ def test_code_examples_pagination(client, mock_supabase_client):
             "source_id": "test-source",
             "content": f"def example_{i}():\n    pass",
             "summary": f"Example {i}",
-            "metadata": {"language": "python"}
+            "metadata": {"language": "python"},
         }
         for i in range(3)
     ]
@@ -276,6 +274,7 @@ def test_code_examples_pagination(client, mock_supabase_client):
 @pytest.mark.skip(reason="Mock contamination issue - works in isolation")
 def test_pagination_limit_validation(client, mock_supabase_client):
     """Test that pagination limits are properly validated."""
+
     class MockExecuteResult:
         def __init__(self, data=None, count=None):
             self.data = data
@@ -331,7 +330,7 @@ def test_summary_search_filter(client, mock_supabase_client):
             "summary": "Python guide",
             "metadata": {"knowledge_type": "technical"},
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
+            "updated_at": "2024-01-01T00:00:00",
         }
     ]
 
@@ -368,7 +367,7 @@ def test_summary_knowledge_type_filter(client, mock_supabase_client):
             "summary": "Tech guide",
             "metadata": {"knowledge_type": "technical"},
             "created_at": "2024-01-01T00:00:00",
-            "updated_at": "2024-01-01T00:00:00"
+            "updated_at": "2024-01-01T00:00:00",
         }
     ]
 
@@ -399,6 +398,7 @@ def test_summary_knowledge_type_filter(client, mock_supabase_client):
 @pytest.mark.skip(reason="Mock contamination issue - works in isolation")
 def test_empty_results_pagination(client, mock_supabase_client):
     """Test pagination with empty results."""
+
     class MockExecuteResult:
         def __init__(self, data=None, count=None):
             self.data = data

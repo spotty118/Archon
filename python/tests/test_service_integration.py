@@ -31,9 +31,7 @@ def test_document_storage_flow(client):
 
 def test_code_extraction_flow(client):
     """Test code extraction endpoint."""
-    response = client.post(
-        "/api/knowledge/extract-code", json={"document_id": "test-doc-id", "languages": ["python"]}
-    )
+    response = client.post("/api/knowledge/extract-code", json={"document_id": "test-doc-id", "languages": ["python"]})
     assert response.status_code in [200, 400, 404, 422, 500]
 
 

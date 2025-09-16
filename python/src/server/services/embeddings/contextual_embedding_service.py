@@ -118,7 +118,7 @@ async def _get_model_choice(provider: str | None = None) -> str:
     # Handle empty model case - fallback to provider-specific defaults or explicit config
     if not model:
         search_logger.warning(f"chat_model is empty for provider {provider_name}, using fallback logic")
-        
+
         if provider_name == "ollama":
             # Try to get OLLAMA_CHAT_MODEL specifically
             try:
@@ -139,7 +139,7 @@ async def _get_model_choice(provider: str | None = None) -> str:
         else:
             # OpenAI or other providers
             model = "gpt-4o-mini"
-    
+
     search_logger.debug(f"Using model from credential service: {model}")
 
     return model
