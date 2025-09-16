@@ -30,6 +30,9 @@ from typing import Any
 
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.routing import Route
 
 # Import Logfire configuration
 from src.server.config.logfire_config import mcp_logger, setup_logfire
@@ -290,6 +293,38 @@ try:
         port=server_port,
     )
     logger.info("✓ FastMCP server instance created successfully")
+
+    async def _health_endpoint(request: Request) -> JSONResponse:
+        context = _shared_context
+
+        response_payload: dict[str, Any] = {
+            "service": "archon-mcp",
+            "status": "starting",
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        if context is None:
+            return JSONResponse(response_payload, status_code=503)
+
+        await perform_health_checks(context)
+        assert context.health_status is not None
+
+        response_payload.update(
+            {
+                "status": context.health_status.get("status", "unknown"),
+                "dependencies": {
+                    "api_service": context.health_status.get("api_service", False),
+                    "agents_service": context.health_status.get("agents_service", False),
+                },
+                "last_health_check": context.health_status.get("last_health_check"),
+                "uptime_seconds": time.time() - (context.startup_time or time.time()),
+            }
+        )
+
+        status_code = 200 if response_payload["status"] == "healthy" else 503
+        return JSONResponse(response_payload, status_code=status_code)
+
+    mcp._custom_starlette_routes.append(Route("/health", endpoint=_health_endpoint, methods=["GET"]))
 
 except Exception as e:
     logger.error(f"✗ Failed to create FastMCP server: {e}")
