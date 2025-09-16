@@ -529,9 +529,18 @@ def main():
         # Initialize Logfire first
         setup_logfire(service_name="archon-mcp-server")
 
+        streamable_path = mcp.settings.streamable_http_path
+        if not streamable_path.startswith("/"):
+            streamable_path = f"/{streamable_path}"
+
         logger.info("🚀 Starting Archon MCP Server")
         logger.info("   Mode: Streamable HTTP")
-        logger.info(f"   URL: http://{server_host}:{server_port}/mcp")
+        logger.info(
+            "   URL: http://%s:%s%s",
+            server_host,
+            server_port,
+            streamable_path,
+        )
 
         mcp_logger.info("🔥 Logfire initialized for MCP server")
         mcp_logger.info(f"🌟 Starting MCP server - host={server_host}, port={server_port}")
