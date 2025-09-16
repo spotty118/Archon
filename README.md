@@ -104,6 +104,12 @@ Once everything is running:
 3. **Test Projects**: Projects → Create a new project and add tasks
 4. **Integrate with your AI coding assistant**: MCP Dashboard → Copy connection config for your AI coding assistant 
 
+## 🆕 Recent Enhancements
+
+- **Credential API contract restored** – `/api/credentials` responses once again include the `is_encrypted` flag and tolerate older payload shapes. The backend now decrypts stored values consistently for callers and recognizes both `encrypted` and `is_encrypted` inputs when saving credentials.
+- **Progress tracking output refined** – document storage callbacks report `(status, progress, message, …metadata)` so tooling receives human-readable updates alongside batch metrics. All backend progress suites pass after these changes.
+- **Integration testing note** – Vitest specs under `test/integration/knowledge/` call the live API; start the backend (`make dev` or `docker compose --profile backend up -d`) before running `npm run test -- --run` to avoid empty `{}` responses. The testing guide now documents this requirement.
+
 ## Installing Make
 
 <details>
