@@ -536,6 +536,12 @@ def main():
         mcp_logger.info("🔥 Logfire initialized for MCP server")
         mcp_logger.info(f"🌟 Starting MCP server - host={server_host}, port={server_port}")
 
+        # Add health endpoint
+        @mcp.server.app.get("/health")
+        async def health():
+            """Health check endpoint for MCP server."""
+            return {"status": "healthy", "service": "mcp", "timestamp": datetime.now().isoformat()}
+
         mcp.run(transport="streamable-http")
 
     except Exception as e:
