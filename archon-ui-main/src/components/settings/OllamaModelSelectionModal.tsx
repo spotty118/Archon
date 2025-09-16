@@ -4,6 +4,26 @@ import { X, Search, RotateCcw, Zap, Eye, Settings, Download } from 'lucide-react
 import { Button } from '../ui/Button';
 import { useToast } from '../../features/ui/hooks/useToast';
 
+const isDebugEnabled = process.env.NODE_ENV !== 'production';
+
+const debugLog = (...args: unknown[]) => {
+  if (!isDebugEnabled) {
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.debug(...args);
+};
+
+const debugError = (...args: unknown[]) => {
+  if (!isDebugEnabled) {
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.error(...args);
+};
+
 interface ContextInfo {
   current?: number;
   max?: number;
@@ -1141,22 +1161,3 @@ export const OllamaModelSelectionModal: React.FC<OllamaModelSelectionModalProps>
 };
 
 export default OllamaModelSelectionModal;
-const isDebugEnabled = process.env.NODE_ENV !== 'production';
-
-const debugLog = (...args: unknown[]) => {
-  if (!isDebugEnabled) {
-    return;
-  }
-
-  // eslint-disable-next-line no-console
-  console.debug(...args);
-};
-
-const debugError = (...args: unknown[]) => {
-  if (!isDebugEnabled) {
-    return;
-  }
-
-  // eslint-disable-next-line no-console
-  debugError(...args);
-};

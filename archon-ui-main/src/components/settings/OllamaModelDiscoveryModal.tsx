@@ -14,6 +14,26 @@ import { useToast } from '../../features/ui/hooks/useToast';
 import { ollamaService, type OllamaModel } from '../../services/ollamaService';
 import type { OllamaInstance, ModelSelectionState } from './types/OllamaTypes';
 
+const isDebugEnabled = process.env.NODE_ENV !== 'production';
+
+const debugLog = (...args: unknown[]) => {
+  if (!isDebugEnabled) {
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.debug(...args);
+};
+
+const debugError = (...args: unknown[]) => {
+  if (!isDebugEnabled) {
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.error(...args);
+};
+
 interface OllamaModelDiscoveryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -888,22 +908,3 @@ const OllamaModelDiscoveryModal: React.FC<OllamaModelDiscoveryModalProps> = ({
 };
 
 export default OllamaModelDiscoveryModal;
-const isDebugEnabled = process.env.NODE_ENV !== 'production';
-
-const debugLog = (...args: unknown[]) => {
-  if (!isDebugEnabled) {
-    return;
-  }
-
-  // eslint-disable-next-line no-console
-  console.debug(...args);
-};
-
-const debugError = (...args: unknown[]) => {
-  if (!isDebugEnabled) {
-    return;
-  }
-
-  // eslint-disable-next-line no-console
-  debugError(...args);
-};
